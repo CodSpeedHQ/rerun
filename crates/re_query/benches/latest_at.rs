@@ -28,10 +28,10 @@ mod constants {
 
 #[cfg(not(debug_assertions))]
 mod constants {
-    pub const NUM_FRAMES_POINTS: u32 = 1_000;
-    pub const NUM_POINTS: u32 = 1_000;
-    pub const NUM_FRAMES_STRINGS: u32 = 1_000;
-    pub const NUM_STRINGS: u32 = 1_000;
+    pub const NUM_FRAMES_POINTS: u32 = 100;
+    pub const NUM_POINTS: u32 = 100;
+    pub const NUM_FRAMES_STRINGS: u32 = 100;
+    pub const NUM_STRINGS: u32 = 100;
 }
 
 #[allow(clippy::wildcard_imports)]
