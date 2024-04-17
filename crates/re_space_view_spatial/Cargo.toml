@@ -57,6 +57,7 @@ web-time.workspace = true
 
 [dev-dependencies]
 criterion.workspace = true
+codspeed-criterion-compat.workspace = true
 mimalloc.workspace = true
 
 [lib]
