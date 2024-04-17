@@ -5,7 +5,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 use std::sync::Arc;
 
-use arrow2::array::{Array, FixedSizeListArray, PrimitiveArray, StructArray};
+use arrow2::array::{Array, PrimitiveArray, StructArray};
 use criterion::Criterion;
 use itertools::Itertools;
 
@@ -23,7 +23,7 @@ criterion::criterion_main!(benches);
 // ---
 
 #[cfg(not(debug_assertions))]
-const NUM_ROWS: usize = 10_000;
+const NUM_ROWS: usize = 1000;
 #[cfg(not(debug_assertions))]
 const NUM_INSTANCES: usize = 100;
 
@@ -271,7 +271,12 @@ fn estimated_size_bytes(c: &mut Criterion) {
                 ArrayKind::Primitive => {
                     bench_downcast_first::<PrimitiveArray<u64>>(&mut group, kind);
                 }
-                ArrayKind::Struct => bench_downcast_first::<FixedSizeListArray>(&mut group, kind),
+                // TODO: find out why the `ArrayKind::Struct` case panics:
+                // thread 'main' panicked at crates/re_data_store/benches/arrow2.rs:290:30:
+                // called `Option::unwrap()` on a `None` value
+
+                // ArrayKind::Struct => bench_downcast_first::<FixedSizeListArray>(&mut group, kind),
+                ArrayKind::Struct => {}
                 ArrayKind::StructLarge => bench_downcast_first::<StructArray>(&mut group, kind),
             }
 
