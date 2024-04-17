@@ -43,9 +43,9 @@ def _spawn_viewer(
     """
 
     import os
-    import subprocess
-    import sys
     from time import sleep
+
+    import rerun_bindings
 
     # Let the spawned rerun process know it's just an app
     new_env = os.environ.copy()
@@ -54,11 +54,6 @@ def _spawn_viewer(
     if os.environ.get("_RERUN_TEST_FORCE_SAVE") is not None:
         return
     new_env["RERUN_APP_ONLY"] = "true"
-
-    # sys.executable: the absolute path of the executable binary for the Python interpreter
-    python_executable = sys.executable
-    if python_executable is None:
-        python_executable = "python3"
 
     # TODO(jleibs): More options to opt out of this behavior.
     if _check_for_existing_viewer(port):
@@ -70,18 +65,7 @@ def _spawn_viewer(
     else:
         # start_new_session=True ensures the spawned process does NOT die when
         # we hit ctrl-c in the terminal running the parent Python process.
-        subprocess.Popen(
-            [
-                python_executable,
-                "-c",
-                "import rerun_bindings; rerun_bindings.main()",
-                f"--port={port}",
-                f"--memory-limit={memory_limit}",
-                "--expect-data-soon",
-            ],
-            env=new_env,
-            start_new_session=True,
-        )
+        rerun_bindings.spawn(port=port, memory_limit=memory_limit)
 
         # Give the newly spawned Rerun Viewer some time to bind.
         #

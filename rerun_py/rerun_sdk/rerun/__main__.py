@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-import rerun_bindings as bindings
+import os
+import subprocess
+import sys
 
-from rerun import unregister_shutdown
 
+def main() -> int:
+    if "RERUN_CLI_PATH" in os.environ:
+        print(f"Using overridden RERUN_CLI_PATH={os.environ['RERUN_CLI_PATH']}", file=sys.stderr)
+        target_path = os.environ["RERUN_CLI_PATH"]
+    else:
+        target_path = os.path.join(os.path.dirname(__file__), "..", "bin", "rerun")
 
-def main() -> None:
-    # When running `python -m rerun` (i.e. executing this file), the `rerun` package and its `__init__.py` are still
-    # loaded. This has the side effect of executing `register_shutdown()` (schedule `bindings.shutdown()` to be called
-    # at exit. We don't need this here, so we unregister that call.
-    # TODO(ab): figure out a way to skip loading `__init__.py` entirely (to avoid doing this and save on loading time)
-    unregister_shutdown()
-
-    exit(bindings.main())
+    return subprocess.call([target_path, *sys.argv[1:]])
 
 
 if __name__ == "__main__":
