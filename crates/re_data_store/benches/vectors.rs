@@ -3,7 +3,7 @@
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-use criterion::{criterion_group, Criterion};
+use codspeed_criterion_compat::{criterion_group, Criterion};
 
 use smallvec::SmallVec;
 use tinyvec::TinyVec;
@@ -12,12 +12,12 @@ use tinyvec::TinyVec;
 
 criterion_group!(benches, sort, split, swap, swap_opt);
 
-criterion::criterion_main!(benches);
+codspeed_criterion_compat::criterion_main!(benches);
 
 // ---
 
 #[cfg(not(debug_assertions))]
-const NUM_INSTANCES: usize = 10_000;
+const NUM_INSTANCES: usize = 1000;
 #[cfg(not(debug_assertions))]
 const SMALLVEC_SIZE: usize = 4;
 
@@ -35,7 +35,9 @@ fn split(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group(format!("vector_ops/split_off/instances={NUM_INSTANCES}"));
-    group.throughput(criterion::Throughput::Elements(NUM_INSTANCES as _));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
+        NUM_INSTANCES as _,
+    ));
 
     {
         fn split_off<T: Copy, const N: usize>(
@@ -150,7 +152,9 @@ fn sort(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group(format!("vector_ops/sort/instances={NUM_INSTANCES}"));
-    group.throughput(criterion::Throughput::Elements(NUM_INSTANCES as _));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
+        NUM_INSTANCES as _,
+    ));
 
     {
         let data: SmallVec<[i64; SMALLVEC_SIZE]> = (0..NUM_INSTANCES as i64).rev().collect();
@@ -201,7 +205,9 @@ fn swap(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group(format!("vector_ops/swap/instances={NUM_INSTANCES}"));
-    group.throughput(criterion::Throughput::Elements(NUM_INSTANCES as _));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
+        NUM_INSTANCES as _,
+    ));
 
     {
         let data: SmallVec<[i64; SMALLVEC_SIZE]> = (0..NUM_INSTANCES as i64).collect();
@@ -276,7 +282,9 @@ fn swap_opt(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group(format!("vector_ops/swap_opt/instances={NUM_INSTANCES}"));
-    group.throughput(criterion::Throughput::Elements(NUM_INSTANCES as _));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
+        NUM_INSTANCES as _,
+    ));
 
     {
         let data: SmallVec<[Option<i64>; SMALLVEC_SIZE]> =
