@@ -10,7 +10,7 @@ use re_log_types::{
 };
 use re_types::datagen::{build_some_colors, build_some_positions2d};
 
-use criterion::{criterion_group, criterion_main, Criterion};
+use codspeed_criterion_compat::{criterion_group, criterion_main, Criterion};
 
 #[cfg(not(debug_assertions))]
 const NUM_POINTS: usize = 10_000;
@@ -86,7 +86,9 @@ fn mono_points_arrow(c: &mut Criterion) {
     {
         let store_id = StoreId::random(StoreKind::Recording);
         let mut group = c.benchmark_group("mono_points_arrow");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         group.bench_function("generate_message_bundles", |b| {
             b.iter(generate_tables);
         });
@@ -142,7 +144,9 @@ fn mono_points_arrow_batched(c: &mut Criterion) {
     {
         let store_id = StoreId::random(StoreKind::Recording);
         let mut group = c.benchmark_group("mono_points_arrow_batched");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         group.bench_function("generate_message_bundles", |b| {
             b.iter(generate_table);
         });
@@ -199,7 +203,9 @@ fn batch_points_arrow(c: &mut Criterion) {
     {
         let store_id = StoreId::random(StoreKind::Recording);
         let mut group = c.benchmark_group("batch_points_arrow");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         group.bench_function("generate_message_bundles", |b| {
             b.iter(generate_tables);
         });
