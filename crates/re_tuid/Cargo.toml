@@ -34,6 +34,7 @@ serde = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
 criterion.workspace = true
+codspeed-criterion-compat.workspace = true
 
 [lib]
 bench = false
