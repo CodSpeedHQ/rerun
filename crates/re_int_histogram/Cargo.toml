@@ -26,6 +26,7 @@ static_assertions.workspace = true
 
 [dev-dependencies]
 criterion.workspace = true
+codspeed-criterion-compat.workspace = true
 insta.workspace = true
 mimalloc.workspace = true
 
