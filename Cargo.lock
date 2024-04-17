@@ -1105,6 +1105,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "codspeed"
+version = "2.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "655a6d8e698ef8de25b6fb160dc904d98cf3642df48fae8bb05711db1893f47d"
+dependencies = [
+ "colored",
+ "libc",
+ "serde_json",
+]
+
+[[package]]
+name = "codspeed-criterion-compat"
+version = "2.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb377d73b85084b1ca5615e42fdbf3b52631d6d8feda4be6dfc2150646f53cea"
+dependencies = [
+ "codspeed",
+ "colored",
+ "criterion",
+]
+
+[[package]]
 name = "color_quant"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1115,6 +1137,16 @@ name = "colorchoice"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acbf1af155f9b9ef647e42cdc158db4b64a1b61f743629225fde6f3e0be2a7c7"
+
+[[package]]
+name = "colored"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cbf2150cce219b664a8a70df7a1f933836724b503f8a413af9365b4dcc4d90b8"
+dependencies = [
+ "lazy_static",
+ "windows-sys 0.48.0",
+]
 
 [[package]]
 name = "com"
@@ -1269,9 +1301,9 @@ dependencies = [
 
 [[package]]
 name = "criterion"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f9c16c823fba76d9643cc387e9677d9771abe0827561381815215c47f808da9"
+checksum = "f2b12d017a929603d80db1831cd3a24082f8137ce19c69e6447f54f5fc8d692f"
 dependencies = [
  "anes",
  "cast",
@@ -4251,6 +4283,7 @@ version = "0.16.0-alpha.1+dev"
 dependencies = [
  "ahash",
  "anyhow",
+ "codspeed-criterion-compat",
  "criterion",
  "document-features",
  "indent",
@@ -4387,6 +4420,7 @@ dependencies = [
 name = "re_int_histogram"
 version = "0.16.0-alpha.1+dev"
 dependencies = [
+ "codspeed-criterion-compat",
  "criterion",
  "insta",
  "mimalloc",
@@ -4411,6 +4445,7 @@ dependencies = [
 name = "re_log_encoding"
 version = "0.16.0-alpha.1+dev"
 dependencies = [
+ "codspeed-criterion-compat",
  "criterion",
  "ehttp",
  "js-sys",
@@ -4441,6 +4476,7 @@ dependencies = [
  "backtrace",
  "bytemuck",
  "clean-path",
+ "codspeed-criterion-compat",
  "criterion",
  "crossbeam",
  "document-features",
@@ -4497,6 +4533,7 @@ name = "re_query"
 version = "0.16.0-alpha.1+dev"
 dependencies = [
  "backtrace",
+ "codspeed-criterion-compat",
  "criterion",
  "document-features",
  "itertools 0.12.0",
@@ -4523,6 +4560,7 @@ dependencies = [
  "ahash",
  "anyhow",
  "backtrace",
+ "codspeed-criterion-compat",
  "criterion",
  "document-features",
  "itertools 0.12.0",
@@ -4551,6 +4589,7 @@ name = "re_query_cache"
 version = "0.16.0-alpha.1+dev"
 dependencies = [
  "ahash",
+ "codspeed-criterion-compat",
  "criterion",
  "indent",
  "itertools 0.12.0",
@@ -4579,6 +4618,7 @@ dependencies = [
  "ahash",
  "anyhow",
  "backtrace",
+ "codspeed-criterion-compat",
  "criterion",
  "indent",
  "itertools 0.12.0",
@@ -4795,6 +4835,7 @@ dependencies = [
  "anyhow",
  "bitflags 2.4.1",
  "bytemuck",
+ "codspeed-criterion-compat",
  "criterion",
  "egui",
  "glam",
@@ -4955,6 +4996,7 @@ dependencies = [
 name = "re_tuid"
 version = "0.16.0-alpha.1+dev"
 dependencies = [
+ "codspeed-criterion-compat",
  "criterion",
  "document-features",
  "getrandom",
@@ -5048,6 +5090,7 @@ dependencies = [
  "anyhow",
  "backtrace",
  "bytemuck",
+ "codspeed-criterion-compat",
  "criterion",
  "document-features",
  "once_cell",
