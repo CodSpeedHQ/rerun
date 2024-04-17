@@ -69,6 +69,7 @@ web-sys = { workspace = true, optional = true, features = ["Window"] }
 re_types = { workspace = true, features = ["datagen", "serde"] }
 
 criterion.workspace = true
+codspeed-criterion-compat.workspace = true
 mimalloc.workspace = true
 serde_test.workspace = true
 
