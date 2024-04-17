@@ -1,7 +1,7 @@
 //! Contains:
 //! - A 1:1 port of the benchmarks in `crates/re_query/benches/query_benchmarks.rs`, with caching enabled.
 
-use criterion::{criterion_group, criterion_main, Criterion};
+use codspeed_criterion_compat::{criterion_group, criterion_main, Criterion};
 
 use itertools::Itertools;
 use re_data_store::{DataStore, LatestAtQuery, StoreSubscriber};
@@ -28,10 +28,10 @@ mod constants {
 
 #[cfg(not(debug_assertions))]
 mod constants {
-    pub const NUM_FRAMES_POINTS: u32 = 1_000;
-    pub const NUM_POINTS: u32 = 1_000;
-    pub const NUM_FRAMES_STRINGS: u32 = 1_000;
-    pub const NUM_STRINGS: u32 = 1_000;
+    pub const NUM_FRAMES_POINTS: u32 = 100;
+    pub const NUM_POINTS: u32 = 100;
+    pub const NUM_FRAMES_STRINGS: u32 = 100;
+    pub const NUM_STRINGS: u32 = 100;
 }
 
 #[allow(clippy::wildcard_imports)]
@@ -64,7 +64,7 @@ fn mono_points(c: &mut Criterion) {
         let mut group = c.benchmark_group("arrow_mono_points2");
         // Mono-insert is slow -- decrease the sample size
         group.sample_size(10);
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_POINTS * NUM_FRAMES_POINTS) as _,
         ));
         group.bench_function("insert", |b| {
@@ -74,7 +74,9 @@ fn mono_points(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_mono_points2");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         let (caches, store) = insert_rows(msgs.iter());
         group.bench_function("query", |b| {
             b.iter(|| query_and_visit_points(&caches, &store, &paths));
@@ -92,7 +94,7 @@ fn mono_strings(c: &mut Criterion) {
     {
         let mut group = c.benchmark_group("arrow_mono_strings2");
         group.sample_size(10);
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_STRINGS * NUM_FRAMES_STRINGS) as _,
         ));
         group.bench_function("insert", |b| {
@@ -102,7 +104,9 @@ fn mono_strings(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_mono_strings2");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         let (caches, store) = insert_rows(msgs.iter());
         group.bench_function("query", |b| {
             b.iter(|| query_and_visit_strings(&caches, &store, &paths));
@@ -117,7 +121,7 @@ fn batch_points(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_batch_points2");
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_POINTS * NUM_FRAMES_POINTS) as _,
         ));
         group.bench_function("insert", |b| {
@@ -127,7 +131,9 @@ fn batch_points(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_batch_points2");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         let (caches, store) = insert_rows(msgs.iter());
         group.bench_function("query", |b| {
             b.iter(|| query_and_visit_points(&caches, &store, &paths));
@@ -142,7 +148,7 @@ fn batch_strings(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_batch_strings2");
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_STRINGS * NUM_FRAMES_STRINGS) as _,
         ));
         group.bench_function("insert", |b| {
@@ -152,7 +158,9 @@ fn batch_strings(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_batch_strings2");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         let (caches, store) = insert_rows(msgs.iter());
         group.bench_function("query", |b| {
             b.iter(|| query_and_visit_strings(&caches, &store, &paths));
@@ -367,5 +375,5 @@ fn query_and_visit_strings(
         }
     }
     assert_eq!(NUM_STRINGS as usize, strings.len());
-    criterion::black_box(strings)
+    codspeed_criterion_compat::black_box(strings)
 }

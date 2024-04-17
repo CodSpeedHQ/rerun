@@ -2,7 +2,7 @@
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 use arrow2::array::{Array as _, StructArray};
-use criterion::{criterion_group, criterion_main, Criterion};
+use codspeed_criterion_compat::{criterion_group, criterion_main, Criterion};
 
 use re_data_store::{
     DataStore, DataStoreConfig, GarbageCollectionOptions, GarbageCollectionTarget, LatestAtQuery,
@@ -51,7 +51,7 @@ fn num_rows_per_bucket() -> &'static [u64] {
     if std::env::var("CI").is_ok() {
         &[]
     } else {
-        &[0, 2, 32, 2048]
+        &[0, 2, 32, 256]
     }
 }
 
@@ -62,7 +62,7 @@ fn insert(c: &mut Criterion) {
         let mut group = c.benchmark_group(format!(
             "datastore/num_rows={NUM_ROWS}/num_instances={NUM_INSTANCES}/packed={packed}/insert"
         ));
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_INSTANCES * NUM_ROWS) as _,
         ));
 
@@ -98,7 +98,7 @@ fn insert_same_time_point(c: &mut Criterion) {
     #[cfg(debug_assertions)]
     let num_rows_list = [100];
     #[cfg(not(debug_assertions))]
-    let num_rows_list = [1_000, 10_000, 50_000];
+    let num_rows_list = [100];
 
     for num_rows in num_rows_list {
         for shuffled in [false, true] {
@@ -108,7 +108,9 @@ fn insert_same_time_point(c: &mut Criterion) {
                 "datastore/num_rows={num_rows}/num_instances={num_instances}/insert_same_time_point/shuffled={shuffled}"
             ));
             group.sample_size(10); // it is so slow
-            group.throughput(criterion::Throughput::Elements(num_rows * num_instances));
+            group.throughput(codspeed_criterion_compat::Throughput::Elements(
+                num_rows * num_instances,
+            ));
 
             let rows = build_rows_ex(num_rows as _, num_instances as _, shuffled, packed, |_| {
                 TimePoint::from([build_frame_nr(TimeInt::ZERO)])
@@ -147,7 +149,9 @@ fn latest_at(c: &mut Criterion) {
         let mut group = c.benchmark_group(format!(
             "datastore/num_rows={NUM_ROWS}/num_instances={NUM_INSTANCES}/packed={packed}/latest_at"
         ));
-        group.throughput(criterion::Throughput::Elements(NUM_INSTANCES as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_INSTANCES as _,
+        ));
 
         let rows = build_rows_with_packed(packed);
 
@@ -198,7 +202,9 @@ fn latest_at_missing(c: &mut Criterion) {
         let mut group = c.benchmark_group(format!(
             "datastore/num_rows={NUM_ROWS}/num_instances={NUM_INSTANCES}/packed={packed}/latest_at_missing"
         ));
-        group.throughput(criterion::Throughput::Elements(NUM_INSTANCES as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_INSTANCES as _,
+        ));
 
         let rows = build_rows_with_packed(packed);
 
@@ -275,7 +281,7 @@ fn range(c: &mut Criterion) {
         let mut group = c.benchmark_group(format!(
             "datastore/num_rows={NUM_ROWS}/num_instances={NUM_INSTANCES}/packed={packed}/range"
         ));
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_INSTANCES * NUM_ROWS) as _,
         ));
 
@@ -320,7 +326,7 @@ fn gc(c: &mut Criterion) {
     let mut group = c.benchmark_group(format!(
         "datastore/num_rows={NUM_ROWS}/num_instances={NUM_INSTANCES}/gc"
     ));
-    group.throughput(criterion::Throughput::Elements(
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
         (NUM_INSTANCES * NUM_ROWS) as _,
     ));
 

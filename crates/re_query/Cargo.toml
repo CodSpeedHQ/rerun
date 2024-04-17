@@ -68,6 +68,7 @@ unindent = { workspace = true, optional = true }
 re_types = { workspace = true, features = ["datagen"] }
 
 criterion.workspace = true
+codspeed-criterion-compat.workspace = true
 mimalloc.workspace = true
 rand = { workspace = true, features = ["std", "std_rng"] }
 similar-asserts.workspace = true

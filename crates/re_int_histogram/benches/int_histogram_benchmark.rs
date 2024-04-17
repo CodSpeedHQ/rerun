@@ -1,7 +1,7 @@
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-use criterion::{criterion_group, criterion_main, Criterion};
+use codspeed_criterion_compat::{criterion_group, criterion_main, Criterion};
 
 // ----------------
 
@@ -53,7 +53,7 @@ fn btree(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("btree");
-        group.throughput(criterion::Throughput::Elements(COUNT));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(COUNT));
         group.bench_function("dense_insert", |b| {
             b.iter(|| create(COUNT as _, 1));
         });
@@ -84,7 +84,7 @@ fn int_histogram(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("int_histogram");
-        group.throughput(criterion::Throughput::Elements(COUNT));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(COUNT));
         group.bench_function("dense_insert", |b| {
             b.iter(|| create(COUNT as _, 1));
         });
