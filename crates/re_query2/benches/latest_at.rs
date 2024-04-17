@@ -1,7 +1,7 @@
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-use criterion::{criterion_group, criterion_main, Criterion};
+use codspeed_criterion_compat::{criterion_group, criterion_main, Criterion};
 
 use itertools::Itertools;
 use re_data_store::{DataStore, LatestAtQuery};
@@ -93,7 +93,7 @@ fn mono_points(c: &mut Criterion) {
         let mut group = c.benchmark_group("arrow_mono_points2");
         // Mono-insert is slow -- decrease the sample size
         group.sample_size(10);
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_POINTS * NUM_FRAMES_POINTS) as _,
         ));
         group.bench_function("insert", |b| {
@@ -103,7 +103,9 @@ fn mono_points(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_mono_points2");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         let store = insert_rows(msgs.iter());
         group.bench_function("query", |b| {
             b.iter(|| query_and_visit_points(&store, &paths));
@@ -121,7 +123,7 @@ fn mono_strings(c: &mut Criterion) {
     {
         let mut group = c.benchmark_group("arrow_mono_strings2");
         group.sample_size(10);
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_STRINGS * NUM_FRAMES_STRINGS) as _,
         ));
         group.bench_function("insert", |b| {
@@ -131,7 +133,9 @@ fn mono_strings(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_mono_strings2");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         let store = insert_rows(msgs.iter());
         group.bench_function("query", |b| {
             b.iter(|| query_and_visit_strings(&store, &paths));
@@ -146,7 +150,7 @@ fn batch_points(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_batch_points2");
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_POINTS * NUM_FRAMES_POINTS) as _,
         ));
         group.bench_function("insert", |b| {
@@ -156,7 +160,9 @@ fn batch_points(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_batch_points2");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         let store = insert_rows(msgs.iter());
         group.bench_function("query", |b| {
             b.iter(|| query_and_visit_points(&store, &paths));
@@ -171,7 +177,7 @@ fn batch_strings(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_batch_strings2");
-        group.throughput(criterion::Throughput::Elements(
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
             (NUM_STRINGS * NUM_FRAMES_STRINGS) as _,
         ));
         group.bench_function("insert", |b| {
@@ -181,7 +187,9 @@ fn batch_strings(c: &mut Criterion) {
 
     {
         let mut group = c.benchmark_group("arrow_batch_strings2");
-        group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_POINTS as _,
+        ));
         let store = insert_rows(msgs.iter());
         group.bench_function("query", |b| {
             b.iter(|| query_and_visit_strings(&store, &paths));
@@ -343,5 +351,5 @@ fn query_and_visit_strings(store: &DataStore, paths: &[EntityPath]) -> Vec<SaveS
     }
     assert_eq!(NUM_STRINGS as usize, strings.len());
 
-    criterion::black_box(strings)
+    codspeed_criterion_compat::black_box(strings)
 }

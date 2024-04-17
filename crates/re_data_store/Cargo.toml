@@ -51,6 +51,7 @@ re_types = { workspace = true, features = ["datagen", "testing"] }
 
 anyhow.workspace = true
 criterion.workspace = true
+codspeed-criterion-compat.workspace = true
 mimalloc.workspace = true
 rand.workspace = true
 similar-asserts.workspace = true
