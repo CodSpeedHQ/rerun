@@ -1,4 +1,4 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use codspeed_criterion_compat::{criterion_group, criterion_main, Criterion};
 
 use itertools::Itertools as _;
 
@@ -50,7 +50,7 @@ fn range(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group("flat_vec_deque");
-    group.throughput(criterion::Throughput::Elements(
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
         (ADDED_NUM_ENTRIES * ADDED_VALUES_PER_ENTRY) as _,
     ));
 
@@ -96,7 +96,9 @@ fn insert(c: &mut Criterion) {
     let added = (0..ADDED_VALUES_PER_ENTRY as i64).collect_vec();
 
     let mut group = c.benchmark_group("flat_vec_deque");
-    group.throughput(criterion::Throughput::Elements(added.len() as _));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
+        added.len() as _
+    ));
 
     {
         group.bench_function("insert/empty", |b| {
@@ -146,7 +148,7 @@ fn insert_many(c: &mut Criterion) {
         .collect_vec();
 
     let mut group = c.benchmark_group("flat_vec_deque");
-    group.throughput(criterion::Throughput::Elements(
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
         (ADDED_NUM_ENTRIES * ADDED_VALUES_PER_ENTRY) as _,
     ));
 
@@ -204,7 +206,7 @@ fn insert_deque(c: &mut Criterion) {
     );
 
     let mut group = c.benchmark_group("flat_vec_deque");
-    group.throughput(criterion::Throughput::Elements(
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
         (ADDED_NUM_ENTRIES * ADDED_VALUES_PER_ENTRY) as _,
     ));
 
@@ -252,7 +254,7 @@ fn remove(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group("flat_vec_deque");
-    group.throughput(criterion::Throughput::Elements(1));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(1));
 
     {
         group.bench_function("remove/prefilled/front", |b| {
@@ -288,7 +290,7 @@ fn remove_range(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group("flat_vec_deque");
-    group.throughput(criterion::Throughput::Elements(
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
         (ADDED_NUM_ENTRIES * ADDED_VALUES_PER_ENTRY) as _,
     ));
 
