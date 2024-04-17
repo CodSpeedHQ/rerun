@@ -3,7 +3,7 @@
 
 use std::collections::VecDeque;
 
-use criterion::{criterion_group, criterion_main, Criterion};
+use codspeed_criterion_compat::{criterion_group, criterion_main, Criterion};
 use itertools::Itertools;
 
 use re_log_types::{VecDequeInsertionExt as _, VecDequeRemovalExt as _};
@@ -51,7 +51,9 @@ fn insert_many(c: &mut Criterion) {
     let inserted = (0..NUM_MODIFIED_ELEMENTS as i64).collect_vec();
 
     let mut group = c.benchmark_group("vec_deque");
-    group.throughput(criterion::Throughput::Elements(inserted.len() as _));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
+        inserted.len() as _,
+    ));
 
     group.bench_function("insert_many/prefilled/front", |b| {
         let base = create_prefilled();
@@ -87,7 +89,9 @@ fn remove_range(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group("vec_deque");
-    group.throughput(criterion::Throughput::Elements(NUM_MODIFIED_ELEMENTS as _));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
+        NUM_MODIFIED_ELEMENTS as _,
+    ));
 
     group.bench_function("remove_range/prefilled/front", |b| {
         let base = create_prefilled();
@@ -126,7 +130,7 @@ fn remove(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group("vec_deque");
-    group.throughput(criterion::Throughput::Elements(1));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(1));
 
     group.bench_function("remove/prefilled/front", |b| {
         let base = create_prefilled();
@@ -162,7 +166,7 @@ fn swap_remove(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group("vec_deque");
-    group.throughput(criterion::Throughput::Elements(1));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(1));
 
     group.bench_function("swap_remove/prefilled/front", |b| {
         let base = create_prefilled();
@@ -198,7 +202,7 @@ fn swap_remove_front(c: &mut Criterion) {
     }
 
     let mut group = c.benchmark_group("vec_deque");
-    group.throughput(criterion::Throughput::Elements(1));
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(1));
 
     group.bench_function("swap_remove_front/prefilled/front", |b| {
         let base = create_prefilled();

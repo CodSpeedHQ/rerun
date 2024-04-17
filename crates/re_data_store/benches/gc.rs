@@ -1,7 +1,7 @@
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
+use codspeed_criterion_compat::{criterion_group, criterion_main, BatchSize, Criterion};
 
 use itertools::Itertools;
 use re_data_store::{
@@ -21,7 +21,7 @@ criterion_main!(benches);
 #[cfg(not(debug_assertions))]
 mod constants {
     pub const NUM_ENTITY_PATHS: usize = 20;
-    pub const NUM_ROWS_PER_ENTITY_PATH: usize = 10_000;
+    pub const NUM_ROWS_PER_ENTITY_PATH: usize = 1000;
 }
 
 // `cargo test` also runs the benchmark setup code, so make sure they run quickly:
@@ -45,7 +45,7 @@ fn num_rows_per_bucket() -> &'static [u64] {
     if std::env::var("CI").is_ok() {
         &[]
     } else {
-        &[256, 512, 1024, 2048]
+        &[256]
     }
 }
 
@@ -57,7 +57,7 @@ fn plotting_dashboard(c: &mut Criterion) {
     let mut group = c.benchmark_group(format!(
         "datastore/num_entities={NUM_ENTITY_PATHS}/num_rows_per_entity={NUM_ROWS_PER_ENTITY_PATH}/plotting_dashboard/drop_at_least={DROP_AT_LEAST}"
     ));
-    group.throughput(criterion::Throughput::Elements(
+    group.throughput(codspeed_criterion_compat::Throughput::Elements(
         ((NUM_ENTITY_PATHS * NUM_ROWS_PER_ENTITY_PATH) as f64 * DROP_AT_LEAST) as _,
     ));
     group.sample_size(10);
