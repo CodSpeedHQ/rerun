@@ -86,6 +86,7 @@ crossbeam.workspace = true
 
 [dev-dependencies]
 criterion.workspace = true
+codspeed-criterion-compat.workspace = true
 mimalloc.workspace = true
 similar-asserts.workspace = true
 
