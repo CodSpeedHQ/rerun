@@ -54,7 +54,7 @@ fn num_rows_per_bucket() -> &'static [u64] {
     if std::env::var("CI").is_ok() {
         &[]
     } else {
-        &[0, 2, 32, 2048]
+        &[0, 2, 32, 256]
     }
 }
 
@@ -101,7 +101,7 @@ fn insert_same_time_point(c: &mut Criterion) {
     #[cfg(debug_assertions)]
     let num_rows_list = [100];
     #[cfg(not(debug_assertions))]
-    let num_rows_list = [1_000, 10_000, 50_000];
+    let num_rows_list = [100];
 
     for num_rows in num_rows_list {
         for shuffled in [false, true] {

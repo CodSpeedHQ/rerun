@@ -1,0 +1,58 @@
+name: codspeed-benchmarks
+
+on:
+  push:
+    branches:
+      - "main" # or "master"
+  pull_request:
+  # `workflow_dispatch` allows CodSpeed to trigger backtest
+  # performance analysis in order to generate initial data.
+  workflow_dispatch:
+
+env:
+  # web_sys_unstable_apis is required to enable the web_sys clipboard API which egui_web uses
+  # https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.Clipboard.html
+  # https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html
+  RUSTFLAGS: --cfg=web_sys_unstable_apis --deny warnings
+
+  # See https://github.com/ericseppanen/cargo-cranky/issues/8
+  RUSTDOCFLAGS: --deny warnings --deny rustdoc::missing_crate_level_docs
+
+  # Not only `sccache` cannot cache incremental builds, it's counter-productive to generate all
+  # these incremental artifacts when running on CI.
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup rust toolchain, cache and cargo-codspeed binary
+        uses: moonrepo/setup-rust@v1
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+
+      - name: Build the benchmark target(s)
+        # have to run one at a time since multiple packages is not yet supported
+        # `--all-features` is not supported
+        run: |
+          # cargo codspeed build -p re_int_histogram      # not used in `.github/workflows/reusable_bench.yml`
+          # cargo codspeed build -p re_log_types          # not used in `.github/workflows/reusable_bench.yml`
+          # cargo codspeed build -p re_query_cache        # not used in `.github/workflows/reusable_bench.yml`
+          # cargo codspeed build -p re_query_cache2       # not used in `.github/workflows/reusable_bench.yml`
+          # cargo codspeed build -p re_space_view_spatial # not used in `.github/workflows/reusable_bench.yml`
+          # cargo codspeed build -p re_types_core         # not used in `.github/workflows/reusable_bench.yml`
+
+          # cargo codspeed build -p re_entity_db          # no benchmarks defined in this package
+
+          cargo codspeed build -p re_log_encoding --features=decoder,encoder
+          cargo codspeed build -p re_data_store -p re_query -p re_tuid
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@v2
+        with:
+          token: ${{ secrets.CODSPEED_TOKEN }}
+          run: cargo codspeed run
