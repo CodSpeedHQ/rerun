@@ -23,7 +23,7 @@ criterion_main!(benches);
 #[cfg(not(debug_assertions))]
 mod constants {
     pub const NUM_ENTITY_PATHS: usize = 20;
-    pub const NUM_ROWS_PER_ENTITY_PATH: usize = 10_000;
+    pub const NUM_ROWS_PER_ENTITY_PATH: usize = 1000;
 }
 
 // `cargo test` also runs the benchmark setup code, so make sure they run quickly:
@@ -47,7 +47,7 @@ fn num_rows_per_bucket() -> &'static [u64] {
     if std::env::var("CI").is_ok() {
         &[]
     } else {
-        &[256, 512, 1024, 2048]
+        &[256]
     }
 }
 
