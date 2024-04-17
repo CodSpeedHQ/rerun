@@ -14,8 +14,8 @@ use re_viewer_context::Annotations;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-criterion::criterion_main!(benches);
-criterion::criterion_group!(benches, bench_points);
+codspeed_criterion_compat::criterion_main!(benches);
+codspeed_criterion_compat::criterion_group!(benches, bench_points);
 
 // ---
 
@@ -36,7 +36,7 @@ use self::constants::*;
 // ---
 
 /// Mimics `examples/python/open_photogrammetry_format/main.py`
-fn bench_points(c: &mut criterion::Criterion) {
+fn bench_points(c: &mut codspeed_criterion_compat::Criterion) {
     let timeline = Timeline::log_time();
     let ent_path = EntityPath::from("points");
 
@@ -121,7 +121,7 @@ fn bench_points(c: &mut criterion::Criterion) {
 
             {
                 let mut group = c.benchmark_group("Points3D");
-                group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+                group.throughput(codspeed_criterion_compat::Throughput::Elements(NUM_POINTS as _));
                 group.bench_function(bench_name(true, "load_all"), |b| {
                     b.iter(|| {
                         let points = LoadedPoints::load(&data, &ent_path, at, &annotations);
@@ -137,7 +137,7 @@ fn bench_points(c: &mut criterion::Criterion) {
                 let points = LoadedPoints::load(&data, &ent_path, at, &annotations);
 
                 let mut group = c.benchmark_group("Points3D");
-                group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+                group.throughput(codspeed_criterion_compat::Throughput::Elements(NUM_POINTS as _));
                 group.bench_function(bench_name(true, "load_colors"), |b| {
                     b.iter(|| {
                         let colors = LoadedPoints::load_colors(
@@ -154,7 +154,7 @@ fn bench_points(c: &mut criterion::Criterion) {
             // NOTE: we don't log radii!
             {
                 let mut group = c.benchmark_group("Points3D");
-                group.throughput(criterion::Throughput::Elements(NUM_POINTS as _));
+                group.throughput(codspeed_criterion_compat::Throughput::Elements(NUM_POINTS as _));
                 group.bench_function(bench_name(true, "load_radii"), |b| {
                     b.iter(|| {
                         let radii = LoadedPoints::load_radii(&data, &ent_path);

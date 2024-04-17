@@ -6,7 +6,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 use std::sync::Arc;
 
 use arrow2::array::{Array, FixedSizeListArray, PrimitiveArray, StructArray};
-use criterion::Criterion;
+use codspeed_criterion_compat::Criterion;
 use itertools::Itertools;
 
 use re_log_types::DataCell;
@@ -19,14 +19,14 @@ use re_types_core::{Component, SizeBytes};
 
 // ---
 
-criterion::criterion_group!(benches, erased_clone, estimated_size_bytes);
+codspeed_criterion_compat::criterion_group!(benches, erased_clone, estimated_size_bytes);
 
-criterion::criterion_main!(benches);
+codspeed_criterion_compat::criterion_main!(benches);
 
 // ---
 
 #[cfg(not(debug_assertions))]
-const NUM_ROWS: usize = 10_000;
+const NUM_ROWS: usize = 1000;
 #[cfg(not(debug_assertions))]
 const NUM_INSTANCES: usize = 100;
 
@@ -75,7 +75,9 @@ fn erased_clone(c: &mut Criterion) {
         let mut group = c.benchmark_group(format!(
             "arrow2/size_bytes/{kind}/rows={NUM_ROWS}/instances={NUM_INSTANCES}"
         ));
-        group.throughput(criterion::Throughput::Elements(NUM_ROWS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_ROWS as _,
+        ));
 
         match kind {
             ArrayKind::Primitive => {
@@ -98,7 +100,10 @@ fn erased_clone(c: &mut Criterion) {
 
     // TODO(cmc): Use cells once `cell.size_bytes()` has landed (#1727)
     fn bench_arrow<'a, T: Component + SizeBytes + 'a>(
-        group: &mut criterion::BenchmarkGroup<'_, criterion::measurement::WallTime>,
+        group: &mut codspeed_criterion_compat::BenchmarkGroup<
+            '_,
+            codspeed_criterion_compat::measurement::WallTime,
+        >,
         data: &'a Vec<T>,
     ) where
         &'a T: Into<::std::borrow::Cow<'a, T>>,
@@ -127,7 +132,10 @@ fn erased_clone(c: &mut Criterion) {
 
     #[allow(clippy::ptr_arg)] // We want to know it's a vec and not a slice to the stack!
     fn bench_native<T: Clone>(
-        group: &mut criterion::BenchmarkGroup<'_, criterion::measurement::WallTime>,
+        group: &mut codspeed_criterion_compat::BenchmarkGroup<
+            '_,
+            codspeed_criterion_compat::measurement::WallTime,
+        >,
         data: &Vec<T>,
     ) {
         let vecs = (0..NUM_ROWS).map(|_| data.clone()).collect_vec();
@@ -193,7 +201,9 @@ fn estimated_size_bytes(c: &mut Criterion) {
         let mut group = c.benchmark_group(format!(
             "arrow2/erased_clone/{kind}/rows={NUM_ROWS}/instances={NUM_INSTANCES}"
         ));
-        group.throughput(criterion::Throughput::Elements(NUM_ROWS as _));
+        group.throughput(codspeed_criterion_compat::Throughput::Elements(
+            NUM_ROWS as _,
+        ));
 
         fn generate_cells(kind: ArrayKind) -> Vec<DataCell> {
             match kind {
@@ -275,7 +285,10 @@ fn estimated_size_bytes(c: &mut Criterion) {
             }
 
             fn bench_downcast_first<T: arrow2::array::Array + Clone>(
-                group: &mut criterion::BenchmarkGroup<'_, criterion::measurement::WallTime>,
+                group: &mut codspeed_criterion_compat::BenchmarkGroup<
+                    '_,
+                    codspeed_criterion_compat::measurement::WallTime,
+                >,
                 kind: ArrayKind,
             ) {
                 let cells = generate_cells(kind);
@@ -331,7 +344,10 @@ fn estimated_size_bytes(c: &mut Criterion) {
             }
 
             fn bench_std<T: Clone>(
-                group: &mut criterion::BenchmarkGroup<'_, criterion::measurement::WallTime>,
+                group: &mut codspeed_criterion_compat::BenchmarkGroup<
+                    '_,
+                    codspeed_criterion_compat::measurement::WallTime,
+                >,
                 data: Vec<Vec<T>>,
             ) {
                 {
