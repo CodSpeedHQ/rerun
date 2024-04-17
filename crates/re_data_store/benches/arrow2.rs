@@ -27,7 +27,7 @@ criterion::criterion_main!(benches);
 // ---
 
 #[cfg(not(debug_assertions))]
-const NUM_ROWS: usize = 10_000;
+const NUM_ROWS: usize = 1000;
 #[cfg(not(debug_assertions))]
 const NUM_INSTANCES: usize = 100;
 
