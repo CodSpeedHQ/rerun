@@ -5,14 +5,14 @@ use egui_plot::{Legend, Line, Plot, PlotPoint, Points};
 use re_data_store::TimeType;
 use re_format::next_grid_tick_magnitude_ns;
 use re_log_types::{EntityPath, TimeInt, TimeZone};
-use re_space_view::{controls, query_space_view_sub_archetype_or_default};
+use re_space_view::{controls, query_view_property_or_default};
 use re_types::blueprint::datatypes::VisibleTimeRange;
 use re_types::{blueprint::components::Corner2D, components::Range1D};
 use re_viewer_context::external::re_entity_db::{
     EditableAutoValue, EntityProperties, TimeSeriesAggregator,
 };
 use re_viewer_context::{
-    IdentifiedViewSystem, IndicatedEntities, PerVisualizer, RecommendedSpaceView,
+    IdentifiedViewSystem, IndicatedEntities, PerVisualizer, QueryRange, RecommendedSpaceView,
     SmallVisualizerSet, SpaceViewClass, SpaceViewClassIdentifier, SpaceViewClassRegistryError,
     SpaceViewId, SpaceViewSpawnHeuristics, SpaceViewState, SpaceViewStateExt as _,
     SpaceViewSystemExecutionError, SystemExecutionOutput, ViewQuery, ViewSystemIdentifier,
@@ -75,7 +75,7 @@ pub struct TimeSeriesSpaceView;
 const DEFAULT_LEGEND_CORNER: egui_plot::Corner = egui_plot::Corner::RightBottom;
 
 impl TimeSeriesSpaceView {
-    pub const DEFAULT_TIME_RANGE: VisibleTimeRange = VisibleTimeRange::EVERYTHING;
+    pub const DEFAULT_QUERY_RANGE: QueryRange = QueryRange::TimeRange(VisibleTimeRange::EVERYTHING);
 }
 
 impl SpaceViewClass for TimeSeriesSpaceView {
@@ -141,8 +141,8 @@ impl SpaceViewClass for TimeSeriesSpaceView {
         re_viewer_context::SpaceViewClassLayoutPriority::Low
     }
 
-    fn default_visible_time_range(&self) -> VisibleTimeRange {
-        Self::DEFAULT_TIME_RANGE.clone()
+    fn default_query_range(&self) -> QueryRange {
+        Self::DEFAULT_QUERY_RANGE.clone()
     }
 
     fn selection_ui(
@@ -317,11 +317,7 @@ It can greatly improve performance (and readability) in such situations as it pr
                 corner: legend_corner,
             },
             _,
-        ) = query_space_view_sub_archetype_or_default(
-            query.space_view_id,
-            blueprint_db,
-            blueprint_query,
-        );
+        ) = query_view_property_or_default(query.space_view_id, blueprint_db, blueprint_query);
 
         let (
             re_types::blueprint::archetypes::ScalarAxis {
@@ -329,11 +325,7 @@ It can greatly improve performance (and readability) in such situations as it pr
                 lock_range_during_zoom: y_lock_range_during_zoom,
             },
             _,
-        ) = query_space_view_sub_archetype_or_default(
-            query.space_view_id,
-            blueprint_db,
-            blueprint_query,
-        );
+        ) = query_view_property_or_default(query.space_view_id, blueprint_db, blueprint_query);
 
         let (current_time, time_type, timeline) = {
             // Avoid holding the lock for long
@@ -628,7 +620,7 @@ fn legend_ui(ctx: &ViewerContext<'_>, space_view_id: SpaceViewId, ui: &mut egui:
     let blueprint_db = ctx.store_context.blueprint;
     let blueprint_query = ctx.blueprint_query;
     let (re_types::blueprint::archetypes::PlotLegend { visible, corner }, blueprint_path) =
-        query_space_view_sub_archetype_or_default(space_view_id, blueprint_db, blueprint_query);
+        query_view_property_or_default(space_view_id, blueprint_db, blueprint_query);
 
     ctx.re_ui
         .selection_grid(ui, "time_series_selection_ui_legend")
@@ -695,7 +687,7 @@ fn axis_ui(
             lock_range_during_zoom: y_lock_range_during_zoom,
         },
         blueprint_path,
-    ) = query_space_view_sub_archetype_or_default(
+    ) = query_view_property_or_default(
         space_view_id,
         ctx.store_context.blueprint,
         ctx.blueprint_query,
