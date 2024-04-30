@@ -65,11 +65,8 @@ pub enum LabelStyle {
 
 // ----------------------------------------------------------------------------
 
-use egui::emath::{Rangef, Rot2};
-use egui::{
-    epaint::util::FloatOrd, pos2, Align2, CollapsingResponse, Color32, Mesh, NumExt, Rect, Shape,
-    Vec2, Widget,
-};
+use egui::emath::{Float as _, Rangef, Rot2};
+use egui::{pos2, Align2, CollapsingResponse, Color32, Mesh, NumExt, Rect, Shape, Vec2, Widget};
 
 #[derive(Clone)]
 pub struct ReUi {

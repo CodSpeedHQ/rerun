@@ -51,16 +51,15 @@ skip = [
   { name = "base64" },            # Too popular
   { name = "cargo_metadata" },    # Older version used by ply-rs. It's small, and it's build-time only!
   { name = "cfg_aliases" },       # Tiny macro-only crate. Winit and other use older version than us.
-  { name = "hashbrown" },         # Old version used by polar-rs
   { name = "libloading" },        # Old version used by ash (vulkan binding), newer version used by khronos-egl
   { name = "memoffset" },         # Small crate
   { name = "prettyplease" },      # Old version being used by prost
   { name = "pulldown-cmark" },    # Build-dependency via `ply-rs` (!). TODO(emilk): use a better crate for .ply parsing
   { name = "raw-window-handle" }, # Pretty small crate; some crates still on old version
   { name = "redox_syscall" },     # Plenty of versions in the wild
-  { name = "spin" },              # Old version used by rusttls
   { name = "webpki-roots" },      # ureq and tungstenite are on different version 😭
   { name = "windows" },           # Old version used by accesskit_windows, newer version used by wgpu
+  { name = "block2" },            # Old version dragged in via accesskit_winit, newer version used by objc2-foundation.
 ]
 skip-tree = [
   { name = "async-io" },       # Old version via rfd
