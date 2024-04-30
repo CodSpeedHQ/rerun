@@ -4969,6 +4969,7 @@ dependencies = [
  "bytemuck",
  "codspeed-criterion-compat",
  "document-features",
+ "itertools 0.12.0",
  "once_cell",
  "re_arrow2",
  "re_error",
