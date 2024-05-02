@@ -4989,7 +4989,6 @@ dependencies = [
  "egui_commonmark",
  "egui_extras",
  "egui_tiles",
- "once_cell",
  "parking_lot",
  "rand",
  "re_entity_db",
