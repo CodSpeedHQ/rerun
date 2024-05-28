@@ -110,9 +110,9 @@ checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
 
 [[package]]
 name = "ahash"
-version = "0.8.8"
+version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42cd52102d3df161c77a887b608d7a4897d7cc112886a9537b738a887a03aaff"
+checksum = "e89da841a80418a9b391ebaea17f5c112ffaaa96f621d2c285b5174da76b9011"
 dependencies = [
  "cfg-if",
  "getrandom",
@@ -144,7 +144,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39b801912a977c3fd52d80511fe1c0c8480c6f957f21ae2ce1b92ffe970cf4b9"
 dependencies = [
  "android-properties",
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "cc",
  "cesu8",
  "jni",
@@ -242,7 +242,7 @@ checksum = "1faa3c733d9a3dd6fbaf85da5d162a2e03b2e0033a90dceb0e2a90fdd1e5380a"
 dependencies = [
  "clipboard-win",
  "core-graphics",
- "image",
+ "image 0.24.6",
  "log",
  "objc",
  "objc-foundation",
@@ -685,9 +685,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.4.1"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "327762f6e5a765692301e5bb513e0d9fef63be86bbc14528052b1cd3e6f03e07"
+checksum = "cf4b9d6a944f767f8e5e0db018570623c85f3d925ac718db4e06d0187adb21c1"
 dependencies = [
  "bytemuck",
 ]
@@ -722,7 +722,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ae85a0696e7ea3b835a453750bf002770776609115e6d25c6d2ff28a8200f7e7"
 dependencies = [
- "objc-sys 0.3.2",
+ "objc-sys 0.3.5",
 ]
 
 [[package]]
@@ -743,6 +743,15 @@ checksum = "15b55663a85f33501257357e6421bb33e769d5c9ffb5ba0921c975a123e35e68"
 dependencies = [
  "block-sys 0.2.1",
  "objc2 0.4.1",
+]
+
+[[package]]
+name = "block2"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c132eebf10f5cad5289222520a4a058514204aed6d791f1cf4fe8088b82d15f"
+dependencies = [
+ "objc2 0.5.2",
 ]
 
 [[package]]
@@ -821,7 +830,7 @@ version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b50b5a44d59a98c55a9eeb518f39bf7499ba19fd98ee7d22618687f3f10adbf"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "log",
  "polling 3.3.0",
  "rustix 0.38.24",
@@ -1074,36 +1083,6 @@ dependencies = [
  "anyhow",
  "clap",
  "rerun",
-]
-
-[[package]]
-name = "cocoa"
-version = "0.25.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6140449f97a6e97f9511815c5632d84c8aacf8ac271ad77c559218161a1373c"
-dependencies = [
- "bitflags 1.3.2",
- "block",
- "cocoa-foundation",
- "core-foundation",
- "core-graphics",
- "foreign-types",
- "libc",
- "objc",
-]
-
-[[package]]
-name = "cocoa-foundation"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c6234cbb2e4c785b456c0644748b1ac416dd045799740356f8363dfe00c93f7"
-dependencies = [
- "bitflags 1.3.2",
- "block",
- "core-foundation",
- "core-graphics-types",
- "libc",
- "objc",
 ]
 
 [[package]]
@@ -1570,7 +1549,7 @@ dependencies = [
 name = "dna"
 version = "0.17.0-alpha.3"
 dependencies = [
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "rand",
  "rerun",
 ]
@@ -1599,8 +1578,7 @@ checksum = "68b0cf012f1230e43cd00ebb729c6bb58707ecfa8ad08b52ef3a4ccd2697fc30"
 [[package]]
 name = "ecolor"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20930a432bbd57a6d55e07976089708d4893f3d556cf42a0d79e9e321fa73b10"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
  "bytemuck",
  "serde",
@@ -1609,21 +1587,22 @@ dependencies = [
 [[package]]
 name = "eframe"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "020e2ccef6bbcec71dbc542f7eed64a5846fc3076727f5746da8fd307c91bab2"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
+ "ahash",
  "bytemuck",
- "cocoa",
  "directories-next",
  "document-features",
  "egui",
  "egui-wgpu",
  "egui-winit",
  "egui_glow",
- "image",
+ "image 0.25.1",
  "js-sys",
  "log",
- "objc",
+ "objc2 0.5.2",
+ "objc2-app-kit",
+ "objc2-foundation",
  "parking_lot",
  "percent-encoding",
  "pollster",
@@ -1632,7 +1611,6 @@ dependencies = [
  "ron",
  "serde",
  "static_assertions",
- "thiserror",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -1645,12 +1623,12 @@ dependencies = [
 [[package]]
 name = "egui"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "584c5d1bf9a67b25778a3323af222dbe1a1feb532190e103901187f92c7fe29a"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
  "accesskit",
  "ahash",
  "backtrace",
+ "emath",
  "epaint",
  "log",
  "nohash-hasher",
@@ -1662,9 +1640,9 @@ dependencies = [
 [[package]]
 name = "egui-wgpu"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "469ff65843f88a702b731a1532b7d03b0e8e96d283e70f3a22b0e06c46cb9b37"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
+ "ahash",
  "bytemuck",
  "document-features",
  "egui",
@@ -1681,10 +1659,10 @@ dependencies = [
 [[package]]
 name = "egui-winit"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e3da0cbe020f341450c599b35b92de4af7b00abde85624fd16f09c885573609"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
  "accesskit_winit",
+ "ahash",
  "arboard",
  "egui",
  "log",
@@ -1699,25 +1677,35 @@ dependencies = [
 
 [[package]]
 name = "egui_commonmark"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "013480797931a2649e03069613ed35514569372d6f79df70fc3653ae18a75c6c"
+version = "0.16.1"
+source = "git+https://github.com/rerun-io/egui_commonmark?rev=1c08d5ea58d60c6a61487b5eecefdfdb35c47036#1c08d5ea58d60c6a61487b5eecefdfdb35c47036"
+dependencies = [
+ "egui",
+ "egui_commonmark_backend",
+ "egui_extras",
+ "pulldown-cmark 0.11.0",
+]
+
+[[package]]
+name = "egui_commonmark_backend"
+version = "0.16.1"
+source = "git+https://github.com/rerun-io/egui_commonmark?rev=1c08d5ea58d60c6a61487b5eecefdfdb35c47036#1c08d5ea58d60c6a61487b5eecefdfdb35c47036"
 dependencies = [
  "egui",
  "egui_extras",
- "pulldown-cmark 0.10.0",
+ "pulldown-cmark 0.11.0",
 ]
 
 [[package]]
 name = "egui_extras"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b78779f35ded1a853786c9ce0b43fe1053e10a21ea3b23ebea411805ce41593"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
+ "ahash",
  "egui",
  "ehttp",
  "enum-map",
- "image",
+ "image 0.25.1",
  "log",
  "mime_guess2",
  "puffin",
@@ -1727,9 +1715,9 @@ dependencies = [
 [[package]]
 name = "egui_glow"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0e5d975f3c86edc3d35b1db88bb27c15dde7c55d3b5af164968ab5ede3f44ca"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
+ "ahash",
  "bytemuck",
  "egui",
  "egui-winit",
@@ -1745,21 +1733,20 @@ dependencies = [
 [[package]]
 name = "egui_plot"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7854b86dc1c2d352c5270db3d600011daa913d6b554141a03939761323288a1"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
+ "ahash",
  "egui",
 ]
 
 [[package]]
 name = "egui_tiles"
 version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e2c0ff99daddcbdc54b141dbb7be3b014463da48a03ebc801bf63e500b23d75"
+source = "git+https://github.com/rerun-io/egui_tiles?rev=7a9ef17dd873efc2c803a0a91a64246ab1a2fa83#7a9ef17dd873efc2c803a0a91a64246ab1a2fa83"
 dependencies = [
  "ahash",
  "egui",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "log",
  "serde",
 ]
@@ -1789,8 +1776,7 @@ checksum = "a26ae43d7bcc3b814de94796a5e736d4029efb0ee900c12e2d54c993ad1a1e07"
 [[package]]
 name = "emath"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4c3a552cfca14630702449d35f41c84a0d15963273771c6059175a803620f3f"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
  "bytemuck",
  "serde",
@@ -1891,8 +1877,7 @@ dependencies = [
 [[package]]
 name = "epaint"
 version = "0.27.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b381f8b149657a4acf837095351839f32cd5c4aec1817fc4df84e18d76334176"
+source = "git+https://github.com/emilk/egui.git?rev=54429e0549e829c64b8de1b66f846fdf1a7ee37c#54429e0549e829c64b8de1b66f846fdf1a7ee37c"
 dependencies = [
  "ab_glyph",
  "ahash",
@@ -2332,7 +2317,7 @@ dependencies = [
  "base64 0.13.1",
  "byteorder",
  "gltf-json",
- "image",
+ "image 0.24.6",
  "lazy_static",
  "urlencoding",
 ]
@@ -2376,7 +2361,7 @@ version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbcd2dba93594b227a1f57ee09b8b9da8892c34d55aa332e034a228d0fe6a171"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "gpu-alloc-types",
 ]
 
@@ -2386,7 +2371,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98ff03b468aa837d70984d55f5d3f846f6ec31fe34bbb97c4f85219caeee1ca4"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
 ]
 
 [[package]]
@@ -2408,7 +2393,7 @@ version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cc11df1ace8e7e564511f53af41f3e42ddc95b56fd07b3f4445d2a6048bc682c"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "gpu-descriptor-types",
  "hashbrown 0.14.2",
 ]
@@ -2467,7 +2452,7 @@ version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af2a7e73e1f34c48da31fb668a907f250794837e08faa144fd24f0b8b741e890"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "com",
  "libc",
  "libloading 0.8.1",
@@ -2603,6 +2588,20 @@ dependencies = [
  "num-traits",
  "png",
  "tiff",
+]
+
+[[package]]
+name = "image"
+version = "0.25.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd54d660e773627692c524beaad361aca785a4f9f5730ce91f42aabe5bce3d11"
+dependencies = [
+ "bytemuck",
+ "byteorder",
+ "num-traits",
+ "png",
+ "zune-core",
+ "zune-jpeg",
 ]
 
 [[package]]
@@ -2751,9 +2750,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25db6b064527c5d482d0423354fcd07a89a2dfe07b67892e62411946db7f07b0"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
 dependencies = [
  "either",
 ]
@@ -3071,7 +3070,7 @@ version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c43f73953f8cbe511f021b58f18c3ce1c3d1ae13fe953293e13345bf83217f25"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "block",
  "core-graphics-types",
  "foreign-types",
@@ -3170,7 +3169,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8878eb410fc90853da3908aebfe61d73d26d4437ef850b70050461f939509899"
 dependencies = [
  "bit-set",
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "codespan-reporting",
  "hexf-parse",
  "indexmap 2.1.0",
@@ -3219,7 +3218,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2076a31b7010b17a38c01907c45b945e8f11495ee4dd588309718901b1f7a5b7"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "jni-sys",
  "log",
  "ndk-sys",
@@ -3274,7 +3273,7 @@ version = "6.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6205bd8bb1e454ad2e27422015fb5e4f2bcc7e08fa8f27058670d208324a4d2d"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "crossbeam-channel",
  "filetime",
  "fsevent-sys",
@@ -3422,9 +3421,9 @@ checksum = "df3b9834c1e95694a05a828b59f55fa2afec6288359cda67146126b3f90a55d7"
 
 [[package]]
 name = "objc-sys"
-version = "0.3.2"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7c71324e4180d0899963fc83d9d241ac39e699609fc1025a850aadac8257459"
+checksum = "cdb91bdd390c7ce1a8607f35f3ca7151b65afc0ff5ff3b34fa350f7d7c7e4310"
 
 [[package]]
 name = "objc2"
@@ -3443,8 +3442,58 @@ version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "559c5a40fdd30eb5e344fbceacf7595a81e242529fb4e21cf5f43fb4f11ff98d"
 dependencies = [
- "objc-sys 0.3.2",
+ "objc-sys 0.3.5",
  "objc2-encode 3.0.0",
+]
+
+[[package]]
+name = "objc2"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46a785d4eeff09c14c487497c162e92766fbb3e4059a71840cecc03d9a50b804"
+dependencies = [
+ "objc-sys 0.3.5",
+ "objc2-encode 4.0.3",
+]
+
+[[package]]
+name = "objc2-app-kit"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e4e89ad9e3d7d297152b17d39ed92cd50ca8063a89a9fa569046d41568891eff"
+dependencies = [
+ "bitflags 2.5.0",
+ "block2 0.5.1",
+ "libc",
+ "objc2 0.5.2",
+ "objc2-core-data",
+ "objc2-core-image",
+ "objc2-foundation",
+ "objc2-quartz-core",
+]
+
+[[package]]
+name = "objc2-core-data"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "617fbf49e071c178c0b24c080767db52958f716d9eabdf0890523aeae54773ef"
+dependencies = [
+ "bitflags 2.5.0",
+ "block2 0.5.1",
+ "objc2 0.5.2",
+ "objc2-foundation",
+]
+
+[[package]]
+name = "objc2-core-image"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "55260963a527c99f1819c4f8e3b47fe04f9650694ef348ffd2227e8196d34c80"
+dependencies = [
+ "block2 0.5.1",
+ "objc2 0.5.2",
+ "objc2-foundation",
+ "objc2-metal",
 ]
 
 [[package]]
@@ -3461,6 +3510,49 @@ name = "objc2-encode"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d079845b37af429bfe5dfa76e6d087d788031045b25cfc6fd898486fd9847666"
+
+[[package]]
+name = "objc2-encode"
+version = "4.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7891e71393cd1f227313c9379a26a584ff3d7e6e7159e988851f0934c993f0f8"
+
+[[package]]
+name = "objc2-foundation"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ee638a5da3799329310ad4cfa62fbf045d5f56e3ef5ba4149e7452dcf89d5a8"
+dependencies = [
+ "bitflags 2.5.0",
+ "block2 0.5.1",
+ "libc",
+ "objc2 0.5.2",
+]
+
+[[package]]
+name = "objc2-metal"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd0cba1276f6023976a406a14ffa85e1fdd19df6b0f737b063b95f6c8c7aadd6"
+dependencies = [
+ "bitflags 2.5.0",
+ "block2 0.5.1",
+ "objc2 0.5.2",
+ "objc2-foundation",
+]
+
+[[package]]
+name = "objc2-quartz-core"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e42bee7bff906b14b167da2bac5efe6b6a07e6f7c0a21a7308d40c960242dc7a"
+dependencies = [
+ "bitflags 2.5.0",
+ "block2 0.5.1",
+ "objc2 0.5.2",
+ "objc2-foundation",
+ "objc2-metal",
+]
 
 [[package]]
 name = "objc_exception"
@@ -3958,11 +4050,11 @@ dependencies = [
 
 [[package]]
 name = "pulldown-cmark"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dce76ce678ffc8e5675b22aa1405de0b7037e2fdf8913fea40d1926c6fe1e6e7"
+checksum = "8746739f11d39ce5ad5c2520a9b75285310dbfe78c541ccf832d38615765aec0"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "memchr",
  "unicase",
 ]
@@ -4187,7 +4279,7 @@ name = "re_blueprint_tree"
 version = "0.17.0-alpha.3"
 dependencies = [
  "egui",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "re_context_menu",
  "re_data_ui",
  "re_entity_db",
@@ -4227,7 +4319,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "egui",
  "egui_tiles",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "nohash-hasher",
  "once_cell",
  "re_entity_db",
@@ -4247,7 +4339,7 @@ name = "re_crash_handler"
 version = "0.17.0-alpha.3"
 dependencies = [
  "backtrace",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "libc",
  "parking_lot",
  "re_analytics",
@@ -4260,7 +4352,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "ahash",
  "anyhow",
- "image",
+ "image 0.25.1",
  "once_cell",
  "parking_lot",
  "rayon",
@@ -4281,7 +4373,7 @@ name = "re_data_source"
 version = "0.17.0-alpha.3"
 dependencies = [
  "anyhow",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "rayon",
  "re_build_tools",
  "re_data_loader",
@@ -4303,7 +4395,7 @@ dependencies = [
  "document-features",
  "indent",
  "insta",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "mimalloc",
  "nohash-hasher",
  "once_cell",
@@ -4334,8 +4426,8 @@ dependencies = [
  "egui",
  "egui_extras",
  "egui_plot",
- "image",
- "itertools 0.12.0",
+ "image 0.25.1",
+ "itertools 0.13.0",
  "re_data_store",
  "re_entity_db",
  "re_error",
@@ -4363,7 +4455,7 @@ dependencies = [
  "cargo_metadata 0.18.1",
  "glob",
  "indicatif",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "rayon",
  "re_build_tools",
  "re_format",
@@ -4389,7 +4481,7 @@ dependencies = [
  "document-features",
  "emath",
  "getrandom",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "mimalloc",
  "nohash-hasher",
  "parking_lot",
@@ -4499,7 +4591,7 @@ dependencies = [
  "document-features",
  "fixed",
  "half 2.3.1",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "mimalloc",
  "natord",
  "nohash-hasher",
@@ -4533,7 +4625,7 @@ dependencies = [
  "ahash",
  "backtrace",
  "emath",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "memory-stats",
  "nohash-hasher",
  "once_cell",
@@ -4557,7 +4649,7 @@ dependencies = [
  "codspeed-criterion-compat",
  "indent",
  "indexmap 2.1.0",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "mimalloc",
  "nohash-hasher",
  "parking_lot",
@@ -4586,7 +4678,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "ahash",
  "anyhow",
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "bytemuck",
  "cfg-if",
  "cfg_aliases 0.2.0",
@@ -4599,7 +4691,7 @@ dependencies = [
  "glam",
  "gltf",
  "half 2.3.1",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "macaw",
  "never",
  "notify",
@@ -4636,8 +4728,8 @@ dependencies = [
  "bytemuck",
  "console_error_panic_hook",
  "glam",
- "image",
- "itertools 0.12.0",
+ "image 0.25.1",
+ "itertools 0.13.0",
  "macaw",
  "pollster",
  "rand",
@@ -4659,7 +4751,7 @@ dependencies = [
  "anyhow",
  "crossbeam",
  "document-features",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "libc",
  "ndarray",
  "ndarray-rand",
@@ -4706,7 +4798,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "egui",
  "egui_tiles",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "nohash-hasher",
  "once_cell",
  "re_context_menu",
@@ -4795,12 +4887,12 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "ahash",
  "anyhow",
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "bytemuck",
  "codspeed-criterion-compat",
  "egui",
  "glam",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "macaw",
  "mimalloc",
  "nohash-hasher",
@@ -4892,7 +4984,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "egui",
  "egui_plot",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "rayon",
  "re_data_store",
  "re_format",
@@ -4925,7 +5017,7 @@ name = "re_time_panel"
 version = "0.17.0-alpha.3"
 dependencies = [
  "egui",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "re_context_menu",
  "re_data_store",
  "re_data_ui",
@@ -4976,9 +5068,9 @@ dependencies = [
  "emath",
  "glam",
  "half 2.3.1",
- "image",
+ "image 0.25.1",
  "infer",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "linked-hash-map",
  "mime_guess2",
  "mint",
@@ -4998,8 +5090,6 @@ dependencies = [
  "smallvec",
  "thiserror",
  "uuid",
- "zune-core",
- "zune-jpeg",
 ]
 
 [[package]]
@@ -5025,7 +5115,7 @@ dependencies = [
  "convert_case",
  "flatbuffers",
  "indent",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "prettyplease",
  "proc-macro2",
  "quote",
@@ -5050,7 +5140,7 @@ dependencies = [
  "backtrace",
  "codspeed-criterion-compat",
  "document-features",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "once_cell",
  "re_arrow2",
  "re_error",
@@ -5097,8 +5187,8 @@ dependencies = [
  "egui-wgpu",
  "egui_plot",
  "ehttp",
- "image",
- "itertools 0.12.0",
+ "image 0.25.1",
+ "itertools 0.13.0",
  "js-sys",
  "poll-promise",
  "re_analytics",
@@ -5170,7 +5260,7 @@ dependencies = [
  "glam",
  "half 2.3.1",
  "indexmap 2.1.0",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "macaw",
  "ndarray",
  "nohash-hasher",
@@ -5204,8 +5294,8 @@ dependencies = [
  "egui",
  "egui_tiles",
  "glam",
- "image",
- "itertools 0.12.0",
+ "image 0.25.1",
+ "itertools 0.13.0",
  "nohash-hasher",
  "rayon",
  "re_context_menu",
@@ -5229,7 +5319,7 @@ dependencies = [
  "ahash",
  "egui",
  "egui_tiles",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "nohash-hasher",
  "once_cell",
  "parking_lot",
@@ -5353,7 +5443,7 @@ dependencies = [
  "clap",
  "document-features",
  "env_logger",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "log",
  "puffin",
  "rayon",
@@ -5419,7 +5509,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "crossbeam",
  "document-features",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "mimalloc",
  "once_cell",
  "parking_lot",
@@ -5566,7 +5656,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "anyhow",
  "clap",
- "image",
+ "image 0.25.1",
  "re_log",
  "rerun",
 ]
@@ -5588,7 +5678,7 @@ dependencies = [
  "anyhow",
  "clap",
  "half 2.3.1",
- "image",
+ "image 0.25.1",
  "ndarray",
  "re_log",
  "rerun",
@@ -5650,7 +5740,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "anyhow",
  "clap",
- "image",
+ "image 0.25.1",
  "re_log",
  "rerun",
 ]
@@ -5800,7 +5890,7 @@ version = "0.38.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ad981d6c340a49cdc40a1028d9c6084ec7e9fa33fcb839cab656a267071e234"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "errno",
  "libc",
  "linux-raw-sys 0.4.11",
@@ -6105,7 +6195,7 @@ version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "60e3d9941fa3bacf7c2bf4b065304faa14164151254cd16ce1b1bc8fc381600f"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "calloop",
  "calloop-wayland-source",
  "cursor-icon",
@@ -6148,7 +6238,7 @@ dependencies = [
 name = "snippets"
 version = "0.17.0-alpha.3"
 dependencies = [
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "ndarray",
  "rand",
  "re_build_tools",
@@ -6185,7 +6275,7 @@ version = "0.3.0+sdk-1.3.268.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eda41003dc44290527a59b13432d4a0379379fa074b70174882adfbdfd917844"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
 ]
 
 [[package]]
@@ -6319,7 +6409,7 @@ dependencies = [
  "anyhow",
  "clap",
  "glam",
- "itertools 0.12.0",
+ "itertools 0.13.0",
  "ndarray",
  "ndarray-rand",
  "rand",
@@ -6342,7 +6432,7 @@ version = "0.17.0-alpha.3"
 dependencies = [
  "anyhow",
  "clap",
- "image",
+ "image 0.25.1",
  "re_log",
  "rerun",
 ]
@@ -6991,7 +7081,7 @@ version = "0.31.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ca7d52347346f5473bf2f56705f360e8440873052e575e55890c4fa57843ed3"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "nix",
  "wayland-backend",
  "wayland-scanner",
@@ -7003,7 +7093,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "625c5029dbd43d25e6aa9615e88b829a5cad13b2819c4ae129fdbb7c31ab4c7e"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "cursor-icon",
  "wayland-backend",
 ]
@@ -7025,7 +7115,7 @@ version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e253d7107ba913923dc253967f35e8561a3c65f914543e46843c88ddd729e21c"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "wayland-backend",
  "wayland-client",
  "wayland-scanner",
@@ -7037,7 +7127,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23803551115ff9ea9bce586860c5c5a971e360825a0309264102a9495a5ff479"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "wayland-backend",
  "wayland-client",
  "wayland-protocols",
@@ -7050,7 +7140,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad1f61b76b6c2d8742e10f9ba5c3737f6530b4c243132c2a2ccc8aa96fe25cd6"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "wayland-backend",
  "wayland-client",
  "wayland-protocols",
@@ -7103,17 +7193,18 @@ dependencies = [
 
 [[package]]
 name = "webbrowser"
-version = "0.8.10"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd222aa310eb7532e3fd427a5d7db7e44bc0b0cf1c1e21139c345325511a85b6"
+checksum = "425ba64c1e13b1c6e8c5d2541c8fac10022ca584f33da781db01b5756aef1f4e"
 dependencies = [
+ "block2 0.5.1",
  "core-foundation",
  "home",
  "jni",
  "log",
  "ndk-context",
- "objc",
- "raw-window-handle 0.5.2",
+ "objc2 0.5.2",
+ "objc2-foundation",
  "url",
  "web-sys",
 ]
@@ -7172,7 +7263,7 @@ checksum = "28b94525fc99ba9e5c9a9e24764f2bc29bad0911a7446c12f446a8277369bf3a"
 dependencies = [
  "arrayvec",
  "bit-vec",
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "cfg_aliases 0.1.1",
  "codespan-reporting",
  "indexmap 2.1.0",
@@ -7199,7 +7290,7 @@ dependencies = [
  "android_system_properties",
  "arrayvec",
  "ash",
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "block",
  "cfg_aliases 0.1.1",
  "core-graphics-types",
@@ -7238,7 +7329,7 @@ version = "0.19.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b671ff9fb03f78b46ff176494ee1ebe7d603393f42664be55b64dc8d53969805"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "js-sys",
  "web-sys",
 ]
@@ -7551,7 +7642,7 @@ dependencies = [
  "ahash",
  "android-activity",
  "atomic-waker",
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "bytemuck",
  "calloop",
  "cfg_aliases 0.1.1",
@@ -7661,7 +7752,7 @@ version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6924668544c48c0133152e7eec86d644a056ca3d09275eb8d5cdb9855f9d8699"
 dependencies = [
- "bitflags 2.4.1",
+ "bitflags 2.5.0",
  "dlib",
  "log",
  "once_cell",
