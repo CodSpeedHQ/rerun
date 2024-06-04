@@ -267,12 +267,18 @@ impl ViewTextFilters {
 // ---
 
 fn get_time_point(ctx: &ViewerContext<'_>, entry: &Entry) -> Option<TimePoint> {
-    if let Some((time_point, _)) = ctx.recording_store().row_metadata(&entry.row_id) {
-        Some(time_point.clone())
-    } else {
-        re_log::warn_once!("Missing metadata for {:?}", entry.entity_path);
-        None
-    }
+    // TODO: the metadata registry is an antipattern -- we will bring these capabilities back once
+    // we remove the shitty native cache
+    // TODO: we have the chunk, therefore we must have this information already somewhere?
+    _ = ctx;
+    _ = entry;
+    None
+    // if let Some((time_point, _)) = ctx.recording_store().row_metadata(&entry.row_id) {
+    //     Some(time_point.clone())
+    // } else {
+    //     re_log::warn_once!("Missing metadata for {:?}", entry.entity_path);
+    //     None
+    // }
 }
 
 /// `scroll_to_row` indicates how far down we want to scroll in terms of logical rows,
@@ -370,7 +376,7 @@ fn table_ui(
                     row.col(|ui| {
                         ui.colored_label(
                             egui::Color32::RED,
-                            "<failed to load TextLog from data store>",
+                            "<failed to load TextLog from chunk store>",
                         );
                     });
                     return;

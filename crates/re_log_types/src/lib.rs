@@ -23,9 +23,9 @@ pub mod hash;
 pub mod path;
 pub mod time_point;
 
-mod data_cell;
-mod data_row;
-mod data_table;
+// mod data_cell;
+// mod data_row;
+// mod data_table;
 mod instance;
 mod resolved_time_range;
 mod time;
@@ -37,16 +37,6 @@ use std::sync::Arc;
 use re_build_info::CrateVersion;
 
 pub use self::arrow_msg::{ArrowChunkReleaseCallback, ArrowMsg};
-pub use self::data_cell::{DataCell, DataCellError, DataCellInner, DataCellResult};
-pub use self::data_row::{
-    DataCellRow, DataCellVec, DataReadError, DataReadResult, DataRow, DataRowError, DataRowResult,
-    RowId,
-};
-pub use self::data_table::{
-    DataCellColumn, DataCellOptVec, DataTable, DataTableError, DataTableResult, EntityPathVec,
-    ErasedTimeVec, RowIdVec, TableId, TimePointVec, METADATA_KIND, METADATA_KIND_CONTROL,
-    METADATA_KIND_DATA,
-};
 pub use self::instance::Instance;
 pub use self::path::*;
 pub use self::resolved_time_range::{ResolvedTimeRange, ResolvedTimeRangeF};
@@ -322,7 +312,14 @@ impl_into_enum!(
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct SetStoreInfo {
-    pub row_id: RowId,
+    /// A time-based UID that is only used to help keep track of when these `StoreInfo` originated
+    /// and how they fit in the global ordering of events.
+    //
+    // NOTE: Using a raw `Tuid` instead of an actual `RowId` to prevent a nasty dependency cycle.
+    // Note that both using a `RowId` as well as this whole serde/msgpack layer as a whole are hacks
+    // that are destined to disappear anyhow as we are closing in on our network-exposed data APIs.
+    pub row_id: re_tuid::Tuid,
+
     pub info: StoreInfo,
 }
 

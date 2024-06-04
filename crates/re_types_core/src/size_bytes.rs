@@ -2,6 +2,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
 use std::sync::Arc;
 
 use arrow2::datatypes::{DataType, Field};
+use arrow2::types::{NativeType, Offset};
 use smallvec::SmallVec;
 
 // ---
@@ -175,6 +176,7 @@ impl<T: SizeBytes> SizeBytes for Option<T> {
     }
 }
 
+// TODO: that shit is so dangerous...
 impl<T: SizeBytes> SizeBytes for Arc<T> {
     #[inline]
     fn heap_size_bytes(&self) -> u64 {
@@ -344,6 +346,27 @@ impl SizeBytes for Box<dyn Array> {
     #[inline]
     fn heap_size_bytes(&self) -> u64 {
         estimated_bytes_size(&**self as _) as _
+    }
+}
+
+impl<T: SizeBytes + NativeType> SizeBytes for PrimitiveArray<T> {
+    #[inline]
+    fn heap_size_bytes(&self) -> u64 {
+        estimated_bytes_size(self) as _
+    }
+}
+
+impl<T: SizeBytes + Offset> SizeBytes for ListArray<T> {
+    #[inline]
+    fn heap_size_bytes(&self) -> u64 {
+        estimated_bytes_size(self) as _
+    }
+}
+
+impl SizeBytes for StructArray {
+    #[inline]
+    fn heap_size_bytes(&self) -> u64 {
+        estimated_bytes_size(self) as _
     }
 }
 
