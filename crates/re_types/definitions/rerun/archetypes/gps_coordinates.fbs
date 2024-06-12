@@ -7,12 +7,12 @@ namespace rerun.archetypes;
 
 // ---
 
-/// Set of GpsCoordinates 
+/// Set of `GpsCoordinates`
 ///
-/// \example archetypes/disconnected_space title="Disconnected space" image="https://static.rerun.io/disconnected_space/b8f95b0e32359de625a765247c84935146c1fba9/1200w.png"
+/// \example archetypes/gps_coordinates title="GPS Coordinates" image="https://static.rerun.io/disconnected_space/b8f95b0e32359de625a765247c84935146c1fba9/1200w.png"
 table GpsCoordinates (
   "attr.rust.derive": "PartialEq",
-  "attr.docs.category": "Spatial 2D",
+  "attr.docs.category": "Spatial 3D",
   "attr.docs.view_types": "MapView"
 ) {
   // --- Required ---
