@@ -24,6 +24,7 @@ Archetypes are bundles of components. This page lists all built-in components.
 
 * [`Arrows2D`](archetypes/arrows2d.md): 2D arrows with optional colors, radii, labels, etc.
 * [`Boxes2D`](archetypes/boxes2d.md): 2D boxes with half-extents and optional center, rotations, rotations, colors etc.
+* [`GpsCoordinates`](archetypes/gps_coordinates.md): Set of GpsCoordinates 
 * [`LineStrips2D`](archetypes/line_strips2d.md): 2D line strips with positions and optional colors, radii, labels, etc.
 * [`Points2D`](archetypes/points2d.md): A 2D point cloud with positions and optional colors, radii, labels, etc.
 

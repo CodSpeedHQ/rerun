@@ -12,6 +12,7 @@ from .boxes3d import Boxes3D
 from .clear import Clear
 from .depth_image import DepthImage
 from .disconnected_space import DisconnectedSpace
+from .gps_coordinates import GpsCoordinates
 from .image import Image
 from .line_strips2d import LineStrips2D
 from .line_strips3d import LineStrips3D
@@ -40,6 +41,7 @@ __all__ = [
     "Clear",
     "DepthImage",
     "DisconnectedSpace",
+    "GpsCoordinates",
     "Image",
     "LineStrips2D",
     "LineStrips3D",
