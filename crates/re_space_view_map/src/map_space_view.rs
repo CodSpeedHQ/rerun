@@ -1,23 +1,22 @@
-use std::mem;
+
 
 use egui::Color32;
-use egui::{Align2, RichText, Ui, Window};
-use re_tracing::reexports::puffin::are_scopes_on;
+use egui::{Align2, Ui, Window};
+
 use re_types::components::Radius;
-use walkers::{sources::Attribution, Map, MapMemory, Plugin, Position, Tiles, TilesManager};
+use walkers::{sources::Attribution, Map, MapMemory, Plugin, Tiles, TilesManager};
 use {
     egui::{self, ahash::HashMap, Context},
-    re_data_ui::{item_ui, DataUi},
-    re_entity_db::{EntityProperties, InstancePath},
+    re_entity_db::{EntityProperties},
     re_log_types::EntityPath,
     re_space_view::suggest_space_view_for_each_entity,
     re_types::SpaceViewClassIdentifier,
     re_ui,
     re_viewer_context::{
-        HoverHighlight, IdentifiedViewSystem as _, Item, SelectionHighlight, SpaceViewClass,
+        SpaceViewClass,
         SpaceViewClassLayoutPriority, SpaceViewClassRegistryError, SpaceViewId,
         SpaceViewSpawnHeuristics, SpaceViewState, SpaceViewStateExt as _,
-        SpaceViewSystemExecutionError, SpaceViewSystemRegistrator, SystemExecutionOutput, UiLayout,
+        SpaceViewSystemExecutionError, SpaceViewSystemRegistrator, SystemExecutionOutput,
         ViewQuery, ViewerContext,
     },
 };
@@ -43,7 +42,7 @@ pub struct CustomShapes {
 impl Plugin for CustomShapes {
     fn run(
         &mut self,
-        response: &egui::Response,
+        _response: &egui::Response,
         painter: egui::Painter,
         projector: &walkers::Projector,
     ) {
@@ -153,7 +152,7 @@ impl SpaceViewClass for MapSpaceView {
         &self,
         _ctx: &ViewerContext<'_>,
         ui: &mut egui::Ui,
-        state: &mut dyn SpaceViewState,
+        _state: &mut dyn SpaceViewState,
         _space_origin: &EntityPath,
         _space_view_id: SpaceViewId,
         _root_entity_properties: &mut EntityProperties,
@@ -179,11 +178,11 @@ impl SpaceViewClass for MapSpaceView {
     /// This is called with freshly created & executed context & part systems.
     fn ui(
         &self,
-        ctx: &ViewerContext<'_>,
+        _ctx: &ViewerContext<'_>,
         ui: &mut egui::Ui,
         state: &mut dyn SpaceViewState,
         _root_entity_properties: &EntityProperties,
-        query: &ViewQuery<'_>,
+        _query: &ViewQuery<'_>,
         system_output: SystemExecutionOutput,
     ) -> Result<(), SpaceViewSystemExecutionError> {
         let state = state.downcast_mut::<MapSpaceViewState>()?;
@@ -208,9 +207,9 @@ impl SpaceViewClass for MapSpaceView {
         egui::Frame::default().show(ui, |ui| {
             let tiles = &mut (*tiles.unwrap());
 
-            let attribution = tiles.attribution();
+            let _attribution = tiles.attribution();
             let some_tiles_manager: Option<&mut dyn TilesManager> = Some(tiles);
-            let map = ui.add(
+            let _map = ui.add(
                 Map::new(
                     some_tiles_manager,
                     // tiles,
