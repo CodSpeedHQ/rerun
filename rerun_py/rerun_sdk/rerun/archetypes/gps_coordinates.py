@@ -19,23 +19,17 @@ __all__ = ["GpsCoordinates"]
 @define(str=False, repr=False, init=False)
 class GpsCoordinates(Archetype):
     """
-    **Archetype**: Set of GpsCoordinates.
+    **Archetype**: Set of `GPS coordinates`.
 
     Example
     -------
-    ### Disconnected space:
+    ### GPS coordinates:
     ```python
     import rerun as rr
 
-    rr.init("rerun_example_disconnected_space", spawn=True)
+    rr.init("rerun_example_gps_coordinates", spawn=True)
 
-    # These two points can be projected into the same space..
-    rr.log("world/room1/point", rr.Points3D([[0, 0, 0]]))
-    rr.log("world/room2/point", rr.Points3D([[1, 1, 1]]))
-
-    # ..but this one lives in a completely separate space!
-    rr.log("world/wormhole", rr.DisconnectedSpace())
-    rr.log("world/wormhole/point", rr.Points3D([[2, 2, 2]]))
+    rr.log("points", rr.GpsCoordinates([[47.6344, 19.1397, 0], [47.6334, 19.1399, 1]]))
     ```
     <center>
     <picture>

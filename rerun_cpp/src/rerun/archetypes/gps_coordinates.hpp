@@ -18,27 +18,21 @@
 #include <vector>
 
 namespace rerun::archetypes {
-    /// **Archetype**: Set of GpsCoordinates
+    /// **Archetype**: Set of `GPS coordinates`
     ///
     /// ## Example
     ///
-    /// ### Disconnected space
+    /// ### GPS coordinates
     /// ![image](https://static.rerun.io/disconnected_space/b8f95b0e32359de625a765247c84935146c1fba9/full.png)
     ///
     /// ```cpp
     /// #include <rerun.hpp>
     ///
     /// int main() {
-    ///     const auto rec = rerun::RecordingStream("rerun_example_disconnected_space");
+    ///     const auto rec = rerun::RecordingStream("rerun_example_gps_coordinates");
     ///     rec.spawn().exit_on_failure();
     ///
-    ///     // These two points can be projected into the same space..
-    ///     rec.log("world/room1/point", rerun::Points3D({{0.0f, 0.0f, 0.0f}}));
-    ///     rec.log("world/room2/point", rerun::Points3D({{1.0f, 1.0f, 1.0f}}));
-    ///
-    ///     // ..but this one lives in a completely separate space!
-    ///     rec.log("world/wormhole", rerun::DisconnectedSpace(true));
-    ///     rec.log("world/wormhole/point", rerun::Points3D({{2.0f, 2.0f, 2.0f}}));
+    ///     rec.log("points", rerun::GpsCoordinates({{47.6343f, 19.1397f, 0.0f}, {47.6344f, 19.1395f, 1.0f}}));
     /// }
     /// ```
     struct GpsCoordinates {

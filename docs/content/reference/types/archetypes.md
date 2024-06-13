@@ -24,7 +24,6 @@ Archetypes are bundles of components. This page lists all built-in components.
 
 * [`Arrows2D`](archetypes/arrows2d.md): 2D arrows with optional colors, radii, labels, etc.
 * [`Boxes2D`](archetypes/boxes2d.md): 2D boxes with half-extents and optional center, rotations, rotations, colors etc.
-* [`GpsCoordinates`](archetypes/gps_coordinates.md): Set of GpsCoordinates 
 * [`LineStrips2D`](archetypes/line_strips2d.md): 2D line strips with positions and optional colors, radii, labels, etc.
 * [`Points2D`](archetypes/points2d.md): A 2D point cloud with positions and optional colors, radii, labels, etc.
 
@@ -33,6 +32,7 @@ Archetypes are bundles of components. This page lists all built-in components.
 * [`Arrows3D`](archetypes/arrows3d.md): 3D arrows with optional colors, radii, labels, etc.
 * [`Asset3D`](archetypes/asset3d.md): A prepacked 3D asset (`.gltf`, `.glb`, `.obj`, `.stl`, etc.).
 * [`Boxes3D`](archetypes/boxes3d.md): 3D boxes with half-extents and optional center, rotations, rotations, colors etc.
+* [`GpsCoordinates`](archetypes/gps_coordinates.md): Set of `GPS coordinates`
 * [`LineStrips3D`](archetypes/line_strips3d.md): 3D line strips with positions and optional colors, radii, labels, etc.
 * [`Mesh3D`](archetypes/mesh3d.md): A 3D triangle mesh as specified by its per-mesh and per-vertex properties.
 * [`Pinhole`](archetypes/pinhole.md): Camera perspective projection (a.k.a. intrinsics).

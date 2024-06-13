@@ -1,20 +1,17 @@
-
-
 use egui::Color32;
 use egui::{Align2, Ui, Window};
 
-use re_types::components::Radius;
+use re_types::components::{Color, Radius};
 use walkers::{sources::Attribution, Map, MapMemory, Plugin, Tiles, TilesManager};
 use {
     egui::{self, ahash::HashMap, Context},
-    re_entity_db::{EntityProperties},
+    re_entity_db::EntityProperties,
     re_log_types::EntityPath,
     re_space_view::suggest_space_view_for_each_entity,
     re_types::SpaceViewClassIdentifier,
     re_ui,
     re_viewer_context::{
-        SpaceViewClass,
-        SpaceViewClassLayoutPriority, SpaceViewClassRegistryError, SpaceViewId,
+        SpaceViewClass, SpaceViewClassLayoutPriority, SpaceViewClassRegistryError, SpaceViewId,
         SpaceViewSpawnHeuristics, SpaceViewState, SpaceViewStateExt as _,
         SpaceViewSystemExecutionError, SpaceViewSystemRegistrator, SystemExecutionOutput,
         ViewQuery, ViewerContext,
@@ -35,11 +32,11 @@ pub enum Provider {
 }
 
 /// Sample map plugin which draws custom stuff on the map.
-pub struct CustomShapes {
+pub struct PositionsOnMap {
     positions: Vec<MapEntry>,
 }
 
-impl Plugin for CustomShapes {
+impl Plugin for PositionsOnMap {
     fn run(
         &mut self,
         _response: &egui::Response,
@@ -53,10 +50,13 @@ impl Plugin for CustomShapes {
             // Project it into the position on the screen.
             let position = projector.project(position).to_pos2();
 
-            // Draw a circle at the position.
+            // Radius of the circle
             let radius = f32::from(entry.radii.unwrap_or(Radius(10.)));
 
-            painter.circle_filled(position, radius, Color32::RED);
+            // Color of the circle
+            let color = entry.color.unwrap_or(Color::new(Color32::RED));
+
+            painter.circle_filled(position, radius, color);
         }
     }
 }
@@ -66,8 +66,6 @@ impl Plugin for CustomShapes {
 /// This state is preserved between frames, but not across Viewer sessions.
 #[derive(Default)]
 pub struct MapSpaceViewState {
-    // TODO(wumpf, jleibs): This should be part of the Blueprint so that it is serialized out.
-    //                      but right now there is no way of doing that.
     tiles: Option<Tiles>,
     map_memory: MapMemory,
     selected_provider: Provider,
@@ -78,6 +76,7 @@ impl MapSpaceViewState {
     pub fn get_mut_refs(&mut self) -> (Option<&mut Tiles>, &mut MapMemory) {
         (self.tiles.as_mut(), &mut self.map_memory)
     }
+
     pub fn set_tiles(&mut self, tiles: Tiles) {
         self.tiles = Some(tiles);
     }
@@ -189,22 +188,22 @@ impl SpaceViewClass for MapSpaceView {
         let map_viz_system = system_output.view_systems.get::<MapVisualizerSystem>()?;
 
         // set tiles in case it is not already
-        let (tiles, memory) = match state.tiles {
-            Some(ref mut _tiles) => state.get_mut_refs(),
-            None => {
-                state.set_tiles(Tiles::new(
-                    walkers::sources::Mapbox {
-                        style: walkers::sources::MapboxStyle::Dark,
-                        access_token: std::option_env!("MAPBOX_ACCESS_TOKEN").unwrap().to_string(),
-                        high_resolution: false,
-                    },
-                    ui.ctx().clone(),
-                ));
-                state.get_mut_refs()
-            }
+        let (tiles, memory) = if let Some(ref mut _tiles) = state.tiles {
+            state.get_mut_refs()
+        } else {
+            state.set_tiles(Tiles::new(
+                walkers::sources::Mapbox {
+                    style: walkers::sources::MapboxStyle::Dark,
+                    access_token: state.token.clone(),
+                    high_resolution: false,
+                },
+                ui.ctx().clone(),
+            ));
+            state.get_mut_refs()
         };
 
         egui::Frame::default().show(ui, |ui| {
+            // TODO(tfoldi): tiles must be always Some at this point but still would be nice to have a check here
             let tiles = &mut (*tiles.unwrap());
 
             let _attribution = tiles.attribution();
@@ -212,15 +211,14 @@ impl SpaceViewClass for MapSpaceView {
             let _map = ui.add(
                 Map::new(
                     some_tiles_manager,
-                    // tiles,
                     memory,
-                    // &mut MapMemory::default(),
                     map_viz_system.map_entries[0].position,
                 )
-                .with_plugin(CustomShapes {
+                .with_plugin(PositionsOnMap {
                     positions: map_viz_system.map_entries.clone(),
                 }),
             );
+            // add zoom controls
             // acknowledge(ui, attribution);
         });
         Ok(())
