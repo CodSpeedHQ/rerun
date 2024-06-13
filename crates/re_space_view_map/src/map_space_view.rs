@@ -1,8 +1,8 @@
-use egui::{Align2, Ui, Window};
-use egui::{Button, Color32};
+use egui::Color32;
+use egui::{Ui, Window};
 
 use re_types::components::{Color, Radius};
-use re_ui::list_item;
+
 use walkers::{sources::Attribution, Map, MapMemory, Plugin, Tiles, TilesManager};
 use {
     egui::{self, Context},
@@ -156,7 +156,7 @@ impl SpaceViewClass for MapSpaceView {
         _space_view_id: SpaceViewId,
         _root_entity_properties: &mut EntityProperties,
     ) -> Result<(), SpaceViewSystemExecutionError> {
-        let mut map_state = state.downcast_mut::<MapSpaceViewState>()?;
+        let map_state = state.downcast_mut::<MapSpaceViewState>()?;
         let mut selected = map_state.selected_provider;
 
         // TODO(tfoldi): UI looks horrible, needs to be improved
@@ -190,10 +190,10 @@ impl SpaceViewClass for MapSpaceView {
         });
 
         ui.horizontal(|ui| {
-            if (ui
+            if ui
                 .button("Follow position")
                 .on_hover_text("Follow the position of the entity on the map.")
-                .clicked())
+                .clicked()
             {
                 map_state.map_memory.follow_my_position();
             }
@@ -301,7 +301,7 @@ fn get_tile_manager(provider: Provider, mapbox_access_token: &str, egui_ctx: &Co
         Provider::MapboxStreets => Tiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Streets,
-                access_token: mapbox_access_token.to_string(),
+                access_token: mapbox_access_token.to_owned(),
                 high_resolution: false,
             },
             egui_ctx.clone(),
@@ -309,7 +309,7 @@ fn get_tile_manager(provider: Provider, mapbox_access_token: &str, egui_ctx: &Co
         Provider::MapboxDark => Tiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Dark,
-                access_token: mapbox_access_token.to_string(),
+                access_token: mapbox_access_token.to_owned(),
                 high_resolution: false,
             },
             egui_ctx.clone(),
@@ -317,12 +317,13 @@ fn get_tile_manager(provider: Provider, mapbox_access_token: &str, egui_ctx: &Co
         Provider::MapboxSatellite => Tiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Satellite,
-                access_token: mapbox_access_token.to_string(),
+                access_token: mapbox_access_token.to_owned(),
                 high_resolution: true,
             },
             egui_ctx.clone(),
         ),
 
+        #[allow(unreachable_patterns)]
         _ => unreachable!("Provider not implemented"),
     }
 }
