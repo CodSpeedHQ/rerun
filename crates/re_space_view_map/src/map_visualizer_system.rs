@@ -18,7 +18,7 @@ pub struct MapEntry {
 
 impl Default for MapEntry {
     fn default() -> Self {
-        MapEntry {
+        Self {
             position: Position::from_lat_lon(51.4934, 0.),
             radii: None,
             color: None,
