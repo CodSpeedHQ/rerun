@@ -1,10 +1,11 @@
-use egui::Color32;
 use egui::{Align2, Ui, Window};
+use egui::{Button, Color32};
 
 use re_types::components::{Color, Radius};
+use re_ui::list_item;
 use walkers::{sources::Attribution, Map, MapMemory, Plugin, Tiles, TilesManager};
 use {
-    egui::{self, ahash::HashMap, Context},
+    egui::{self, Context},
     re_entity_db::EntityProperties,
     re_log_types::EntityPath,
     re_space_view::suggest_space_view_for_each_entity,
@@ -24,11 +25,9 @@ use crate::map_visualizer_system::{MapEntry, MapVisualizerSystem};
 pub enum Provider {
     #[default]
     OpenStreetMap,
-    Geoportal,
     MapboxStreets,
     MapboxDark,
     MapboxSatellite,
-    LocalTiles,
 }
 
 /// Sample map plugin which draws custom stuff on the map.
@@ -69,7 +68,7 @@ pub struct MapSpaceViewState {
     tiles: Option<Tiles>,
     map_memory: MapMemory,
     selected_provider: Provider,
-    token: String,
+    mapbox_access_token: String,
 }
 
 impl MapSpaceViewState {
@@ -123,11 +122,12 @@ impl SpaceViewClass for MapSpaceView {
     }
 
     fn new_state(&self) -> Box<dyn SpaceViewState> {
+        println!("Creating new state");
         Box::<MapSpaceViewState>::new(MapSpaceViewState {
             tiles: None,
             map_memory: MapMemory::default(),
             selected_provider: Provider::OpenStreetMap,
-            token: String::new(),
+            mapbox_access_token: std::env::var("MAPBOX_ACCESS_TOKEN").unwrap_or_default(),
         })
     }
 
@@ -151,28 +151,64 @@ impl SpaceViewClass for MapSpaceView {
         &self,
         _ctx: &ViewerContext<'_>,
         ui: &mut egui::Ui,
-        _state: &mut dyn SpaceViewState,
+        state: &mut dyn SpaceViewState,
         _space_origin: &EntityPath,
         _space_view_id: SpaceViewId,
         _root_entity_properties: &mut EntityProperties,
     ) -> Result<(), SpaceViewSystemExecutionError> {
-        let mut selected = "osm";
+        let mut map_state = state.downcast_mut::<MapSpaceViewState>()?;
+        let mut selected = map_state.selected_provider;
 
+        // TODO(tfoldi): UI looks horrible, needs to be improved
         ui.horizontal(|ui| {
             ui.label("Map provider");
-            egui::ComboBox::from_id_source("color_coordinates_mode")
-                .selected_text("OpenStreetMap")
+            egui::ComboBox::from_id_source("map_provider")
+                .selected_text(format!("{selected:?}"))
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut selected, "osm", "OpenStreetMap");
-                    ui.selectable_value(&mut selected, "geoportal", "Geoportal");
-                    ui.selectable_value(&mut selected, "mapbox", "Mapbox");
+                    ui.selectable_value(&mut selected, Provider::OpenStreetMap, "OpenStreetMap");
+                    ui.selectable_value(
+                        &mut selected,
+                        Provider::MapboxStreets,
+                        "Mapbox Streets (Light)",
+                    );
+                    ui.selectable_value(
+                        &mut selected,
+                        Provider::MapboxDark,
+                        "Mapbox Streets (Dark)",
+                    );
+                    ui.selectable_value(
+                        &mut selected,
+                        Provider::MapboxSatellite,
+                        "Mapbox Satellite",
+                    );
                 });
         });
+
+        ui.horizontal(|ui| {
+            ui.label("Mapbox Access Token").on_hover_text("Access token for Mapbox API. Please refer to the Mapbox documentation for more information.");
+            ui.text_edit_singleline(&mut map_state.mapbox_access_token);
+        });
+
+        ui.horizontal(|ui| {
+            if (ui
+                .button("Follow position")
+                .on_hover_text("Follow the position of the entity on the map.")
+                .clicked())
+            {
+                map_state.map_memory.follow_my_position();
+            }
+        });
+
+        // If the selected provider has changed, reset the tiles.
+        if selected != map_state.selected_provider {
+            map_state.tiles = None;
+            map_state.selected_provider = selected;
+        }
 
         Ok(())
     }
 
-    /// The contents of the Space View window and all interaction within it.
+    /// The contents of the Map Space View window and all interaction within it.
     ///
     /// This is called with freshly created & executed context & part systems.
     fn ui(
@@ -188,16 +224,13 @@ impl SpaceViewClass for MapSpaceView {
         let map_viz_system = system_output.view_systems.get::<MapVisualizerSystem>()?;
 
         // set tiles in case it is not already
-        let (tiles, memory) = if let Some(ref mut _tiles) = state.tiles {
+        let (tiles, map_memory) = if let Some(ref mut _tiles) = state.tiles {
             state.get_mut_refs()
         } else {
-            state.set_tiles(Tiles::new(
-                walkers::sources::Mapbox {
-                    style: walkers::sources::MapboxStyle::Dark,
-                    access_token: state.token.clone(),
-                    high_resolution: false,
-                },
-                ui.ctx().clone(),
+            state.set_tiles(get_tile_manager(
+                state.selected_provider,
+                &state.mapbox_access_token,
+                ui.ctx(),
             ));
             state.get_mut_refs()
         };
@@ -206,31 +239,52 @@ impl SpaceViewClass for MapSpaceView {
             // TODO(tfoldi): tiles must be always Some at this point but still would be nice to have a check here
             let tiles = &mut (*tiles.unwrap());
 
-            let _attribution = tiles.attribution();
             let some_tiles_manager: Option<&mut dyn TilesManager> = Some(tiles);
-            let _map = ui.add(
+            let map_widget = ui.add(
                 Map::new(
                     some_tiles_manager,
-                    memory,
-                    map_viz_system.map_entries[0].position,
+                    map_memory,
+                    map_viz_system
+                        .map_entries
+                        .first()
+                        .unwrap_or(&MapEntry::default())
+                        .position,
                 )
                 .with_plugin(PositionsOnMap {
                     positions: map_viz_system.map_entries.clone(),
                 }),
             );
-            // add zoom controls
-            // acknowledge(ui, attribution);
+
+            // TODO(tfoldi): move to function along with acknowledge in a separate file
+            let map_pos = map_widget.rect;
+            Window::new("Zoom")
+                .collapsible(false)
+                .resizable(false)
+                .title_bar(false)
+                .current_pos(egui::Pos2::new(map_pos.max.x - 80., map_pos.min.y + 10.))
+                .show(ui.ctx(), |ui| {
+                    ui.horizontal(|ui| {
+                        if ui.button(egui::RichText::new("➕").heading()).clicked() {
+                            let _ = map_memory.zoom_in();
+                        }
+
+                        if ui.button(egui::RichText::new("➖").heading()).clicked() {
+                            let _ = map_memory.zoom_out();
+                        }
+                    });
+                });
+            acknowledge(ui, &map_pos, tiles.attribution());
         });
         Ok(())
     }
 }
 
-pub fn acknowledge(ui: &Ui, attribution: Attribution) {
+pub fn acknowledge(ui: &Ui, map_pos: &egui::Rect, attribution: Attribution) {
     Window::new("Acknowledge")
         .collapsible(false)
         .resizable(false)
         .title_bar(false)
-        .anchor(Align2::LEFT_TOP, [10., 10.])
+        .current_pos(egui::Pos2::new(map_pos.min.x + 10., map_pos.max.y - 40.))
         .show(ui.ctx(), |ui| {
             ui.horizontal(|ui| {
                 if let Some(logo) = attribution.logo_light {
@@ -241,51 +295,34 @@ pub fn acknowledge(ui: &Ui, attribution: Attribution) {
         });
 }
 
-fn providers(egui_ctx: Context) -> HashMap<Provider, Box<dyn TilesManager + Send>> {
-    let mut providers: HashMap<Provider, Box<dyn TilesManager + Send>> = HashMap::default();
+fn get_tile_manager(provider: Provider, mapbox_access_token: &str, egui_ctx: &Context) -> Tiles {
+    match provider {
+        Provider::OpenStreetMap => Tiles::new(walkers::sources::OpenStreetMap, egui_ctx.clone()),
+        Provider::MapboxStreets => Tiles::new(
+            walkers::sources::Mapbox {
+                style: walkers::sources::MapboxStyle::Streets,
+                access_token: mapbox_access_token.to_string(),
+                high_resolution: false,
+            },
+            egui_ctx.clone(),
+        ),
+        Provider::MapboxDark => Tiles::new(
+            walkers::sources::Mapbox {
+                style: walkers::sources::MapboxStyle::Dark,
+                access_token: mapbox_access_token.to_string(),
+                high_resolution: false,
+            },
+            egui_ctx.clone(),
+        ),
+        Provider::MapboxSatellite => Tiles::new(
+            walkers::sources::Mapbox {
+                style: walkers::sources::MapboxStyle::Satellite,
+                access_token: mapbox_access_token.to_string(),
+                high_resolution: true,
+            },
+            egui_ctx.clone(),
+        ),
 
-    providers.insert(
-        Provider::OpenStreetMap,
-        Box::new(Tiles::new(
-            walkers::sources::OpenStreetMap,
-            egui_ctx.to_owned(),
-        )),
-    );
-
-    providers.insert(
-        Provider::Geoportal,
-        Box::new(Tiles::new(walkers::sources::Geoportal, egui_ctx.to_owned())),
-    );
-
-    // Pass in a mapbox access token at compile time. May or may not be what you want to do,
-    // potentially loading it from application settings instead.
-    let mapbox_access_token = std::option_env!("MAPBOX_ACCESS_TOKEN");
-
-    // We only show the mapbox map if we have an access token
-    if let Some(token) = mapbox_access_token {
-        providers.insert(
-            Provider::MapboxStreets,
-            Box::new(Tiles::new(
-                walkers::sources::Mapbox {
-                    style: walkers::sources::MapboxStyle::Streets,
-                    access_token: token.to_string(),
-                    high_resolution: false,
-                },
-                egui_ctx.to_owned(),
-            )),
-        );
-        providers.insert(
-            Provider::MapboxSatellite,
-            Box::new(Tiles::new(
-                walkers::sources::Mapbox {
-                    style: walkers::sources::MapboxStyle::Satellite,
-                    access_token: token.to_string(),
-                    high_resolution: true,
-                },
-                egui_ctx.to_owned(),
-            )),
-        );
+        _ => unreachable!("Provider not implemented"),
     }
-
-    providers
 }

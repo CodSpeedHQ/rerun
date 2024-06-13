@@ -16,6 +16,16 @@ pub struct MapEntry {
     pub color: Option<components::Color>,
 }
 
+impl Default for MapEntry {
+    fn default() -> Self {
+        MapEntry {
+            position: Position::from_lat_lon(51.4934, 0.),
+            radii: None,
+            color: None,
+        }
+    }
+}
+
 /// A text scene, with everything needed to render it.
 #[derive(Default)]
 pub struct MapVisualizerSystem {
