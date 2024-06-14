@@ -1,0 +1,22 @@
+[project]
+name = "ocr"
+version = "0.1.0"
+readme = "README.md"
+dependencies = [
+  "rerun-sdk",
+  "paddleocr",
+  "paddlepaddle",
+  "paddleclas",
+  "tabulate",
+  "opencv-python",
+  "requests",
+  "pandas",
+  "tqdm",
+]
+
+[project.scripts]
+ocr = "ocr:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
