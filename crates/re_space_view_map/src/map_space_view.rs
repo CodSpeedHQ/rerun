@@ -9,6 +9,7 @@ use {
     re_entity_db::EntityProperties,
     re_log_types::EntityPath,
     re_space_view::suggest_space_view_for_each_entity,
+    re_types::blueprint::components::MapProvider,
     re_types::{SpaceViewClassIdentifier, View},
     re_ui,
     re_viewer_context::{
@@ -21,14 +22,14 @@ use {
 
 use crate::map_visualizer_system::{MapEntry, MapVisualizerSystem};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub enum Provider {
-    #[default]
-    OpenStreetMap,
-    MapboxStreets,
-    MapboxDark,
-    MapboxSatellite,
-}
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+// pub enum MapProvider {
+//     #[default]
+//     OpenStreetMap,
+//     MapboxStreets,
+//     MapboxDark,
+//     MapboxSatellite,
+// }
 
 // walkers plugin to visualize points on a Map
 pub struct PositionsOnMap {
@@ -64,7 +65,7 @@ impl Plugin for PositionsOnMap {
 pub struct MapSpaceViewState {
     tiles: Option<Tiles>,
     map_memory: MapMemory,
-    selected_provider: Provider,
+    selected_provider: MapProvider,
     mapbox_access_token: String,
 }
 
@@ -121,7 +122,7 @@ impl SpaceViewClass for MapSpaceView {
         Box::<MapSpaceViewState>::new(MapSpaceViewState {
             tiles: None,
             map_memory: MapMemory::default(),
-            selected_provider: Provider::OpenStreetMap,
+            selected_provider: MapProvider::default(),
             // TODO(tfoldi): this should come from the app configuration or blueprint
             mapbox_access_token: std::env::var("MAPBOX_ACCESS_TOKEN").unwrap_or_default(),
         })
@@ -158,20 +159,20 @@ impl SpaceViewClass for MapSpaceView {
             egui::ComboBox::from_id_source("map_provider")
                 .selected_text(format!("{selected:?}"))
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut selected, Provider::OpenStreetMap, "OpenStreetMap");
+                    ui.selectable_value(&mut selected, MapProvider::OpenStreetMap, "OpenStreetMap");
                     ui.selectable_value(
                         &mut selected,
-                        Provider::MapboxStreets,
+                        MapProvider::MapboxStreets,
                         "Mapbox Streets (Light)",
                     );
                     ui.selectable_value(
                         &mut selected,
-                        Provider::MapboxDark,
+                        MapProvider::MapboxDark,
                         "Mapbox Streets (Dark)",
                     );
                     ui.selectable_value(
                         &mut selected,
-                        Provider::MapboxSatellite,
+                        MapProvider::MapboxSatellite,
                         "Mapbox Satellite",
                     );
                 });
@@ -288,10 +289,10 @@ pub fn acknowledge(ui: &Ui, map_pos: &egui::Rect, attribution: Attribution) {
         });
 }
 
-fn get_tile_manager(provider: Provider, mapbox_access_token: &str, egui_ctx: &Context) -> Tiles {
+fn get_tile_manager(provider: MapProvider, mapbox_access_token: &str, egui_ctx: &Context) -> Tiles {
     match provider {
-        Provider::OpenStreetMap => Tiles::new(walkers::sources::OpenStreetMap, egui_ctx.clone()),
-        Provider::MapboxStreets => Tiles::new(
+        MapProvider::OpenStreetMap => Tiles::new(walkers::sources::OpenStreetMap, egui_ctx.clone()),
+        MapProvider::MapboxStreets => Tiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Streets,
                 access_token: mapbox_access_token.to_owned(),
@@ -299,7 +300,7 @@ fn get_tile_manager(provider: Provider, mapbox_access_token: &str, egui_ctx: &Co
             },
             egui_ctx.clone(),
         ),
-        Provider::MapboxDark => Tiles::new(
+        MapProvider::MapboxDark => Tiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Dark,
                 access_token: mapbox_access_token.to_owned(),
@@ -307,7 +308,7 @@ fn get_tile_manager(provider: Provider, mapbox_access_token: &str, egui_ctx: &Co
             },
             egui_ctx.clone(),
         ),
-        Provider::MapboxSatellite => Tiles::new(
+        MapProvider::MapboxSatellite => Tiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Satellite,
                 access_token: mapbox_access_token.to_owned(),

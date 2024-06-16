@@ -1,0 +1,22 @@
+include "arrow/attributes.fbs";
+include "python/attributes.fbs";
+include "rust/attributes.fbs";
+
+include "rerun/datatypes.fbs";
+include "rerun/attributes.fbs";
+
+namespace rerun.blueprint.archetypes;
+
+
+/// Configuration for the background of a view.
+table MapOptions (
+    "attr.rerun.scope": "blueprint",
+    "attr.rust.derive": "Copy",
+    "attr.rust.generate_field_info"
+) {
+    // --- Required ---
+
+    /// The type of the background.
+    provider: rerun.blueprint.components.MapProvider ("attr.rerun.component_required", order: 1000);
+
+}

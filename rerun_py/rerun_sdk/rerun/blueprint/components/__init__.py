@@ -32,6 +32,7 @@ from .included_content import IncludedContent, IncludedContentBatch, IncludedCon
 from .included_space_view import IncludedSpaceView, IncludedSpaceViewBatch, IncludedSpaceViewType
 from .interactive import Interactive, InteractiveBatch, InteractiveType
 from .lock_range_during_zoom import LockRangeDuringZoom, LockRangeDuringZoomBatch, LockRangeDuringZoomType
+from .map_provider import MapProvider, MapProviderArrayLike, MapProviderBatch, MapProviderLike, MapProviderType
 from .panel_state import PanelState, PanelStateArrayLike, PanelStateBatch, PanelStateLike, PanelStateType
 from .query_expression import QueryExpression, QueryExpressionBatch, QueryExpressionType
 from .root_container import RootContainer, RootContainerBatch, RootContainerType
@@ -105,6 +106,11 @@ __all__ = [
     "LockRangeDuringZoom",
     "LockRangeDuringZoomBatch",
     "LockRangeDuringZoomType",
+    "MapProvider",
+    "MapProviderArrayLike",
+    "MapProviderBatch",
+    "MapProviderLike",
+    "MapProviderType",
     "PanelState",
     "PanelStateArrayLike",
     "PanelStateBatch",
