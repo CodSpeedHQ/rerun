@@ -9,7 +9,7 @@ use {
     re_entity_db::EntityProperties,
     re_log_types::EntityPath,
     re_space_view::suggest_space_view_for_each_entity,
-    re_types::SpaceViewClassIdentifier,
+    re_types::{SpaceViewClassIdentifier, View},
     re_ui,
     re_viewer_context::{
         SpaceViewClass, SpaceViewClassLayoutPriority, SpaceViewClassRegistryError, SpaceViewId,
@@ -94,11 +94,13 @@ impl SpaceViewState for MapSpaceViewState {
 #[derive(Default)]
 pub struct MapSpaceView;
 
+type ViewType = re_types::blueprint::views::MapView;
+
 impl SpaceViewClass for MapSpaceView {
     // State type as described above.
 
     fn identifier() -> SpaceViewClassIdentifier {
-        "Map".into()
+        ViewType::identifier()
     }
 
     fn display_name(&self) -> &'static str {

@@ -42,6 +42,7 @@ include "./blueprint/archetypes/plot_legend.fbs";
 include "./blueprint/archetypes/scalar_axis.fbs";
 
 include "./blueprint/views/bar_chart.fbs";
+include "./blueprint/views/map.fbs";
 include "./blueprint/views/spatial2d.fbs";
 include "./blueprint/views/spatial3d.fbs";
 include "./blueprint/views/tensor.fbs";
