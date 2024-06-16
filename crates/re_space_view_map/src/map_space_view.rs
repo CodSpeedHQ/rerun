@@ -1,4 +1,4 @@
-use egui::Color32;
+use egui::{Color32, TextEdit};
 use egui::{Ui, Window};
 
 use re_types::components::{Color, Radius};
@@ -103,7 +103,7 @@ impl SpaceViewClass for MapSpaceView {
     }
 
     fn icon(&self) -> &'static re_ui::Icon {
-        &re_ui::icons::SPACE_VIEW_GENERIC
+        &re_ui::icons::SPACE_VIEW_MAP
     }
 
     fn help_text(&self, _egui_ctx: &egui::Context) -> egui::WidgetText {
@@ -179,7 +179,9 @@ impl SpaceViewClass for MapSpaceView {
 
         ui.horizontal(|ui| {
             ui.label("Mapbox Access Token").on_hover_text("Access token for Mapbox API. Please refer to the Mapbox documentation for more information.");
-            ui.text_edit_singleline(&mut map_state.mapbox_access_token);
+            ui.add( TextEdit::singleline(&mut map_state.mapbox_access_token)
+                .hint_text("Mapbox Access Token")
+                .password(true));
         });
 
         ui.horizontal(|ui| {
@@ -212,8 +214,6 @@ impl SpaceViewClass for MapSpaceView {
     ) -> Result<(), SpaceViewSystemExecutionError> {
         let state = state.downcast_mut::<MapSpaceViewState>()?;
         let map_viz_system = system_output.view_systems.get::<MapVisualizerSystem>()?;
-
-        println!("Map entries: {:?}", map_viz_system.map_entries.len());
 
         // set tiles in case it is not already set or recently changed
         // walkers needs the egui context to create the tiles, so this cannot be elsewhere
