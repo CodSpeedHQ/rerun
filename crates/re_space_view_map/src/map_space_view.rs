@@ -30,7 +30,7 @@ pub enum Provider {
     MapboxSatellite,
 }
 
-/// Sample map plugin which draws custom stuff on the map.
+// walkers plugin to visualize points on a Map
 pub struct PositionsOnMap {
     positions: Vec<MapEntry>,
 }
@@ -60,9 +60,6 @@ impl Plugin for PositionsOnMap {
     }
 }
 
-/// Space view state for the custom space view.
-///
-/// This state is preserved between frames, but not across Viewer sessions.
 #[derive(Default)]
 pub struct MapSpaceViewState {
     tiles: Option<Tiles>,
@@ -97,8 +94,6 @@ pub struct MapSpaceView;
 type ViewType = re_types::blueprint::views::MapView;
 
 impl SpaceViewClass for MapSpaceView {
-    // State type as described above.
-
     fn identifier() -> SpaceViewClassIdentifier {
         ViewType::identifier()
     }
@@ -115,7 +110,6 @@ impl SpaceViewClass for MapSpaceView {
         "Map view".into()
     }
 
-    /// Register all systems (contexts & parts) that the space view needs.
     fn on_register(
         &self,
         system_registry: &mut SpaceViewSystemRegistrator<'_>,
@@ -124,11 +118,11 @@ impl SpaceViewClass for MapSpaceView {
     }
 
     fn new_state(&self) -> Box<dyn SpaceViewState> {
-        println!("Creating new state");
         Box::<MapSpaceViewState>::new(MapSpaceViewState {
             tiles: None,
             map_memory: MapMemory::default(),
             selected_provider: Provider::OpenStreetMap,
+            // TODO(tfoldi): this should come from the app configuration or blueprint
             mapbox_access_token: std::env::var("MAPBOX_ACCESS_TOKEN").unwrap_or_default(),
         })
     }
@@ -146,9 +140,6 @@ impl SpaceViewClass for MapSpaceView {
         suggest_space_view_for_each_entity::<MapVisualizerSystem>(ctx, self)
     }
 
-    /// Additional UI displayed when the space view is selected.
-    ///
-    /// In this sample we show a combo box to select the color coordinates mode.
     fn selection_ui(
         &self,
         _ctx: &ViewerContext<'_>,
@@ -210,9 +201,6 @@ impl SpaceViewClass for MapSpaceView {
         Ok(())
     }
 
-    /// The contents of the Map Space View window and all interaction within it.
-    ///
-    /// This is called with freshly created & executed context & part systems.
     fn ui(
         &self,
         _ctx: &ViewerContext<'_>,
@@ -225,7 +213,10 @@ impl SpaceViewClass for MapSpaceView {
         let state = state.downcast_mut::<MapSpaceViewState>()?;
         let map_viz_system = system_output.view_systems.get::<MapVisualizerSystem>()?;
 
-        // set tiles in case it is not already
+        println!("Map entries: {:?}", map_viz_system.map_entries.len());
+
+        // set tiles in case it is not already set or recently changed
+        // walkers needs the egui context to create the tiles, so this cannot be elsewhere
         let (tiles, map_memory) = if let Some(ref mut _tiles) = state.tiles {
             state.get_mut_refs()
         } else {

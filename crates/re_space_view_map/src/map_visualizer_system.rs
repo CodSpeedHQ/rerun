@@ -26,7 +26,7 @@ impl Default for MapEntry {
     }
 }
 
-/// A text scene, with everything needed to render it.
+/// A map scene, with entries on the map to render.
 #[derive(Default)]
 pub struct MapVisualizerSystem {
     pub map_entries: Vec<MapEntry>,
@@ -60,7 +60,7 @@ impl VisualizerSystem for MapVisualizerSystem {
                 )
                 .map(|res| res.value)
             else {
-                // Text component is required.
+                // Position3D component is required.
                 continue;
             };
 
