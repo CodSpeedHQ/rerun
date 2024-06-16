@@ -28,7 +28,7 @@ class MapView(SpaceView):
     rr.log("points", rr.GpsCoordinates([[47.6344, 19.1397, 0], [47.6334, 19.1399, 1]]))
 
     # Create a map view to display the chart.
-    blueprint = rrb.Blueprint(rrb.MapChartView(origin="points", name="MapView"), collapse_panels=True)
+    blueprint = rrb.Blueprint(rrb.MapView(origin="points", name="MapView"), collapse_panels=True)
 
     rr.send_blueprint(blueprint)
     ```
