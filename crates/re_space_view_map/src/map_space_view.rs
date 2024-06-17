@@ -1,6 +1,5 @@
 use {
     egui::{self, Color32, Context, TextEdit},
-    re_entity_db::EntityProperties,
     re_log_types::EntityPath,
     re_space_view::suggest_space_view_for_each_entity,
     re_types::blueprint::components::MapProvider,
@@ -148,7 +147,6 @@ impl SpaceViewClass for MapSpaceView {
         state: &mut dyn SpaceViewState,
         _space_origin: &EntityPath,
         _space_view_id: SpaceViewId,
-        _root_entity_properties: &mut EntityProperties,
     ) -> Result<(), SpaceViewSystemExecutionError> {
         let map_state = state.downcast_mut::<MapSpaceViewState>()?;
         let mut selected = map_state.selected_provider;
@@ -225,7 +223,7 @@ impl SpaceViewClass for MapSpaceView {
         _ctx: &ViewerContext<'_>,
         ui: &mut egui::Ui,
         state: &mut dyn SpaceViewState,
-        _root_entity_properties: &EntityProperties,
+
         _query: &ViewQuery<'_>,
         system_output: SystemExecutionOutput,
     ) -> Result<(), SpaceViewSystemExecutionError> {
