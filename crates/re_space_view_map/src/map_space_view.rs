@@ -1,21 +1,21 @@
-use egui::{Color32, TextEdit};
-
-use re_types::components::{Color, Radius};
-
-use walkers::{Map, MapMemory, Plugin, Tiles, TilesManager};
 use {
-    egui::{self, Context},
+    egui::{self, Color32, Context, TextEdit},
     re_entity_db::EntityProperties,
     re_log_types::EntityPath,
     re_space_view::suggest_space_view_for_each_entity,
     re_types::blueprint::components::MapProvider,
-    re_types::{SpaceViewClassIdentifier, View},
+    re_types::{
+        components::{Color, Radius},
+        SpaceViewClassIdentifier, View,
+    },
+    re_ui::UiExt,
     re_viewer_context::{
         SpaceViewClass, SpaceViewClassLayoutPriority, SpaceViewClassRegistryError, SpaceViewId,
         SpaceViewSpawnHeuristics, SpaceViewState, SpaceViewStateExt as _,
         SpaceViewSystemExecutionError, SpaceViewSystemRegistrator, SystemExecutionOutput,
         ViewQuery, ViewerContext,
     },
+    walkers::{Map, MapMemory, Plugin, Tiles, TilesManager},
 };
 
 use crate::map_visualizer_system::{MapEntry, MapVisualizerSystem};
@@ -153,7 +153,17 @@ impl SpaceViewClass for MapSpaceView {
         let map_state = state.downcast_mut::<MapSpaceViewState>()?;
         let mut selected = map_state.selected_provider;
 
-        // TODO(tfoldi): UI looks horrible, needs to be improved
+        // TODO(tfoldi): seems there is no implementation for combo box in view_property_ui
+        // list_item::list_item_scope(ui, "map_selection_ui", |ui| {
+        //     view_property_ui::<re_types::blueprint::archetypes::MapOptions>(
+        //         ctx,
+        //         ui,
+        //         space_view_id,
+        //         self,
+        //         state,
+        //     );
+        // });
+
         ui.horizontal(|ui| {
             ui.label("Map provider");
             egui::ComboBox::from_id_source("map_provider")
@@ -176,6 +186,12 @@ impl SpaceViewClass for MapSpaceView {
                         "Mapbox Satellite",
                     );
                 });
+
+            // If the selected provider has changed, reset the tiles.
+            if selected != map_state.selected_provider {
+                map_state.tiles = None;
+                map_state.selected_provider = selected;
+            }
         });
 
         ui.horizontal(|ui| {
@@ -186,20 +202,20 @@ impl SpaceViewClass for MapSpaceView {
         });
 
         ui.horizontal(|ui| {
+            let mut is_following = map_state.map_memory.detached().is_none();
+
             if ui
-                .button("Follow position")
-                .on_hover_text("Follow the position of the entity on the map.")
-                .clicked()
+                .re_checkbox(&mut is_following, "Follow positions on map")
+                .changed()
             {
-                map_state.map_memory.follow_my_position();
+                if is_following {
+                    map_state.map_memory.follow_my_position();
+                } else {
+                    // Detach the map from the current position
+                    // TODO(tfoldi): should be added to the map_memory API
+                }
             }
         });
-
-        // If the selected provider has changed, reset the tiles.
-        if selected != map_state.selected_provider {
-            map_state.tiles = None;
-            map_state.selected_provider = selected;
-        }
 
         Ok(())
     }
@@ -275,3 +291,5 @@ fn get_tile_manager(provider: MapProvider, mapbox_access_token: &str, egui_ctx: 
         ),
     }
 }
+
+re_viewer_context::impl_component_fallback_provider!(MapSpaceView => []);
