@@ -1,6 +1,6 @@
 use re_data_store::LatestAtQuery;
-use re_types::archetypes::GpsCoordinates;
 use re_types::components;
+use re_types::{archetypes::GpsCoordinates, ComponentName};
 use re_viewer_context::{
     IdentifiedViewSystem, SpaceViewSystemExecutionError, ViewContext, ViewContextCollection,
     ViewQuery, VisualizerQueryInfo, VisualizerSystem,
@@ -52,36 +52,65 @@ impl VisualizerSystem for MapVisualizerSystem {
         let timeline_query = LatestAtQuery::new(view_query.timeline, view_query.latest_at);
 
         for data_result in view_query.iter_visible_data_results(ctx, Self::identifier()) {
-            let Some(position) = ctx
+            let resolver = ctx.recording().resolver();
+
+            let positions = ctx
                 .recording()
-                .latest_at_component::<components::Position3D>(
-                    &data_result.entity_path,
+                .latest_at(
                     &timeline_query,
-                )
-                .map(|res| res.value)
-            else {
-                // Position3D component is required.
-                continue;
-            };
-
-            let radii = ctx
-                .recording()
-                .latest_at_component::<components::Radius>(
                     &data_result.entity_path,
-                    &timeline_query,
+                    [ComponentName::from("rerun.components.Position3D")],
                 )
-                .map(|res| res.value);
+                .get_slice::<components::Position3D>(resolver)
+                .unwrap_or_default()
+                .iter()
+                .map(|pos| Position::from_lat_lon(pos.x() as f64, pos.y() as f64))
+                .collect::<Vec<_>>();
 
-            let color = ctx
-                .recording()
-                .latest_at_component::<components::Color>(&data_result.entity_path, &timeline_query)
-                .map(|res| res.value);
+            for position in positions {
+                self.map_entries.push(MapEntry {
+                    position,
+                    radii: None,
+                    color: None,
+                });
+            }
 
-            self.map_entries.push(MapEntry {
-                position: Position::from_lat_lon(position.x() as f64, position.y() as f64),
-                radii,
-                color,
-            });
+            // if let Some(pos) = position {
+            //     self.map_entries.push(MapEntry {
+            //         position: pos,
+            //         radii: None,
+            //         color: None,
+            //     });
+            // }
+
+            // .latest_at_component::<components::Position3D>(
+            //     &data_result.entity_path,
+            //     &timeline_query,
+            // )
+            // .map(|res| res.value)
+            // else {
+            //     // Position3D component is required.
+            //     continue;
+            // };
+
+            // let radii = ctx
+            //     .recording()
+            //     .latest_at_component::<components::Radius>(
+            //         &data_result.entity_path,
+            //         &timeline_query,
+            //     )
+            //     .map(|res| res.value);
+
+            // let color = ctx
+            //     .recording()
+            //     .latest_at_component::<components::Color>(&data_result.entity_path, &timeline_query)
+            //     .map(|res| res.value);
+
+            // self.map_entries.push(MapEntry {
+            //     position: Position::from_lat_lon(position.x() as f64, position.y() as f64),
+            //     radii,
+            //     color,
+            // });
         }
 
         Ok(Vec::new())
