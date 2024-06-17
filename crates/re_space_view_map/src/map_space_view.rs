@@ -70,12 +70,22 @@ pub struct MapSpaceViewState {
 }
 
 impl MapSpaceViewState {
-    pub fn get_mut_refs(&mut self) -> (Option<&mut Tiles>, &mut MapMemory) {
-        (self.tiles.as_mut(), &mut self.map_memory)
-    }
+    // This method ensures that tiles is initialized and returns mutable references to tiles and map_memory.
+    pub fn ensure_and_get_mut_refs(
+        &mut self,
+        ctx: &egui::Context,
+    ) -> Result<(&mut Tiles, &mut MapMemory), SpaceViewSystemExecutionError> {
+        if self.tiles.is_none() {
+            let tiles = get_tile_manager(self.selected_provider, &self.mapbox_access_token, ctx);
+            self.tiles = Some(tiles);
+        }
 
-    pub fn set_tiles(&mut self, tiles: Tiles) {
-        self.tiles = Some(tiles);
+        // Now that tiles is guaranteed to be Some, unwrap is safe here.
+        let tiles_ref = self
+            .tiles
+            .as_mut()
+            .ok_or(SpaceViewSystemExecutionError::MapTilesError)?;
+        Ok((tiles_ref, &mut self.map_memory))
     }
 }
 
@@ -216,23 +226,12 @@ impl SpaceViewClass for MapSpaceView {
         let state = state.downcast_mut::<MapSpaceViewState>()?;
         let map_viz_system = system_output.view_systems.get::<MapVisualizerSystem>()?;
 
-        // set tiles in case it is not already set or recently changed
-        // walkers needs the egui context to create the tiles, so this cannot be elsewhere
-        let (tiles, map_memory) = if let Some(ref mut _tiles) = state.tiles {
-            state.get_mut_refs()
-        } else {
-            state.set_tiles(get_tile_manager(
-                state.selected_provider,
-                &state.mapbox_access_token,
-                ui.ctx(),
-            ));
-            state.get_mut_refs()
+        let (tiles, map_memory) = match state.ensure_and_get_mut_refs(ui.ctx()) {
+            Ok(refs) => refs,
+            Err(e) => return Err(e),
         };
 
         egui::Frame::default().show(ui, |ui| {
-            // TODO(tfoldi): tiles must be always Some at this point but still would be nice to have a check here
-            let tiles = &mut (*tiles.unwrap());
-
             let some_tiles_manager: Option<&mut dyn TilesManager> = Some(tiles);
             let map_widget = ui.add(
                 Map::new(
@@ -316,8 +315,5 @@ fn get_tile_manager(provider: MapProvider, mapbox_access_token: &str, egui_ctx: 
             },
             egui_ctx.clone(),
         ),
-
-        #[allow(unreachable_patterns)]
-        _ => unreachable!("Provider not implemented"),
     }
 }
