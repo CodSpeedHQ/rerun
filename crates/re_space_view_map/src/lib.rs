@@ -4,5 +4,6 @@
 
 mod map_space_view;
 mod map_visualizer_system;
+mod map_windows;
 
 pub use map_space_view::MapSpaceView;
