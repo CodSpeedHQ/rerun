@@ -54,63 +54,42 @@ impl VisualizerSystem for MapVisualizerSystem {
         for data_result in view_query.iter_visible_data_results(ctx, Self::identifier()) {
             let resolver = ctx.recording().resolver();
 
-            let positions = ctx
-                .recording()
-                .latest_at(
-                    &timeline_query,
-                    &data_result.entity_path,
-                    [ComponentName::from("rerun.components.Position3D")],
-                )
+            let results = ctx.recording().latest_at(
+                &timeline_query,
+                &data_result.entity_path,
+                [
+                    ComponentName::from("rerun.components.Position3D"),
+                    ComponentName::from("rerun.components.Color"),
+                    ComponentName::from("rerun.components.Radius"),
+                ],
+            );
+
+            let positions = results
                 .get_slice::<components::Position3D>(resolver)
                 .unwrap_or_default()
                 .iter()
                 .map(|pos| Position::from_lat_lon(pos.x() as f64, pos.y() as f64))
                 .collect::<Vec<_>>();
 
-            for position in positions {
+            let radii = results
+                .get_slice::<components::Radius>(resolver)
+                .unwrap_or_default();
+
+            let colors = results
+                .get_slice::<components::Color>(resolver)
+                .unwrap_or_default();
+
+            let it_positions = positions.into_iter();
+            let it_radii = radii.iter().map(Some).chain(std::iter::repeat(None));
+            let it_colors = colors.iter().map(Some).chain(std::iter::repeat(None));
+
+            for ((pos, rad), col) in it_positions.zip(it_radii).zip(it_colors) {
                 self.map_entries.push(MapEntry {
-                    position,
-                    radii: None,
-                    color: None,
+                    position: pos,
+                    radii: rad.copied(),
+                    color: col.copied(),
                 });
             }
-
-            // if let Some(pos) = position {
-            //     self.map_entries.push(MapEntry {
-            //         position: pos,
-            //         radii: None,
-            //         color: None,
-            //     });
-            // }
-
-            // .latest_at_component::<components::Position3D>(
-            //     &data_result.entity_path,
-            //     &timeline_query,
-            // )
-            // .map(|res| res.value)
-            // else {
-            //     // Position3D component is required.
-            //     continue;
-            // };
-
-            // let radii = ctx
-            //     .recording()
-            //     .latest_at_component::<components::Radius>(
-            //         &data_result.entity_path,
-            //         &timeline_query,
-            //     )
-            //     .map(|res| res.value);
-
-            // let color = ctx
-            //     .recording()
-            //     .latest_at_component::<components::Color>(&data_result.entity_path, &timeline_query)
-            //     .map(|res| res.value);
-
-            // self.map_entries.push(MapEntry {
-            //     position: Position::from_lat_lon(position.x() as f64, position.y() as f64),
-            //     radii,
-            //     color,
-            // });
         }
 
         Ok(Vec::new())
