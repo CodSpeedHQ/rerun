@@ -16,7 +16,7 @@ table MapOptions (
 ) {
     // --- Required ---
 
-    /// The type of the background.
+    /// Map provider and style to use.
     provider: rerun.blueprint.components.MapProvider ("attr.rerun.component_required", order: 1000);
 
 }
