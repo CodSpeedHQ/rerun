@@ -2,8 +2,9 @@ use egui::{self};
 use egui::{Ui, Window};
 use walkers::{sources::Attribution, MapMemory};
 
-pub fn zoom(ui: &Ui, map_pos: &egui::Rect, map_memory: &mut MapMemory) {
+pub fn zoom(ui: &Ui, window_id: &str, map_pos: &egui::Rect, map_memory: &mut MapMemory) {
     Window::new("Zoom")
+        .id(egui::Id::new(window_id).with("map_zoom"))
         .collapsible(false)
         .resizable(false)
         .title_bar(false)
@@ -21,8 +22,9 @@ pub fn zoom(ui: &Ui, map_pos: &egui::Rect, map_memory: &mut MapMemory) {
         });
 }
 
-pub fn acknowledge(ui: &Ui, map_pos: &egui::Rect, attribution: Attribution) {
+pub fn acknowledge(ui: &Ui, window_id: &str, map_pos: &egui::Rect, attribution: Attribution) {
     Window::new("Acknowledge")
+        .id(egui::Id::new(window_id).with("map_acknowledge"))
         .collapsible(false)
         .resizable(false)
         .title_bar(false)

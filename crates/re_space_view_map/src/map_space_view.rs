@@ -237,8 +237,9 @@ impl SpaceViewClass for MapSpaceView {
             );
 
             let map_pos = map_widget.rect;
-            map_windows::zoom(ui, &map_pos, map_memory);
-            map_windows::acknowledge(ui, &map_pos, tiles.attribution());
+            let window_id = query.space_view_id.uuid().to_string();
+            map_windows::zoom(ui, &window_id, &map_pos, map_memory);
+            map_windows::acknowledge(ui, &window_id, &map_pos, tiles.attribution());
         });
         Ok(())
     }
