@@ -5,6 +5,10 @@ title: "MapView"
 
 A map view.
 
+## Properties
+
+### `map_options`
+Configures the look and feel of the map.
 
 ## API reference links
  * 🐍 [Python API docs for `MapView`](https://ref.rerun.io/docs/python/stable/common/blueprint_views#rerun.blueprint.views.MapView)

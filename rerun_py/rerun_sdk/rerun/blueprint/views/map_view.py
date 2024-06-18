@@ -3,12 +3,14 @@
 
 from __future__ import annotations
 
+from typing import Union
+
 __all__ = ["MapView"]
 
 
-from ..._baseclasses import AsComponents
+from ..._baseclasses import AsComponents, ComponentBatchLike
 from ...datatypes import EntityPathLike, Utf8Like
-from .. import components as blueprint_components
+from .. import archetypes as blueprint_archetypes, components as blueprint_components
 from ..api import SpaceView, SpaceViewContentsLike
 
 
@@ -28,7 +30,14 @@ class MapView(SpaceView):
     rr.log("points", rr.GpsCoordinates([[47.6344, 19.1397, 0], [47.6334, 19.1399, 1]]))
 
     # Create a map view to display the chart.
-    blueprint = rrb.Blueprint(rrb.MapView(origin="points", name="MapView"), collapse_panels=True)
+    blueprint = rrb.Blueprint(
+        rrb.MapView(
+            origin="points",
+            name="MapView",
+            map_options=rrb.archetypes.MapOptions(provider=rrb.components.MapProvider.MapboxStreets),
+        ),
+        collapse_panels=True,
+    )
 
     rr.send_blueprint(blueprint)
     ```
@@ -51,6 +60,8 @@ class MapView(SpaceView):
         contents: SpaceViewContentsLike = "$origin/**",
         name: Utf8Like | None = None,
         visible: blueprint_components.VisibleLike | None = None,
+        defaults: list[Union[AsComponents, ComponentBatchLike]] = [],
+        map_options: blueprint_archetypes.MapOptions | None = None,
     ) -> None:
         """
         Construct a blueprint for a new MapView view.
@@ -70,10 +81,27 @@ class MapView(SpaceView):
             Whether this view is visible.
 
             Defaults to true if not specified.
+        defaults:
+            List of default components or component batches to add to the space view. When an archetype
+            in the view is missing a component included in this set, the value of default will be used
+            instead of the normal fallback for the visualizer.
+        map_options:
+            Configures the look and feel of the map.
 
         """
 
         properties: dict[str, AsComponents] = {}
+        if map_options is not None:
+            if not isinstance(map_options, blueprint_archetypes.MapOptions):
+                map_options = blueprint_archetypes.MapOptions(map_options)
+            properties["MapOptions"] = map_options
+
         super().__init__(
-            class_identifier="Map", origin=origin, contents=contents, name=name, visible=visible, properties=properties
+            class_identifier="Map",
+            origin=origin,
+            contents=contents,
+            name=name,
+            visible=visible,
+            properties=properties,
+            defaults=defaults,
         )
