@@ -236,6 +236,10 @@ impl SpaceViewClass for MapSpaceView {
                 }),
             );
 
+            map_widget.double_clicked().then(|| {
+                map_memory.follow_my_position();
+            });
+
             let map_pos = map_widget.rect;
             let window_id = query.space_view_id.uuid().to_string();
             map_windows::zoom(ui, &window_id, &map_pos, map_memory);
