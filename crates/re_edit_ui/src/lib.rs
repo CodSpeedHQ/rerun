@@ -16,7 +16,9 @@ use datatype_editors::{
     edit_f32_zero_to_max_float_raw, edit_f32_zero_to_one, edit_singleline_string,
 };
 use re_types::{
-    blueprint::components::{BackgroundKind, Corner2D, LockRangeDuringZoom, ViewFit, Visible},
+    blueprint::components::{
+        BackgroundKind, Corner2D, LockRangeDuringZoom, MapProvider, ViewFit, Visible,
+    },
     components::{
         AggregationPolicy, AxisLength, Color, Colormap, DepthMeter, DrawOrder, FillRatio,
         GammaCorrection, ImagePlaneDistance, MagnificationFilter, MarkerSize, Name, Opacity,

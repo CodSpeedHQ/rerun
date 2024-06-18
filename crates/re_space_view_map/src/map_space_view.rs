@@ -1,5 +1,8 @@
+use re_types::blueprint::archetypes::MapOptions;
+use re_viewport_blueprint::ViewProperty;
+
 use {
-    egui::{self, Color32, Context, TextEdit},
+    egui::{self, Color32, Context},
     re_log_types::EntityPath,
     re_space_view::suggest_space_view_for_each_entity,
     re_types::blueprint::components::MapProvider,
@@ -7,7 +10,6 @@ use {
         components::{Color, Radius},
         SpaceViewClassIdentifier, View,
     },
-    re_ui::UiExt,
     re_viewer_context::{
         SpaceViewClass, SpaceViewClassLayoutPriority, SpaceViewClassRegistryError, SpaceViewId,
         SpaceViewSpawnHeuristics, SpaceViewState, SpaceViewStateExt as _,
@@ -142,93 +144,75 @@ impl SpaceViewClass for MapSpaceView {
 
     fn selection_ui(
         &self,
-        _ctx: &ViewerContext<'_>,
+        ctx: &ViewerContext<'_>,
         ui: &mut egui::Ui,
         state: &mut dyn SpaceViewState,
         _space_origin: &EntityPath,
-        _space_view_id: SpaceViewId,
+        space_view_id: SpaceViewId,
     ) -> Result<(), SpaceViewSystemExecutionError> {
-        let map_state = state.downcast_mut::<MapSpaceViewState>()?;
-        let mut selected = map_state.selected_provider;
+        re_ui::list_item::list_item_scope(ui, "map_selection_ui", |ui| {
+            re_space_view::view_property_ui::<re_types::blueprint::archetypes::MapOptions>(
+                ctx,
+                ui,
+                space_view_id,
+                self,
+                state,
+            );
+        });
 
-        // TODO(tfoldi): seems there is no implementation for combo box in view_property_ui
-        // list_item::list_item_scope(ui, "map_selection_ui", |ui| {
-        //     view_property_ui::<re_types::blueprint::archetypes::MapOptions>(
-        //         ctx,
-        //         ui,
-        //         space_view_id,
-        //         self,
-        //         state,
-        //     );
+        // TODO(tfoldi): this should be moved to the view_property_ui / blueprint
+        // let map_state = state.downcast_mut::<MapSpaceViewState>()?;
+        // let mut selected = map_state.selected_provider;
+
+        // ui.horizontal(|ui| {
+        //     ui.label("Mapbox Access Token").on_hover_text("Access token for Mapbox API. Please refer to the Mapbox documentation for more information.");
+        //     ui.add( TextEdit::singleline(&mut map_state.mapbox_access_token)
+        //         .hint_text("Mapbox Access Token")
+        //         .password(true));
         // });
 
-        ui.horizontal(|ui| {
-            ui.label("Map provider");
-            egui::ComboBox::from_id_source("map_provider")
-                .selected_text(format!("{selected:?}"))
-                .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut selected, MapProvider::OpenStreetMap, "OpenStreetMap");
-                    ui.selectable_value(
-                        &mut selected,
-                        MapProvider::MapboxStreets,
-                        "Mapbox Streets (Light)",
-                    );
-                    ui.selectable_value(
-                        &mut selected,
-                        MapProvider::MapboxDark,
-                        "Mapbox Streets (Dark)",
-                    );
-                    ui.selectable_value(
-                        &mut selected,
-                        MapProvider::MapboxSatellite,
-                        "Mapbox Satellite",
-                    );
-                });
+        // ui.horizontal(|ui| {
+        //     let mut is_following = map_state.map_memory.detached().is_none();
 
-            // If the selected provider has changed, reset the tiles.
-            if selected != map_state.selected_provider {
-                map_state.tiles = None;
-                map_state.selected_provider = selected;
-            }
-        });
-
-        ui.horizontal(|ui| {
-            ui.label("Mapbox Access Token").on_hover_text("Access token for Mapbox API. Please refer to the Mapbox documentation for more information.");
-            ui.add( TextEdit::singleline(&mut map_state.mapbox_access_token)
-                .hint_text("Mapbox Access Token")
-                .password(true));
-        });
-
-        ui.horizontal(|ui| {
-            let mut is_following = map_state.map_memory.detached().is_none();
-
-            if ui
-                .re_checkbox(&mut is_following, "Follow positions on map")
-                .changed()
-            {
-                if is_following {
-                    map_state.map_memory.follow_my_position();
-                } else {
-                    // Detach the map from the current position
-                    // TODO(tfoldi): should be added to the map_memory API
-                }
-            }
-        });
+        //     if ui
+        //         .re_checkbox(&mut is_following, "Follow positions on map")
+        //         .changed()
+        //     {
+        //         if is_following {
+        //             map_state.map_memory.follow_my_position();
+        //         } else {
+        //             // Detach the map from the current position
+        //             // TODO(tfoldi): should be added to the map_memory API
+        //         }
+        //     }
+        // });
 
         Ok(())
     }
 
     fn ui(
         &self,
-        _ctx: &ViewerContext<'_>,
+        ctx: &ViewerContext<'_>,
         ui: &mut egui::Ui,
         state: &mut dyn SpaceViewState,
 
-        _query: &ViewQuery<'_>,
+        query: &ViewQuery<'_>,
         system_output: SystemExecutionOutput,
     ) -> Result<(), SpaceViewSystemExecutionError> {
         let state = state.downcast_mut::<MapSpaceViewState>()?;
         let map_viz_system = system_output.view_systems.get::<MapVisualizerSystem>()?;
+
+        let blueprint_db = ctx.blueprint_db();
+        let view_id = query.space_view_id;
+        let map_options =
+            ViewProperty::from_archetype::<MapOptions>(blueprint_db, ctx.blueprint_query, view_id);
+        let map_provider = map_options.component_or_fallback::<MapProvider>(ctx, self, state)?;
+
+        // if state changed let's update it from the blueprint
+        if state.selected_provider != map_provider {
+            state.tiles = None;
+            state.selected_provider = map_provider;
+        }
 
         let (tiles, map_memory) = match state.ensure_and_get_mut_refs(ui.ctx()) {
             Ok(refs) => refs,
