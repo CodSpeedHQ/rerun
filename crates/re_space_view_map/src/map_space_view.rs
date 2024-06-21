@@ -216,7 +216,7 @@ impl SpaceViewClass for MapSpaceView {
 
         let (tiles, map_memory) = match state.ensure_and_get_mut_refs(ui.ctx()) {
             Ok(refs) => refs,
-            Err(e) => return Err(e),
+            Err(err) => return Err(err),
         };
 
         egui::Frame::default().show(ui, |ui| {
