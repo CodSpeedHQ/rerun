@@ -30,5 +30,5 @@ snippet: views/map
 
 ## Visualized archetypes
 
-* [`GpsCoordinates`](../archetypes/gps_coordinates.md)
+* [`Points3D`](../archetypes/points3d.md)
 

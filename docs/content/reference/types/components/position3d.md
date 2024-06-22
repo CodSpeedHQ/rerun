@@ -19,6 +19,5 @@ A position in 3D space.
 
 * [`Arrows3D`](../archetypes/arrows3d.md)
 * [`Boxes3D`](../archetypes/boxes3d.md)
-* [`GpsCoordinates`](../archetypes/gps_coordinates.md)
 * [`Mesh3D`](../archetypes/mesh3d.md)
 * [`Points3D`](../archetypes/points3d.md)

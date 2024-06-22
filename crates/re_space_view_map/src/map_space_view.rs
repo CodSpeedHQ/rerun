@@ -16,7 +16,7 @@ use {
         SpaceViewSystemExecutionError, SpaceViewSystemRegistrator, SystemExecutionOutput,
         ViewQuery, ViewerContext,
     },
-    walkers::{Map, MapMemory, Plugin, Tiles, TilesManager},
+    walkers::{HttpTiles, Map, MapMemory, Plugin, Tiles},
 };
 
 use crate::map_visualizer_system::{MapEntry, MapVisualizerSystem};
@@ -54,7 +54,7 @@ impl Plugin for PositionsOnMap {
 
 #[derive(Default)]
 pub struct MapSpaceViewState {
-    tiles: Option<Tiles>,
+    tiles: Option<HttpTiles>,
     map_memory: MapMemory,
     selected_provider: MapProvider,
     mapbox_access_token: String,
@@ -65,7 +65,7 @@ impl MapSpaceViewState {
     pub fn ensure_and_get_mut_refs(
         &mut self,
         ctx: &egui::Context,
-    ) -> Result<(&mut Tiles, &mut MapMemory), SpaceViewSystemExecutionError> {
+    ) -> Result<(&mut HttpTiles, &mut MapMemory), SpaceViewSystemExecutionError> {
         if self.tiles.is_none() {
             let tiles = get_tile_manager(self.selected_provider, &self.mapbox_access_token, ctx);
             self.tiles = Some(tiles);
@@ -161,8 +161,7 @@ impl SpaceViewClass for MapSpaceView {
         });
 
         // TODO(tfoldi): this should be moved to the view_property_ui / blueprint
-        // let map_state = state.downcast_mut::<MapSpaceViewState>()?;
-        // let mut selected = map_state.selected_provider;
+        let map_state = state.downcast_mut::<MapSpaceViewState>()?;
 
         // ui.horizontal(|ui| {
         //     ui.label("Mapbox Access Token").on_hover_text("Access token for Mapbox API. Please refer to the Mapbox documentation for more information.");
@@ -170,6 +169,15 @@ impl SpaceViewClass for MapSpaceView {
         //         .hint_text("Mapbox Access Token")
         //         .password(true));
         // });
+
+        let mut zoom_level = map_state.map_memory.zoom();
+        ui.horizontal(|ui| {
+            ui.label("Zoom level");
+            ui.add(egui::Slider::new(&mut zoom_level, 0.0..=19.0));
+            if zoom_level != map_state.map_memory.zoom() {
+                let _ = map_state.map_memory.set_zoom(zoom_level);
+            }
+        });
 
         // ui.horizontal(|ui| {
         //     let mut is_following = map_state.map_memory.detached().is_none();
@@ -220,7 +228,7 @@ impl SpaceViewClass for MapSpaceView {
         };
 
         egui::Frame::default().show(ui, |ui| {
-            let some_tiles_manager: Option<&mut dyn TilesManager> = Some(tiles);
+            let some_tiles_manager: Option<&mut dyn Tiles> = Some(tiles);
             let map_widget = ui.add(
                 Map::new(
                     some_tiles_manager,
@@ -249,10 +257,16 @@ impl SpaceViewClass for MapSpaceView {
     }
 }
 
-fn get_tile_manager(provider: MapProvider, mapbox_access_token: &str, egui_ctx: &Context) -> Tiles {
+fn get_tile_manager(
+    provider: MapProvider,
+    mapbox_access_token: &str,
+    egui_ctx: &Context,
+) -> HttpTiles {
     match provider {
-        MapProvider::OpenStreetMap => Tiles::new(walkers::sources::OpenStreetMap, egui_ctx.clone()),
-        MapProvider::MapboxStreets => Tiles::new(
+        MapProvider::OpenStreetMap => {
+            HttpTiles::new(walkers::sources::OpenStreetMap, egui_ctx.clone())
+        }
+        MapProvider::MapboxStreets => HttpTiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Streets,
                 access_token: mapbox_access_token.to_owned(),
@@ -260,7 +274,7 @@ fn get_tile_manager(provider: MapProvider, mapbox_access_token: &str, egui_ctx: 
             },
             egui_ctx.clone(),
         ),
-        MapProvider::MapboxDark => Tiles::new(
+        MapProvider::MapboxDark => HttpTiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Dark,
                 access_token: mapbox_access_token.to_owned(),
@@ -268,7 +282,7 @@ fn get_tile_manager(provider: MapProvider, mapbox_access_token: &str, egui_ctx: 
             },
             egui_ctx.clone(),
         ),
-        MapProvider::MapboxSatellite => Tiles::new(
+        MapProvider::MapboxSatellite => HttpTiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Satellite,
                 access_token: mapbox_access_token.to_owned(),

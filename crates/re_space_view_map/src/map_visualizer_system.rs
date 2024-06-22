@@ -1,6 +1,7 @@
 use re_data_store::LatestAtQuery;
-use re_types::components;
-use re_types::{archetypes::GpsCoordinates, ComponentName};
+use re_types::components::Position3D;
+use re_types::ComponentName;
+use re_types::{archetypes::Points3D, components};
 use re_viewer_context::{
     IdentifiedViewSystem, SpaceViewSystemExecutionError, ViewContext, ViewContextCollection,
     ViewQuery, VisualizerQueryInfo, VisualizerSystem,
@@ -40,7 +41,7 @@ impl IdentifiedViewSystem for MapVisualizerSystem {
 
 impl VisualizerSystem for MapVisualizerSystem {
     fn visualizer_query_info(&self) -> VisualizerQueryInfo {
-        VisualizerQueryInfo::from_archetype::<GpsCoordinates>()
+        VisualizerQueryInfo::from_archetype::<Points3D>()
     }
 
     fn execute(
