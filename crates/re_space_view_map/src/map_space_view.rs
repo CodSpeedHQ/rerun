@@ -61,7 +61,7 @@ pub struct MapSpaceViewState {
     tiles: Option<HttpTiles>,
     map_memory: MapMemory,
     selected_provider: MapProvider,
-    mapbox_access_token: String,
+    access_token: String,
 }
 
 impl MapSpaceViewState {
@@ -71,7 +71,7 @@ impl MapSpaceViewState {
         ctx: &egui::Context,
     ) -> Result<(&mut HttpTiles, &mut MapMemory), SpaceViewSystemExecutionError> {
         if self.tiles.is_none() {
-            let tiles = get_tile_manager(self.selected_provider, &self.mapbox_access_token, ctx);
+            let tiles = get_tile_manager(self.selected_provider, &self.access_token, ctx);
             self.tiles = Some(tiles);
         }
 
@@ -128,8 +128,7 @@ impl SpaceViewClass for MapSpaceView {
             tiles: None,
             map_memory: MapMemory::default(),
             selected_provider: MapProvider::default(),
-            // TODO(tfoldi): this should come from the app configuration or blueprint
-            mapbox_access_token: std::env::var("MAPBOX_ACCESS_TOKEN").unwrap_or_default(),
+            access_token: std::env::var("MAPBOX_ACCESS_TOKEN").unwrap_or_default(),
         })
     }
 
@@ -139,7 +138,7 @@ impl SpaceViewClass for MapSpaceView {
     }
 
     fn layout_priority(&self) -> SpaceViewClassLayoutPriority {
-        Default::default()
+        SpaceViewClassLayoutPriority::Low
     }
 
     fn spawn_heuristics(&self, ctx: &ViewerContext<'_>) -> SpaceViewSpawnHeuristics {
@@ -198,6 +197,10 @@ impl SpaceViewClass for MapSpaceView {
         let zoom_level = map_options
             .component_or_fallback::<ZoomLevel>(ctx, self, state)?
             .0;
+        let access_token = map_options
+            .component_or_fallback::<Secret>(ctx, self, state)?
+            .0
+            .to_string();
 
         if state.map_memory.set_zoom(zoom_level).is_err() {
             re_log::warn!(
@@ -206,9 +209,10 @@ impl SpaceViewClass for MapSpaceView {
         };
 
         // if state changed let's update it from the blueprint
-        if state.selected_provider != map_provider {
+        if state.selected_provider != map_provider || access_token != state.access_token {
             state.tiles = None;
             state.selected_provider = map_provider;
+            state.access_token = access_token;
         }
 
         let (tiles, map_memory) = match state.ensure_and_get_mut_refs(ui.ctx()) {
@@ -251,11 +255,7 @@ impl SpaceViewClass for MapSpaceView {
     }
 }
 
-fn get_tile_manager(
-    provider: MapProvider,
-    mapbox_access_token: &str,
-    egui_ctx: &Context,
-) -> HttpTiles {
+fn get_tile_manager(provider: MapProvider, access_token: &str, egui_ctx: &Context) -> HttpTiles {
     match provider {
         MapProvider::OpenStreetMap => {
             HttpTiles::new(walkers::sources::OpenStreetMap, egui_ctx.clone())
@@ -263,7 +263,7 @@ fn get_tile_manager(
         MapProvider::MapboxStreets => HttpTiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Streets,
-                access_token: mapbox_access_token.to_owned(),
+                access_token: access_token.to_owned(),
                 high_resolution: false,
             },
             egui_ctx.clone(),
@@ -271,7 +271,7 @@ fn get_tile_manager(
         MapProvider::MapboxDark => HttpTiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Dark,
-                access_token: mapbox_access_token.to_owned(),
+                access_token: access_token.to_owned(),
                 high_resolution: false,
             },
             egui_ctx.clone(),
@@ -279,7 +279,7 @@ fn get_tile_manager(
         MapProvider::MapboxSatellite => HttpTiles::new(
             walkers::sources::Mapbox {
                 style: walkers::sources::MapboxStyle::Satellite,
-                access_token: mapbox_access_token.to_owned(),
+                access_token: access_token.to_owned(),
                 high_resolution: true,
             },
             egui_ctx.clone(),
