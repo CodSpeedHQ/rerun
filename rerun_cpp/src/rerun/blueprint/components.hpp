@@ -19,6 +19,7 @@
 #include "blueprint/components/query_expression.hpp"
 #include "blueprint/components/root_container.hpp"
 #include "blueprint/components/row_share.hpp"
+#include "blueprint/components/secret.hpp"
 #include "blueprint/components/space_view_class.hpp"
 #include "blueprint/components/space_view_maximized.hpp"
 #include "blueprint/components/space_view_origin.hpp"
@@ -28,3 +29,4 @@
 #include "blueprint/components/visible.hpp"
 #include "blueprint/components/visible_time_range.hpp"
 #include "blueprint/components/visual_bounds2d.hpp"
+#include "blueprint/components/zoom_level.hpp"

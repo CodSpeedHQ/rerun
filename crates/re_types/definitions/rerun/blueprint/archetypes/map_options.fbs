@@ -11,7 +11,7 @@ namespace rerun.blueprint.archetypes;
 /// Configuration for the background of a view.
 table MapOptions (
     "attr.rerun.scope": "blueprint",
-    "attr.rust.derive": "Copy",
+    // "attr.rust.derive": "Default",
     "attr.rust.generate_field_info"
 ) {
     // --- Required ---
@@ -19,4 +19,12 @@ table MapOptions (
     /// Map provider and style to use.
     provider: rerun.blueprint.components.MapProvider ("attr.rerun.component_required", order: 1000);
 
+
+    // --- Optional ---
+
+    /// Zoom level for the map. The default is 16.
+    zoom: rerun.blueprint.components.ZoomLevel ("attr.rerun.component_optional", order: 2000);
+
+    /// Optional access token to access the map tiles.
+    access_token: rerun.blueprint.components.Secret ("attr.rerun.component_optional", order: 3000);
 }

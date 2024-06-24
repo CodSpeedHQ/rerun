@@ -1,4 +1,8 @@
-use re_types::blueprint::archetypes::MapOptions;
+use re_types::blueprint::{
+    archetypes::MapOptions,
+    components::{Secret, ZoomLevel},
+};
+use re_viewer_context::TypedComponentFallbackProvider;
 use re_viewport_blueprint::ViewProperty;
 
 use {
@@ -160,40 +164,16 @@ impl SpaceViewClass for MapSpaceView {
             );
         });
 
-        // TODO(tfoldi): this should be moved to the view_property_ui / blueprint
+        // "Center and follow" button to reset view following mode after interacting
+        // with the map.
         let map_state = state.downcast_mut::<MapSpaceViewState>()?;
-
-        // ui.horizontal(|ui| {
-        //     ui.label("Mapbox Access Token").on_hover_text("Access token for Mapbox API. Please refer to the Mapbox documentation for more information.");
-        //     ui.add( TextEdit::singleline(&mut map_state.mapbox_access_token)
-        //         .hint_text("Mapbox Access Token")
-        //         .password(true));
-        // });
-
-        let mut zoom_level = map_state.map_memory.zoom();
         ui.horizontal(|ui| {
-            ui.label("Zoom level");
-            ui.add(egui::Slider::new(&mut zoom_level, 0.0..=19.0));
-            if zoom_level != map_state.map_memory.zoom() {
-                let _ = map_state.map_memory.set_zoom(zoom_level);
+            let is_detached = map_state.map_memory.detached().is_none();
+
+            if !is_detached && ui.button("Center and follow positions").clicked() {
+                map_state.map_memory.follow_my_position();
             }
         });
-
-        // ui.horizontal(|ui| {
-        //     let mut is_following = map_state.map_memory.detached().is_none();
-
-        //     if ui
-        //         .re_checkbox(&mut is_following, "Follow positions on map")
-        //         .changed()
-        //     {
-        //         if is_following {
-        //             map_state.map_memory.follow_my_position();
-        //         } else {
-        //             // Detach the map from the current position
-        //             // TODO(tfoldi): should be added to the map_memory API
-        //         }
-        //     }
-        // });
 
         Ok(())
     }
@@ -215,6 +195,13 @@ impl SpaceViewClass for MapSpaceView {
         let map_options =
             ViewProperty::from_archetype::<MapOptions>(blueprint_db, ctx.blueprint_query, view_id);
         let map_provider = map_options.component_or_fallback::<MapProvider>(ctx, self, state)?;
+        let zoom_level = map_options.component_or_fallback::<ZoomLevel>(ctx, self, state)?;
+
+        if state.map_memory.set_zoom(zoom_level.into()).is_err() {
+            re_log::warn!(
+                "Failed to set zoom level for map. Zoom level should be between zero and 22"
+            );
+        };
 
         // if state changed let's update it from the blueprint
         if state.selected_provider != map_provider {
@@ -252,6 +239,8 @@ impl SpaceViewClass for MapSpaceView {
             let window_id = query.space_view_id.uuid().to_string();
             map_windows::zoom(ui, &window_id, &map_pos, map_memory);
             map_windows::acknowledge(ui, &window_id, &map_pos, tiles.attribution());
+
+            map_options.save_blueprint_component(ctx, &ZoomLevel(map_memory.zoom()));
         });
         Ok(())
     }
@@ -293,4 +282,20 @@ fn get_tile_manager(
     }
 }
 
-re_viewer_context::impl_component_fallback_provider!(MapSpaceView => []);
+impl TypedComponentFallbackProvider<ZoomLevel> for MapSpaceView {
+    fn fallback_for(&self, _ctx: &re_viewer_context::QueryContext<'_>) -> ZoomLevel {
+        // default zoom level is 16.
+        16.0.into()
+    }
+}
+
+impl TypedComponentFallbackProvider<Secret> for MapSpaceView {
+    fn fallback_for(&self, _ctx: &re_viewer_context::QueryContext<'_>) -> Secret {
+        // default zoom level is 16.
+        std::env::var("MAPBOX_ACCESS_TOKEN")
+            .unwrap_or_default()
+            .into()
+    }
+}
+
+re_viewer_context::impl_component_fallback_provider!(MapSpaceView => [ZoomLevel, Secret]);

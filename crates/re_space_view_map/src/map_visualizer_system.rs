@@ -1,7 +1,5 @@
 use re_data_store::LatestAtQuery;
-use re_types::components::Position3D;
-use re_types::ComponentName;
-use re_types::{archetypes::Points3D, components};
+use re_types::{archetypes::Points3D, components, ComponentName};
 use re_viewer_context::{
     IdentifiedViewSystem, SpaceViewSystemExecutionError, ViewContext, ViewContextCollection,
     ViewQuery, VisualizerQueryInfo, VisualizerSystem,

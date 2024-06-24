@@ -14,10 +14,20 @@ namespace rerun {
     ) {
         using namespace blueprint::archetypes;
         std::vector<DataCell> cells;
-        cells.reserve(2);
+        cells.reserve(4);
 
         {
             auto result = DataCell::from_loggable(archetype.provider);
+            RR_RETURN_NOT_OK(result.error);
+            cells.push_back(std::move(result.value));
+        }
+        {
+            auto result = DataCell::from_loggable(archetype.zoom);
+            RR_RETURN_NOT_OK(result.error);
+            cells.push_back(std::move(result.value));
+        }
+        {
+            auto result = DataCell::from_loggable(archetype.access_token);
             RR_RETURN_NOT_OK(result.error);
             cells.push_back(std::move(result.value));
         }

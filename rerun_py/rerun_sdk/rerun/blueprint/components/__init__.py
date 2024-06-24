@@ -37,6 +37,7 @@ from .panel_state import PanelState, PanelStateArrayLike, PanelStateBatch, Panel
 from .query_expression import QueryExpression, QueryExpressionBatch, QueryExpressionType
 from .root_container import RootContainer, RootContainerBatch, RootContainerType
 from .row_share import RowShare, RowShareArrayLike, RowShareBatch, RowShareLike, RowShareType
+from .secret import Secret, SecretBatch, SecretType
 from .space_view_class import SpaceViewClass, SpaceViewClassBatch, SpaceViewClassType
 from .space_view_maximized import SpaceViewMaximized, SpaceViewMaximizedBatch, SpaceViewMaximizedType
 from .space_view_origin import SpaceViewOrigin, SpaceViewOriginBatch, SpaceViewOriginType
@@ -54,6 +55,7 @@ from .viewer_recommendation_hash import (
 from .visible import Visible, VisibleArrayLike, VisibleBatch, VisibleLike, VisibleType
 from .visible_time_range import VisibleTimeRange, VisibleTimeRangeBatch, VisibleTimeRangeType
 from .visual_bounds2d import VisualBounds2D, VisualBounds2DBatch, VisualBounds2DType
+from .zoom_level import ZoomLevel, ZoomLevelArrayLike, ZoomLevelBatch, ZoomLevelLike, ZoomLevelType
 
 __all__ = [
     "ActiveTab",
@@ -127,6 +129,9 @@ __all__ = [
     "RowShareBatch",
     "RowShareLike",
     "RowShareType",
+    "Secret",
+    "SecretBatch",
+    "SecretType",
     "SpaceViewClass",
     "SpaceViewClassBatch",
     "SpaceViewClassType",
@@ -158,4 +163,9 @@ __all__ = [
     "VisualBounds2D",
     "VisualBounds2DBatch",
     "VisualBounds2DType",
+    "ZoomLevel",
+    "ZoomLevelArrayLike",
+    "ZoomLevelBatch",
+    "ZoomLevelLike",
+    "ZoomLevelType",
 ]
