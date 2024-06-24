@@ -195,9 +195,11 @@ impl SpaceViewClass for MapSpaceView {
         let map_options =
             ViewProperty::from_archetype::<MapOptions>(blueprint_db, ctx.blueprint_query, view_id);
         let map_provider = map_options.component_or_fallback::<MapProvider>(ctx, self, state)?;
-        let zoom_level = map_options.component_or_fallback::<ZoomLevel>(ctx, self, state)?;
+        let zoom_level = map_options
+            .component_or_fallback::<ZoomLevel>(ctx, self, state)?
+            .0;
 
-        if state.map_memory.set_zoom(zoom_level.into()).is_err() {
+        if state.map_memory.set_zoom(zoom_level).is_err() {
             re_log::warn!(
                 "Failed to set zoom level for map. Zoom level should be between zero and 22"
             );
@@ -240,7 +242,10 @@ impl SpaceViewClass for MapSpaceView {
             map_windows::zoom(ui, &window_id, &map_pos, map_memory);
             map_windows::acknowledge(ui, &window_id, &map_pos, tiles.attribution());
 
-            map_options.save_blueprint_component(ctx, &ZoomLevel(map_memory.zoom()));
+            // update blueprint if zoom level changed from ui
+            if map_memory.zoom() != zoom_level {
+                map_options.save_blueprint_component(ctx, &ZoomLevel(map_memory.zoom()));
+            }
         });
         Ok(())
     }
