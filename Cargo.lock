@@ -5214,7 +5214,7 @@ dependencies = [
 
 [[package]]
 name = "re_space_view_map"
-version = "0.17.0-alpha.4"
+version = "0.17.0-alpha.5"
 dependencies = [
  "egui",
  "egui_plot",

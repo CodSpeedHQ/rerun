@@ -64,11 +64,18 @@ pub fn register_editors(registry: &mut re_viewer_context::ComponentUiRegistry) {
     registry.add_singleline_editor_ui::<Name>(edit_singleline_string);
     registry.add_singleline_editor_ui::<Secret>(edit_singleline_secret_string);
 
+    registry.add_singleline_editor_ui::<DepthMeter>(edit_f32_zero_to_max_float_raw);
+    registry.add_singleline_editor_ui::<MarkerSize>(edit_f32_zero_to_max_float_raw);
+    registry.add_singleline_editor_ui::<Radius>(edit_f32_zero_to_max_float_raw);
+    registry.add_singleline_editor_ui::<StrokeWidth>(edit_f32_zero_to_max_float_raw);
+    registry.add_singleline_editor_ui::<ZoomLevel>(edit_f32_zero_to_max_float_raw);
+
     registry.add_singleline_editor_ui(|_ctx, ui, value| edit_enum::<BackgroundKind>(ui, value));
     registry.add_singleline_editor_ui(|_ctx, ui, value| edit_enum::<Colormap>(ui, value));
     registry.add_singleline_editor_ui(|_ctx, ui, value| edit_enum::<Corner2D>(ui, value));
     registry
         .add_singleline_editor_ui(|_ctx, ui, value| edit_enum::<MagnificationFilter>(ui, value));
+    registry.add_singleline_editor_ui(|_ctx, ui, value| edit_enum::<MapProvider>(ui, value));
     registry.add_singleline_editor_ui(|_ctx, ui, value| edit_enum::<AggregationPolicy>(ui, value));
     registry.add_singleline_editor_ui(|_ctx, ui, value| edit_enum::<ViewFit>(ui, value));
 

@@ -75,27 +75,6 @@ static ALL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 4usize]> =
         ]
     });
 
-static FIELD_INFOS: once_cell::sync::Lazy<[::re_types_core::ArchetypeFieldInfo; 3usize]> =
-    once_cell::sync::Lazy::new(|| {
-        [
-            ::re_types_core::ArchetypeFieldInfo {
-                display_name: "Provider",
-                documentation: "Map provider and style to use.",
-                component_name: "rerun.blueprint.components.MapProvider".into(),
-            },
-            ::re_types_core::ArchetypeFieldInfo {
-                display_name: "Zoom",
-                documentation: "Zoom level for the map. The default is 16.",
-                component_name: "rerun.blueprint.components.ZoomLevel".into(),
-            },
-            ::re_types_core::ArchetypeFieldInfo {
-                display_name: "Access token",
-                documentation: "Optional access token to access the map tiles.",
-                component_name: "rerun.blueprint.components.Secret".into(),
-            },
-        ]
-    });
-
 impl MapOptions {
     /// The total number of components in the archetype: 1 required, 1 recommended, 2 optional
     pub const NUM_COMPONENTS: usize = 4usize;
@@ -141,11 +120,6 @@ impl ::re_types_core::Archetype for MapOptions {
     #[inline]
     fn all_components() -> ::std::borrow::Cow<'static, [ComponentName]> {
         ALL_COMPONENTS.as_slice().into()
-    }
-
-    #[inline]
-    fn field_infos() -> Option<::std::borrow::Cow<'static, [::re_types_core::ArchetypeFieldInfo]>> {
-        Some(FIELD_INFOS.as_slice().into())
     }
 
     #[inline]
@@ -220,6 +194,8 @@ impl ::re_types_core::AsComponents for MapOptions {
         .collect()
     }
 }
+
+impl ::re_types_core::ArchetypeReflectionMarker for MapOptions {}
 
 impl MapOptions {
     /// Create a new `MapOptions`.

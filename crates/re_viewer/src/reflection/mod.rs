@@ -119,6 +119,13 @@ fn generate_component_reflection() -> Result<ComponentReflectionMap, Serializati
             },
         ),
         (
+            <MapProvider as Loggable>::name(),
+            ComponentReflection {
+                docstring_md: "Name of the map provider to be used in Map views.",
+                placeholder: Some(MapProvider::default().to_arrow()?),
+            },
+        ),
+        (
             <PanelState as Loggable>::name(),
             ComponentReflection {
                 docstring_md: "Tri-state for panel controls.",
@@ -144,6 +151,13 @@ fn generate_component_reflection() -> Result<ComponentReflectionMap, Serializati
             ComponentReflection {
                 docstring_md: "The layout share of a row in the container.",
                 placeholder: Some(RowShare::default().to_arrow()?),
+            },
+        ),
+        (
+            <Secret as Loggable>::name(),
+            ComponentReflection {
+                docstring_md: "String type to hold a secret value.",
+                placeholder: Some(Secret::default().to_arrow()?),
             },
         ),
         (
@@ -207,6 +221,13 @@ fn generate_component_reflection() -> Result<ComponentReflectionMap, Serializati
             ComponentReflection {
                 docstring_md: "Visual bounds in 2D space used for `Spatial2DView`.",
                 placeholder: Some(VisualBounds2D::default().to_arrow()?),
+            },
+        ),
+        (
+            <ZoomLevel as Loggable>::name(),
+            ComponentReflection {
+                docstring_md: "A zoom level determines how much of the world is visible on a map.",
+                placeholder: Some(ZoomLevel::default().to_arrow()?),
             },
         ),
         (
@@ -575,6 +596,25 @@ fn generate_archetype_reflection() -> ArchetypeReflectionMap {
                     ArchetypeFieldReflection { component_name : "rerun.components.Color"
                     .into(), display_name : "Color", docstring_md :
                     "Color used for the `SolidColor` background type.", },
+                ],
+            },
+        ),
+        (
+            ArchetypeName::new("rerun.blueprint.archetypes.MapOptions"),
+            ArchetypeReflection {
+                display_name: "Map options",
+                docstring_md: "Configuration for the background of a view.",
+                fields: vec![
+                    ArchetypeFieldReflection { component_name :
+                    "rerun.blueprint.components.MapProvider".into(), display_name :
+                    "Provider", docstring_md : "Map provider and style to use.", },
+                    ArchetypeFieldReflection { component_name :
+                    "rerun.blueprint.components.ZoomLevel".into(), display_name : "Zoom",
+                    docstring_md : "Zoom level for the map. The default is 16.", },
+                    ArchetypeFieldReflection { component_name :
+                    "rerun.blueprint.components.Secret".into(), display_name :
+                    "Access token", docstring_md :
+                    "Optional access token to access the map tiles.", },
                 ],
             },
         ),
