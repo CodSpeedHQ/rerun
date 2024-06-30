@@ -2497,7 +2497,7 @@ dependencies = [
  "presser",
  "thiserror",
  "winapi",
- "windows 0.51.1",
+ "windows 0.52.0",
 ]
 
 [[package]]
@@ -2757,7 +2757,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.4.9",
+ "socket2 0.5.7",
  "tokio",
  "tower-service",
  "tracing",
@@ -7582,8 +7582,9 @@ dependencies = [
 
 [[package]]
 name = "walkers"
-version = "0.22.0"
-source = "git+https://github.com/podusowski/walkers?rev=6731ac4#6731ac43bdf532572c61261f59442e0d2a18f8ff"
+version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7de1a32b869838e1997460edb422804b9fba41c0138c41d82019ab6affebbae"
 dependencies = [
  "egui",
  "egui_extras",

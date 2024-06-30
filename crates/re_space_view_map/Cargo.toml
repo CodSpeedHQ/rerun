@@ -35,4 +35,4 @@ re_viewport_blueprint.workspace = true
 egui_plot.workspace = true
 egui.workspace = true
 
-walkers = { git = "https://github.com/podusowski/walkers", rev = "6731ac4" }
+walkers = "0.23.0"
