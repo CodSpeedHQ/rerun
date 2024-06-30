@@ -55,6 +55,13 @@ from .viewer_recommendation_hash import (
 from .visible import Visible, VisibleArrayLike, VisibleBatch, VisibleLike, VisibleType
 from .visible_time_range import VisibleTimeRange, VisibleTimeRangeBatch, VisibleTimeRangeType
 from .visual_bounds2d import VisualBounds2D, VisualBounds2DBatch, VisualBounds2DType
+from .visualizer_overrides import (
+    VisualizerOverrides,
+    VisualizerOverridesArrayLike,
+    VisualizerOverridesBatch,
+    VisualizerOverridesLike,
+    VisualizerOverridesType,
+)
 from .zoom_level import ZoomLevel, ZoomLevelArrayLike, ZoomLevelBatch, ZoomLevelLike, ZoomLevelType
 
 __all__ = [
@@ -163,6 +170,11 @@ __all__ = [
     "VisualBounds2D",
     "VisualBounds2DBatch",
     "VisualBounds2DType",
+    "VisualizerOverrides",
+    "VisualizerOverridesArrayLike",
+    "VisualizerOverridesBatch",
+    "VisualizerOverridesLike",
+    "VisualizerOverridesType",
     "ZoomLevel",
     "ZoomLevelArrayLike",
     "ZoomLevelBatch",

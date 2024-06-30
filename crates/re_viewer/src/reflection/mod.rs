@@ -224,6 +224,13 @@ fn generate_component_reflection() -> Result<ComponentReflectionMap, Serializati
             },
         ),
         (
+            <VisualizerOverrides as Loggable>::name(),
+            ComponentReflection {
+                docstring_md: "Override the visualizers for an entity.\n\nThis component is a stop-gap mechanism based on the current implementation details\nof the visualizer system. It is not intended to be a long-term solution, but provides\nenough utility to be useful in the short term.\n\nThe long-term solution is likely to be based off: <https://github.com/rerun-io/rerun/issues/6626>\n\nThis can only be used as part of blueprints. It will have no effect if used\nin a regular entity.",
+                placeholder: Some(VisualizerOverrides::default().to_arrow()?),
+            },
+        ),
+        (
             <ZoomLevel as Loggable>::name(),
             ComponentReflection {
                 docstring_md: "A zoom level determines how much of the world is visible on a map.",
@@ -564,13 +571,6 @@ fn generate_component_reflection() -> Result<ComponentReflectionMap, Serializati
             ComponentReflection {
                 docstring_md: "How we interpret the coordinate system of an entity/space.\n\nFor instance: What is \"up\"? What does the Z axis mean? Is this right-handed or left-handed?\n\nThe three coordinates are always ordered as [x, y, z].\n\nFor example [Right, Down, Forward] means that the X axis points to the right, the Y axis points\ndown, and the Z axis points forward.\n\nThe following constants are used to represent the different directions:\n * Up = 1\n * Down = 2\n * Right = 3\n * Left = 4\n * Forward = 5\n * Back = 6",
                 placeholder: Some(ViewCoordinates::default().to_arrow()?),
-            },
-        ),
-        (
-            <VisualizerOverrides as Loggable>::name(),
-            ComponentReflection {
-                docstring_md: "The name of a visualizer.",
-                placeholder: Some(VisualizerOverrides::default().to_arrow()?),
             },
         ),
     ];
