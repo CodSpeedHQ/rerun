@@ -1,7 +1,7 @@
 //! This example shows how to wrap the Rerun Viewer in your own GUI.
 
 use re_viewer::external::{
-    arrow2, eframe, egui, re_data_store, re_entity_db, re_log, re_log_types, re_memory, re_types,
+    arrow2, eframe, egui, re_chunk_store, re_entity_db, re_log, re_log_types, re_memory, re_types,
 };
 
 // By using `re_memory::AccountingAllocator` Rerun can keep track of exactly how much memory it is using,
@@ -11,8 +11,7 @@ use re_viewer::external::{
 static GLOBAL: re_memory::AccountingAllocator<mimalloc::MiMalloc> =
     re_memory::AccountingAllocator::new(mimalloc::MiMalloc);
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Direct calls using the `log` crate to stderr. Control with `RUST_LOG=debug` etc.
     re_log::setup_logging();
 
@@ -26,8 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "0.0.0.0",
         re_sdk_comms::DEFAULT_SERVER_PORT,
         Default::default(),
-    )
-    .await?;
+    )?;
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_app_id("rerun_extend_viewer_ui_example"),
@@ -44,17 +42,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         window_title,
         native_options,
         Box::new(move |cc| {
-            let re_ui = re_viewer::customize_eframe(cc);
+            re_viewer::customize_eframe_and_setup_renderer(cc)?;
 
             let mut rerun_app = re_viewer::App::new(
                 re_viewer::build_info(),
                 &app_env,
                 startup_options,
-                re_ui,
+                cc.egui_ctx.clone(),
                 cc.storage,
             );
             rerun_app.add_receiver(rx);
-            Box::new(MyApp { rerun_app })
+            Ok(Box::new(MyApp { rerun_app }))
         }),
     )?;
 
@@ -150,9 +148,9 @@ fn component_ui(
 ) {
     // You can query the data for any time point, but for now
     // just show the last value logged for each component:
-    let query = re_data_store::LatestAtQuery::latest(timeline);
+    let query = re_chunk_store::LatestAtQuery::latest(timeline);
 
-    let results = entity_db.query_caches2().latest_at(
+    let results = entity_db.query_caches().latest_at(
         entity_db.store(),
         &query,
         entity_path,

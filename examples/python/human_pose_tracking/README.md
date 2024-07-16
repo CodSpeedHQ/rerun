@@ -3,7 +3,7 @@ title = "Human pose tracking"
 tags = ["MediaPipe", "Keypoint detection", "2D", "3D"]
 thumbnail = "https://static.rerun.io/human-pose-tracking/5d62a38b48bed1467698d4dc95c1f9fba786d254/480w.png"
 thumbnail_dimensions = [480, 480]
-channel = "main"
+# channel = "main" # TODO(#6901)
 -->
 
 Use the [MediaPipe Pose Landmark Detection](https://developers.google.com/mediapipe/solutions/vision/pose_landmarker) solution to detect and track a human pose in video.
@@ -53,7 +53,7 @@ rr.log(
 ### Segmentation mask
 
 The segmentation result is logged through a combination of two archetypes. The segmentation
-image itself is logged as an
+image itself is logged as a
 [`SegmentationImage`](https://www.rerun.io/docs/reference/types/archetypes/segmentation_image) and
 contains the id for each pixel. The color is determined by the
 [`AnnotationContext`](https://www.rerun.io/docs/reference/types/archetypes/annotation_context) which is
@@ -77,22 +77,15 @@ rr.log(
 #### Segmentation image
 
 ```python
-rr.log(
-    "video/mask",
-    rr.SegmentationImage(segmentation_mask.astype(np.uint8))
-)
+rr.log("video/mask", rr.SegmentationImage(binary_segmentation_mask.astype(np.uint8)))
 ```
 
 ### Body pose points
-Logging the body pose landmarks involves specifying connections between the points, extracting pose landmark points and logging them to the Rerun SDK.
-The 2D points are visualized over the image/video for a better understanding and visualization of the body pose. The 3D points allows the creation of a 3D model of the body posture for a more comprehensive representation of the human pose.
+Logging the body pose as a skeleton involves specifying the connectivity of its keypoints (i.e., pose landmarks), extracting the pose landmarks, and logging them as points to Rerun. In this example, both the 2D and 3D estimates from Mediapipe are visualized.
 
-
-
-The 2D and 3D points are logged through a combination of two archetypes. First, a timeless
+The skeletons are logged through a combination of two archetypes. First, a timeless
 [`ClassDescription`](https://www.rerun.io/docs/reference/types/datatypes/class_description) is logged, that contains the information which maps keypoint ids to labels and how to connect
-the keypoints.
-Defining these connections automatically renders lines between them. Mediapipe provides the `POSE_CONNECTIONS` variable which contains the list of `(from, to)` landmark indices that define the connections. Second, the actual keypoint positions are logged in 2D
+the keypoints. By defining these connections Rerun will automatically add lines between them. Mediapipe provides the `POSE_CONNECTIONS` variable which contains the list of `(from, to)` landmark indices that define the connections. Second, the actual keypoint positions are logged in 2D
 and 3D as [`Points2D`](https://www.rerun.io/docs/reference/types/archetypes/points2d) and
 [`Points3D`](https://www.rerun.io/docs/reference/types/archetypes/points3d) archetypes, respectively.
 
@@ -104,7 +97,9 @@ rr.log(
     rr.AnnotationContext(
         rr.ClassDescription(
             info=rr.AnnotationInfo(id=1, label="Person"),
-            keypoint_annotations=[rr.AnnotationInfo(id=lm.value, label=lm.name) for lm in mp_pose.PoseLandmark],
+            keypoint_annotations=[
+                rr.AnnotationInfo(id=lm.value, label=lm.name) for lm in mp_pose.PoseLandmark
+            ],
             keypoint_connections=mp_pose.POSE_CONNECTIONS,
         )
     ),
@@ -134,7 +129,6 @@ rr.log(
 
 To run this example, make sure you have the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -143,15 +137,15 @@ git checkout latest  # Check out the commit matching the latest SDK release
 
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/human_pose_tracking/requirements.txt
+pip install -e examples/python/human_pose_tracking
 ```
 To experiment with the provided example, simply execute the main Python script:
 ```bash
-python examples/python/human_pose_tracking/main.py # run the example
+python -m human_pose_tracking # run the example
 ```
 
 If you wish to customize it for various videos, adjust the maximum frames, or explore additional features, use the CLI with the `--help` option for guidance:
 
 ```bash
-python examples/python/human_pose_tracking/main.py --help
+python -m human_pose_tracking --help
 ```

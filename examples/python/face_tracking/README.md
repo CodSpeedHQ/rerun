@@ -5,7 +5,7 @@ thumbnail = "https://static.rerun.io/face-tracking/f798733b72c703ee82cc946df39f3
 thumbnail_dimensions = [480, 480]
 -->
 
-Use the [MediaPipe](https://google.github.io/mediapipe/) Face Detector and Landmarker solutions to detect and track a human face in image, video, and camera stream.
+Use the [MediaPipe](https://github.com/google-ai-edge/mediapipe) Face Detector and Landmarker solutions to detect and track a human face in image, video, and camera stream.
 
 
 <picture>
@@ -172,7 +172,6 @@ for blendshape in blendshapes:
 ## Run the code
 To run this example, make sure you have the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -180,13 +179,13 @@ git checkout latest  # Check out the commit matching the latest SDK release
 ```
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/face_tracking/requirements.txt
+pip install -e examples/python/face_tracking
 ```
 To experiment with the provided example, simply execute the main Python script:
 ```bash
-python examples/python/face_tracking/main.py # run the example
+python -m face_tracking # run the example
 ```
 If you wish to customize it for various videos, adjust the maximum frames, explore additional features, or save it use the CLI with the `--help` option for guidance:
 ```bash
-python examples/python/face_tracking/main.py --help
+python -m face_tracking --help
 ```

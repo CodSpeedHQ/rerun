@@ -6,9 +6,9 @@ Generate comparison between examples and their related screenshots.
 This script builds/gather RRDs and corresponding screenshots and displays
 them side-by-side. It pulls from the following sources:
 
-- The screenshots listed in .fbs files (crates/re_types/definitions/rerun/**/*.fbs),
+- The screenshots listed in .fbs files (crates/store/re_types/definitions/rerun/**/*.fbs),
   and the corresponding snippets in the docs (docs/snippets/*.rs)
-- The `rerun.io/viewer` examples, as built by the `re_build_examples` script.
+- The `rerun.io/viewer` examples, as built by the `re_dev_tools`/`build_examples` script.
 
 The comparisons are generated in the `compare_screenshot` directory. Use the `--serve`
 option to show them in a browser.
@@ -91,7 +91,7 @@ def copy_static_assets(examples: list[Example]) -> None:
 
 def build_python_sdk() -> None:
     print("Building Python SDK…")
-    run(["just", "py-build", "--features", "web_viewer"])
+    run(["pixi", "run", "py-build", "--features", "web_viewer"])
 
 
 # ====================================================================================================
@@ -102,7 +102,7 @@ def build_python_sdk() -> None:
 
 
 def extract_snippet_urls_from_fbs() -> dict[str, str]:
-    fbs_path = SCRIPT_DIR_PATH.parent.parent / "crates" / "re_types" / "definitions" / "rerun"
+    fbs_path = SCRIPT_DIR_PATH.parent.parent / "crates" / "store" / "re_types" / "definitions" / "rerun"
 
     urls = {}
     for fbs in fbs_path.glob("**/*.fbs"):
@@ -146,7 +146,7 @@ def collect_snippets() -> Iterable[Example]:
 # ====================================================================================================
 # DEMO EXAMPLES
 #
-# We run the `build_examples` script and scrap the output "example_data" directory.
+# We run the `re_dev_tools`/`build_examples` script and scrap the output "example_data" directory.
 # ====================================================================================================
 
 
@@ -154,15 +154,15 @@ def build_examples() -> None:
     # fmt: off
     cmd = [
         "cargo", "run", "--locked",
-        "-p", "re_build_examples", "--",
-        "rrd", "example_data",
+        "-p", "re_dev_tools", "--",
+        "build-examples", "rrd", "example_data",
     ]
     run(cmd, cwd=RERUN_DIR)
 
     cmd = [
         "cargo", "run", "--locked",
-        "-p", "re_build_examples", "--",
-        "manifest", "example_data/examples_manifest.json",
+        "-p", "re_dev_tools", "--",
+        "build-examples", "manifest", "example_data/examples_manifest.json",
     ]
     run(cmd, cwd=RERUN_DIR)
     # fmt: on

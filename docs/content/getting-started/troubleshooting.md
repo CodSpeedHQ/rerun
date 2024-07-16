@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting
-order: 5
+order: 600
 ---
 
 You can set `RUST_LOG=debug` before running to get some verbose logging output.
@@ -41,7 +41,9 @@ sudo dnf install \
     pkg-config
 ```
 
-On WSL2, in addition to the above packages for Linux, you also need to run:
+### WSL2
+
+In addition to the above packages for Linux, you also need to run:
 
 ```sh
 sudo apt-get -y install \
@@ -54,6 +56,13 @@ sudo apt-get -y install \
 [TODO(#1250)](https://github.com/rerun-io/rerun/issues/1250): Running with the wayland window manager
 sometimes causes Rerun to crash. Try unsetting the wayland display (`unset WAYLAND_DISPLAY` or `WAYLAND_DISPLAY= `) as a workaround.
 
+If you have a multi-gpu setup, Mesa may only report the integrated GPU such that Rerun can't pick the dedicated graphics card.
+To mitigate that set `export MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA` (or `export MESA_D3D12_DEFAULT_ADAPTER_NAME=AMD` respectively for an AMD graphics card).
+
+Since the Mesa driver on WSL dispatches to the Windows host graphics driver, it is important to keep the Windows drivers up-to-date as well.
+For example, [line rendering issues](https://github.com/rerun-io/rerun/issues/6749) have been observed when running from WSL with an
+outdated AMD driver on the Windows host.
+
 ## Startup issues
 
 If Rerun is having trouble starting, you can try resetting its memory with:
@@ -64,7 +73,9 @@ rerun reset
 
 ## Graphics issues
 
-<!-- This section is linked to from `crates/re_viewer/src/native.rs` -->
+<!-- This section is linked to from `crates/viewer/re_viewer/src/native.rs` -->
+
+Make sure to keep your graphics drivers updated.
 
 [Wgpu](https://github.com/gfx-rs/wgpu) (the graphics API we use) maintains a list of
 [known driver issues](https://github.com/gfx-rs/wgpu/wiki/Known-Driver-Issues) and workarounds for them.
@@ -77,7 +88,7 @@ The configuration we use for wgpu can be influenced in the following ways:
     On the web we prefer WebGPU and fall back automatically to WebGL if no support for WebGPU was detected.
     -   For instance, you can try `rerun --renderer=gl` or for the web viewer respectively `rerun --web-viewer --renderer=webgl`.
     -   Alternatively, for the native viewer you can also use the `WGPU_BACKEND` environment variable with the above values.
-    -   The web viewer is configured by the `renderer=<backend>` url argument, e.g. [https://rerun.io/viewer?renderer=webgl&speculative-link]
+    -   The web viewer is configured by the `renderer=<backend>` url argument, e.g. [https://rerun.io/viewer?renderer=webgl]
 -   `WGPU_POWER_PREF`: Overwrites the power setting used for choosing a graphics adapter, must be `high` or `low`. (Default is `high`)
 
 We recommend setting these only if you're asked to try them or know what you're doing,

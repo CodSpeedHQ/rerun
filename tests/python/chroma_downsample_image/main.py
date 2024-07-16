@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Testing NV12 image encoding."""
+
 from __future__ import annotations
 
 import argparse
@@ -40,7 +41,7 @@ def main() -> None:
 
     # Make sure you use a colorful image!
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    img_path = f"{dir_path}/../../../crates/re_ui/data/logo_dark_mode.png"
+    img_path = f"{dir_path}/../../../crates/viewer/re_ui/data/logo_dark_mode.png"
     img_bgra = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
 
     img_rgb = cv2.cvtColor(img_bgra, cv2.COLOR_BGRA2RGB)
@@ -48,14 +49,14 @@ def main() -> None:
 
     rr.log(
         "img_nv12",
-        rr.ImageEncoded(
+        rr.ImageChromaDownsampled(
             contents=bytes(bgra2nv12(img_bgra)),
             format=rr.ImageFormat.NV12((img_bgra.shape[0], img_bgra.shape[1])),
         ),
     )
     rr.log(
         "img_yuy2",
-        rr.ImageEncoded(
+        rr.ImageChromaDownsampled(
             contents=bytes(bgra2yuy2(img_bgra)),
             format=rr.ImageFormat.YUY2((img_bgra.shape[0], img_bgra.shape[1])),
         ),

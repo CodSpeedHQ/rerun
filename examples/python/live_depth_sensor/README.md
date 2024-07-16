@@ -94,7 +94,6 @@ rr.log("realsense/depth/image", rr.DepthImage(depth_image, meter=1.0 / depth_uni
 ## Run the code
 To run this example, make sure you have the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -102,13 +101,13 @@ git checkout latest  # Check out the commit matching the latest SDK release
 ```
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/live_depth_sensor/requirements.txt
+pip install -e examples/python/live_depth_sensor
 ```
 To experiment with the provided example, simply execute the main Python script:
 ```bash
-python examples/python/live_depth_sensor/main.py # run the example
+python -m live_depth_sensor # run the example
 ```
 If you wish to customize it, explore additional features, or save it use the CLI with the `--help` option for guidance:
 ```bash
-python examples/python/live_depth_sensor/main.py --help
+python -m live_depth_sensor --help
 ```

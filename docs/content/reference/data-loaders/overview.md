@@ -3,7 +3,7 @@ title: Overview
 order: 50
 ---
 
-Internally, the [`DataLoader`](https://docs.rs/re_data_source/latest/re_data_source/trait.DataLoader.html) trait takes care of loading files into the Viewer and/or SDK.
+Internally, the [`DataLoader`](https://docs.rs/re_data_loader/latest/re_data_loader/trait.DataLoader.html) trait takes care of loading files into the Viewer and/or SDK.
 
 There are 3 broad kinds of `DataLoader`s: _builtin_, _external_ and _custom_.
 _External_ and _custom_ are the two ways of extending the file loading system that we'll describe below.
@@ -11,7 +11,7 @@ _External_ and _custom_ are the two ways of extending the file loading system th
 When a user attempts to open a file in the Viewer/SDK, **all** known `DataLoader`s are notified of the path to be opened, unconditionally.
 This gives `DataLoader`s maximum flexibility to decide what files they are interested in, as opposed to e.g. only being able to look at a file's extension.
 
-Once notified, a `DataLoader` can return a [`DataLoaderError::Incompatible`](https://docs.rs/re_data_source/latest/re_data_source/enum.DataLoaderError.html#variant.Incompatible) error to indicate that it doesn't support a given file type.
+Once notified, a `DataLoader` can return a [`DataLoaderError::Incompatible`](https://docs.rs/re_data_loader/latest/re_data_loader/enum.DataLoaderError.html#variant.Incompatible) error to indicate that it doesn't support a given file type.
 If, and only if, all loaders known to the Viewer/SDK return an `Incompatible` error code, then an error message is shown to the user indicating that this file type is not (_yet_) supported.
 
 In these instances of unsupported files, we expose two ways of implementing and registering your `DataLoader`s, explained below.
@@ -37,7 +37,7 @@ The Rerun Viewer/SDK will then automatically load the data streamed to the exter
 Like any other `DataLoader`, an external loader will be notified of all file openings, unconditionally.
 To indicate that it does not support a given file, the loader has to exit with a [dedicated status code](https://docs.rs/rerun/latest/rerun/constant.EXTERNAL_DATA_LOADER_INCOMPATIBLE_EXIT_CODE.html).
 
-When the viewer and/or SDK executes an external loader, it will pass to it a set of recommended settings in the form of CLI parameters (in addition to the file path to be loaded, which is passed as the one and only positional argument):
+When the Viewer and/or SDK executes an external loader, it will pass to it a set of recommended settings in the form of CLI parameters (in addition to the file path to be loaded, which is passed as the one and only positional argument):
 
 * `--application-id <application_id>`
 

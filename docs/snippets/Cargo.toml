@@ -6,10 +6,13 @@ rust-version.workspace = true
 license.workspace = true
 publish = false
 
+[lints]
+workspace = true
+
 [dependencies]
 ndarray.workspace = true
 rand = { workspace = true, features = ["std", "std_rng"] }
-rerun = { path = "../../crates/rerun" }
+rerun = { path = "../../crates/top/rerun" }
 
 [build-dependencies]
 itertools.workspace = true

@@ -3,12 +3,10 @@
 """
 Publish wheels to PyPI.
 
-Install dependencies:
-    python3 -m pip install packaging==23.1 google-cloud-storage==2.9.0
-
 Use the script:
     python3 scripts/ci/verify_wheels.py --help
 """
+
 from __future__ import annotations
 
 import argparse
@@ -16,12 +14,12 @@ import os
 import shutil
 import subprocess
 import sys
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import wheel_utils
-from google.cloud.storage import Blob
-from google.cloud.storage import Client as Gcs
+from google.cloud.storage import Blob, Client as Gcs
 from packaging.utils import canonicalize_version
 
 
@@ -38,13 +36,27 @@ def run(
 def check_version(expected_version: str) -> None:
     wheels = list(Path("wheels").glob("*.whl"))
 
-    for wheel in wheels:
-        wheel_version = wheel.stem.split("-")[1]
+    for whl in wheels:
+        wheel_version = whl.stem.split("-")[1]
         if canonicalize_version(wheel_version) != expected_version:
-            print(f"Unexpected version: {wheel_version} (expected: {expected_version}) in {wheel.name}")
+            print(f"Unexpected version: {wheel_version} (expected: {expected_version}) in {whl.name}")
             sys.exit(1)
 
     print(f"All wheel versions match the expected version: {expected_version}")
+
+
+def publish_notebook_asset() -> None:
+    bucket = Gcs("rerun-open").bucket("rerun-web-viewer")
+    wheels = list(Path("wheels").glob("*.whl"))
+    for whl in wheels:
+        if whl.name.startswith("rerun_notebook-"):
+            wheel_version = whl.stem.split("-")[1]
+            with zipfile.ZipFile(whl, "r") as archive:
+                # Extract the specified file to the target directory
+                archive.extract("rerun_notebook/static/widget.js", "extracted")
+                bucket.blob(f"version/{wheel_version}/widget.js").upload_from_filename(
+                    "extracted/rerun_notebook/static/widget.js"
+                )
 
 
 def main() -> None:
@@ -78,6 +90,8 @@ def main() -> None:
             "MATURIN_PYPI_TOKEN": args.token,
         },
     )
+
+    publish_notebook_asset()
 
 
 if __name__ == "__main__":

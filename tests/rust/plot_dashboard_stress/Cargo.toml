@@ -1,14 +1,21 @@
 [package]
 name = "plot_dashboard_stress"
-version = "0.16.0-alpha.1+dev"
-edition = "2021"
-rust-version = "1.74"
-license = "MIT OR Apache-2.0"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+include.workspace = true
+license.workspace = true
 publish = false
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[lints]
+workspace = true
 
 [dependencies]
 re_log = { workspace = true, features = ["setup"] }
-rerun = { path = "../../../crates/rerun", features = ["clap"] }
+rerun = { path = "../../../crates/top/rerun", features = ["clap"] }
 
 anyhow = "1.0"
 clap = { version = "4.0", features = ["derive"] }

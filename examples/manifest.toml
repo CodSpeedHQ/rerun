@@ -32,14 +32,16 @@ Examples related to robotics, autonomous systems, and interfacing with sensor ha
 """
 examples = [
   # display order, most interesting first
+  "droid_dataset",
   "ros_node",
-  "nuscenes",
+  "nuscenes_dataset",
+  "ros2_bridge",
   "ros_bridge",
   "kiss-icp",
   "urdf_loader",
   "live_depth_sensor",
   "lidar",
-  "rrt-star",
+  "rrt_star",
   "rgbd",
   "nv12",
 ]
@@ -54,7 +56,9 @@ examples = [
   # display order, most interesting first
   "controlnet",
   "depth_guided_stable_diffusion",
+  "vista",
   "mcc",
+  "lerobot",
   "shape_pointe",
   "llm_embedding_ner",
   "tfrecord_loader",
@@ -72,6 +76,7 @@ examples = [
   "face_tracking",
   "human_pose_tracking",
   "gesture_detection",
+  "ocr",
   "live_camera_edge_detection",
   "segment_anything_model",
   "tapir",
@@ -89,6 +94,7 @@ examples = [
   "open_photogrammetry_format",
   "kiss-icp",
   "differentiable_blocks_world",
+  "stereo_vision_slam",
   "signed_distance_fields",
   "raw_mesh",
 ]
@@ -102,7 +108,10 @@ Integration with 3rd party tools, formats, libraries, and APIs.
 examples = [
   # display order, most interesting first
   "ros_node",
+  "ros2_bridge",
   "ros_bridge",
+  "notebook",
+  "notebook_neural_field_2d",
   "urdf_loader",
   "vrs",
   "revy",
@@ -121,13 +130,15 @@ Showcase basic usage and specific features of Rerun.
 """
 examples = [
   # display order, most interesting first
+  "notebook",
   "clock",
   "dna",
   "log_file",
   "minimal",
-  "multiprocessing",
+  "multiprocess_logging",
   "multithreading",
   "plots",
+  "live_scrolling_plot",
   "raw_mesh",
 ]
 
@@ -143,9 +154,10 @@ examples = [
   "external_data_loader",
   "incremental_logging",
   "minimal_serve",
-  "notebook",
   "shared_recording",
   "spawn_viewer",
   "stdio",
   "template",
+  "all_examples",
+  "_empty_rerun_sdk",
 ]

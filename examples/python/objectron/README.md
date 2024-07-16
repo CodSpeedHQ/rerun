@@ -3,7 +3,7 @@ title = "Objectron"
 tags = ["2D", "3D", "Object detection", "Pinhole camera", "Blueprint"]
 thumbnail = "https://static.rerun.io/objectron/b645ef3c8eff33fbeaefa6d37e0f9711be15b202/480w.png"
 thumbnail_dimensions = [480, 480]
-# channel = "release"  - Disabled because it sometimes have bad first-frame heuristics
+# Channel = "release" - disabled because it sometimes have bad first-frame heuristics
 build_args = ["--frames=150"]
 -->
 
@@ -18,7 +18,7 @@ Visualize the [Google Research Objectron](https://github.com/google-research-dat
 </picture>
 
 ## Used Rerun types
- [`Points3D`](https://www.rerun.io/docs/reference/types/archetypes/points3d), [`Boxes3D`](https://www.rerun.io/docs/reference/types/archetypes/boxes3d), [`Image`](https://ref.rerun.io/docs/python/0.14.1/common/image_helpers/#rerun.ImageEncoded)<sup>*</sup>, [`Transform3D`](https://www.rerun.io/docs/reference/types/archetypes/transform3d), [`Pinhole`](https://www.rerun.io/docs/reference/types/archetypes/pinhole)
+ [`Points3D`](https://www.rerun.io/docs/reference/types/archetypes/points3d), [`Boxes3D`](https://www.rerun.io/docs/reference/types/archetypes/boxes3d), [`ImageEncoded`](https://www.rerun.io/docs/reference/types/archetypes/image_encoded?speculative-link), [`Transform3D`](https://www.rerun.io/docs/reference/types/archetypes/transform3d), [`Pinhole`](https://www.rerun.io/docs/reference/types/archetypes/pinhole)
 
 ## Background
 
@@ -60,7 +60,7 @@ rr.log(
     ),
 )
 ```
-The input video is logged as a sequence of [`ImageEncoded`](https://ref.rerun.io/docs/python/0.14.1/common/image_helpers/#rerun.ImageEncoded) objects to the `world/camera` entity.
+The input video is logged as a sequence of [`ImageEncoded`](https://www.rerun.io/docs/reference/types/archetypes/image_encoded?speculative-link) objects to the `world/camera` entity.
 ```python
 rr.log("world/camera", rr.ImageEncoded(path=sample.image_path))
 ```
@@ -109,7 +109,6 @@ In particular, we want to reproject the points and the 3D annotation box in the 
 ## Run the code
 To run this example, make sure you have Python version at least 3.9, the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -117,19 +116,19 @@ git checkout latest  # Check out the commit matching the latest SDK release
 ```
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/objectron/requirements.txt
+pip install -e examples/python/objectron
 ```
 To experiment with the provided example, simply execute the main Python script:
 ```bash
-python examples/python/objectron/main.py # run the example
+python -m objectron # run the example
 ```
 
 You can specify the objectron recording:
 ```bash
-python examples/python/objectron/main.py --recording {bike,book,bottle,camera,cereal_box,chair,cup,laptop,shoe}
+python -m objectron --recording {bike,book,bottle,camera,cereal_box,chair,cup,laptop,shoe}
 ```
 
 If you wish to customize it, explore additional features, or save it use the CLI with the `--help` option for guidance:
 ```bash
-python examples/python/objectron/main.py --help
+python -m objectron --help
 ```

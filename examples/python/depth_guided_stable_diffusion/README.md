@@ -40,10 +40,10 @@ rr.log("prompt/uncond_input/ids", rr.Tensor(uncond_input.input_ids))
 ```
 
 ### Text embeddings
-Visualizing the text embeddings. The text embeddings are generated in response to the specific prompts used while the unconditional text embeddings represent a neutral or baseline state without specific input conditions.
+Visualizing the text embeddings (i.e., numerical representation of the input texts) from the prompt and negative prompt.
 ```python
-rr.log("prompt/text_embeddings", rr.Tensor(text_embeddings))
-rr.log("prompt/uncond_embeddings", rr.Tensor(uncond_embeddings))
+rr.log("prompt/text_embeddings", rr.Tensor(prompt_embeds))
+rr.log("prompt/negative_text_embeddings", rr.Tensor(negative_prompt_embeds))
 ```
 
 ### Depth map
@@ -83,7 +83,6 @@ rr.log("image/diffused", rr.Image(image_8))
 
 To run this example, make sure you have the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -92,15 +91,15 @@ git checkout latest  # Check out the commit matching the latest SDK release
 
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/depth_guided_stable_diffusion/requirements.txt
+pip install -e examples/python/depth_guided_stable_diffusion
 ```
 
 To run this example use
 ```bash
-python examples/python/depth_guided_stable_diffusion/main.py
+python -m depth_guided_stable_diffusion
 ```
 
 You can specify your own image and prompts using
 ```bash
-python examples/python/depth_guided_stable_diffusion/main.py [--img-path IMG_PATH] [--depth-map-path DEPTH_MAP_PATH] [--prompt PROMPT]
+python -m depth_guided_stable_diffusion [--img-path IMG_PATH] [--depth-map-path DEPTH_MAP_PATH] [--prompt PROMPT]
 `````

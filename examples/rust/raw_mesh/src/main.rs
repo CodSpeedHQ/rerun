@@ -11,11 +11,7 @@
 use std::path::PathBuf;
 
 use bytes::Bytes;
-use rerun::{
-    components::{MeshProperties, Transform3D},
-    external::{ecolor, re_log},
-    Color, Mesh3D, RecordingStream,
-};
+use rerun::{components::Transform3D, external::re_log, Color, Mesh3D, RecordingStream, Rgba32};
 
 // TODO(cmc): This example needs to support animations to showcase Rerun's time capabilities.
 
@@ -39,8 +35,7 @@ impl From<GltfPrimitive> for Mesh3D {
         if let Some(indices) = indices {
             assert!(indices.len() % 3 == 0);
             let triangle_indices = indices.chunks_exact(3).map(|tri| (tri[0], tri[1], tri[2]));
-            mesh =
-                mesh.with_mesh_properties(MeshProperties::from_triangle_indices(triangle_indices));
+            mesh = mesh.with_triangle_indices(triangle_indices);
         }
         if let Some(vertex_normals) = vertex_normals {
             mesh = mesh.with_vertex_normals(vertex_normals);
@@ -51,11 +46,8 @@ impl From<GltfPrimitive> for Mesh3D {
         if let Some(vertex_texcoords) = vertex_texcoords {
             mesh = mesh.with_vertex_texcoords(vertex_texcoords);
         }
-        if albedo_factor.is_some() {
-            mesh = mesh.with_mesh_material(rerun::datatypes::Material {
-                albedo_factor: albedo_factor
-                    .map(|[r, g, b, a]| ecolor::Rgba::from_rgba_unmultiplied(r, g, b, a).into()),
-            });
+        if let Some([r, g, b, a]) = albedo_factor {
+            mesh = mesh.with_albedo_factor(Rgba32::from_linear_unmultiplied_rgba_f32(r, g, b, a));
         }
 
         mesh.sanity_check().unwrap();
@@ -148,7 +140,7 @@ impl Args {
             anyhow::bail!(
                 "Could not load the scene, have you downloaded the dataset? \
                 Try running the python version first to download it automatically \
-                (`examples/python/raw_mesh/main.py --scene {scene_name}`).",
+                (`python -m raw_mesh --scene {scene_name}`).",
             )
         }
 

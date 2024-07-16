@@ -51,8 +51,22 @@ env:
   # https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html
   RUSTFLAGS: --cfg=web_sys_unstable_apis --deny warnings
 
-  # See https://github.com/ericseppanen/cargo-cranky/issues/8
-  RUSTDOCFLAGS: --deny warnings --deny rustdoc::missing_crate_level_docs
+  RUSTDOCFLAGS: --deny warnings
+
+  # Disable the GHA backend (Github's 10GB storage) since we use our own GCS backend.
+  # See: https://github.com/marketplace/actions/sccache-action
+  SCCACHE_GHA_ENABLED: "false"
+
+  # Wrap every `rustc` invocation in `sccache`.
+  RUSTC_WRAPPER: "sccache"
+
+  # Not only `sccache` cannot cache incremental builds, it's counter-productive to generate all
+  # these incremental artifacts when running on CI.
+  CARGO_INCREMENTAL: "0"
+
+defaults:
+  run:
+    shell: bash
 
 permissions:
   contents: "read"
@@ -70,19 +84,18 @@ jobs:
     steps:
       - name: Set runner and target based on platform
         id: set-config
-        shell: bash
         run: |
           case "${{ inputs.PLATFORM }}" in
             linux-arm64)
               runner="buildjet-8vcpu-ubuntu-2204-arm"
               target="aarch64-unknown-linux-gnu"
-              container="'rerunio/ci_docker:0.12.0'"
+              container="'rerunio/ci_docker:0.14.0'"
               lib_name="librerun_c.a"
               ;;
             linux-x64)
               runner="ubuntu-latest-16-cores"
               target="x86_64-unknown-linux-gnu"
-              container="'rerunio/ci_docker:0.12.0'"
+              container="'rerunio/ci_docker:0.14.0'"
               lib_name="librerun_c.a"
               ;;
             windows-x64)
@@ -124,7 +137,6 @@ jobs:
 
     steps:
       - name: Show context
-        shell: bash
         run: |
           echo "GITHUB_CONTEXT": $GITHUB_CONTEXT
           echo "JOB_CONTEXT": $JOB_CONTEXT
@@ -150,29 +162,27 @@ jobs:
           targets: ${{ needs.set-config.outputs.TARGET }}
 
       - name: Build rerun_c (release)
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --locked -p rerun_c --release --target ${{ needs.set-config.outputs.TARGET }}
+        run: cargo build --locked -p rerun_c --release --target ${{ needs.set-config.outputs.TARGET }}
 
       - name: Get sha
         id: get-sha
-        shell: bash
         run: |
           full_commit="${{ inputs.RELEASE_COMMIT || ((github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.sha) }}"
           echo "sha=$(echo $full_commit | cut -c1-7)" >> "$GITHUB_OUTPUT"
 
       - name: "Upload rerun_c (commit)"
-        uses: google-github-actions/upload-cloud-storage@v1
+        uses: google-github-actions/upload-cloud-storage@v2
         with:
           path: "./target/${{ needs.set-config.outputs.TARGET }}/release/${{ needs.set-config.outputs.LIB_NAME }}"
           destination: "rerun-builds/commit/${{ steps.get-sha.outputs.sha }}/rerun_c/${{ inputs.PLATFORM }}"
           parent: false
+          process_gcloudignore: false
 
       - name: "Upload rerun_c (adhoc)"
         if: ${{ inputs.ADHOC_NAME != '' }}
-        uses: google-github-actions/upload-cloud-storage@v1
+        uses: google-github-actions/upload-cloud-storage@v2
         with:
           path: "./target/${{ needs.set-config.outputs.TARGET }}/release/${{ needs.set-config.outputs.LIB_NAME }}"
           destination: "rerun-builds/adhoc/${{inputs.ADHOC_NAME}}/rerun_c/${{ inputs.PLATFORM }}"
           parent: false
+          process_gcloudignore: false

@@ -4,8 +4,8 @@ import itertools
 from typing import Optional, cast
 
 import rerun as rr
-from rerun.components import HalfSizes3DBatch, Position3DBatch, RadiusArrayLike, Rotation3DBatch
-from rerun.datatypes import ClassIdArrayLike, Rgba32ArrayLike, Rotation3DArrayLike, Utf8ArrayLike
+from rerun.components import HalfSize3DBatch, Position3DBatch, Rotation3DBatch
+from rerun.datatypes import ClassIdArrayLike, Float32ArrayLike, Rgba32ArrayLike, Rotation3DArrayLike, Utf8ArrayLike
 from rerun.datatypes.vec3d import Vec3DArrayLike
 
 from .common_arrays import (
@@ -19,17 +19,9 @@ from .common_arrays import (
     radii_arrays,
     radii_expected,
     rotations_arrays,
-)
-from .common_arrays import (
     vec3ds_arrays as centers_arrays,
-)
-from .common_arrays import (
     vec3ds_arrays as half_sizes_arrays,
-)
-from .common_arrays import (
     vec3ds_expected as centers_expected,
-)
-from .common_arrays import (
     vec3ds_expected as half_sizes_expected,
 )
 
@@ -52,7 +44,7 @@ def test_boxes3d() -> None:
         half_sizes = cast(Vec3DArrayLike, half_sizes)
         centers = cast(Vec3DArrayLike, centers)
         rotations = cast(Rotation3DArrayLike, rotations)
-        radii = cast(Optional[RadiusArrayLike], radii)
+        radii = cast(Optional[Float32ArrayLike], radii)
         colors = cast(Optional[Rgba32ArrayLike], colors)
         labels = cast(Optional[Utf8ArrayLike], labels)
         class_ids = cast(Optional[ClassIdArrayLike], class_ids)
@@ -79,7 +71,7 @@ def test_boxes3d() -> None:
         )
         print(f"{arch}\n")
 
-        assert arch.half_sizes == half_sizes_expected(half_sizes, HalfSizes3DBatch)
+        assert arch.half_sizes == half_sizes_expected(half_sizes, HalfSize3DBatch)
         assert arch.centers == centers_expected(centers, Position3DBatch)
         assert arch.rotations == expected_rotations(rotations, Rotation3DBatch)
         assert arch.colors == colors_expected(colors)

@@ -1,4 +1,4 @@
-This is the high-level documentation for rerun that is hosted at https://www.rerun.io/docs
+This is the high-level documentation for Rerun that is hosted at https://www.rerun.io/docs
 
 ## Other documentation
 API-level documentation is built from source-code. Python lives at [rerun_py](https://github.com/rerun-io/rerun/tree/main/rerun_py) and Rust in the individual [crates](https://github.com/rerun-io/rerun/tree/main/crates).
@@ -14,6 +14,14 @@ The site documentation lives in Markdown files inside [`/content`](./content).
 
 The entry point to the documentation is [`/content/index.md`](./content/index.md).
 
+## Updating the docs
+
+The `rerun.io` docs are built from the contents of the `/docs` directory on the `docs-latest` branch. Any push to `docs-latest` will trigger an automatic redeploy of the website.
+
+Do not push directly to the `docs-latest` branch! To update the docs, either [create a Release](../RELEASES.md), or cherry-pick commits to the `docs-latest` branch _after_ they've been committed to `main`.
+
+⚠ Any commits which are not on `main` and were instead submitted directly to the `docs-latest` branch will be lost the next time we create a release, because the `docs-latest` branch is force-pushed during the release process.
+
 ## Special syntax
 
 ### Frontmatter
@@ -28,13 +36,14 @@ order: 6
 ```
 
 The available attributes are:
-| name     | type    | required | description                                   |
-| -------- | ------- | -------- | --------------------------------------------- |
-| title    | string  | yes      | navigation item title                         |
-| order    | number  | yes      | used to sort navigation items                 |
-| redirect | string  | no       | redirect to the given url                     |
-| hidden   | boolean | no       | don't show the item in navigation             |
-| expand   | boolean | no       | expand the sub-items in navigation by default |
+| name       | type    | required | description                                         |
+| ---------- | ------- | -------- | --------------------------------------------------- |
+| title      | string  | yes      | navigation item title                               |
+| order      | number  | yes      | used to sort navigation items                       |
+| redirect   | string  | no       | redirect to the given url                           |
+| hidden     | boolean | no       | don't show the item in navigation                   |
+| expand     | boolean | no       | expand the sub-items in navigation by default       |
+| ogImageUrl | string  | no       | url to an image to show as the open-graph thumbnail |
 
 ### Snippets
 

@@ -29,15 +29,15 @@ Use the script:
 
     python3 scripts/upload_image.py --help
 
-or the just command:
+or the pixi command:
 
-    just upload --help
+    pixi run upload-image --help
 
 All info/debug output occurs on stderr. If stdout is not a tty (e.g. piping to `pbcopy`), the resulting HTML tag is also
 printed to stdout. For example, this upload the image from the clipboard and copies the resulting HTML tag back to the
 clipboard:
 
-    just upload --name some_name | pbcopy
+    pixi run upload-image --name some_name | pbcopy
 """
 
 from __future__ import annotations
@@ -305,7 +305,7 @@ class Uploader:
         destination.content_encoding = content_encoding
 
         if destination.exists():
-            logging.warn(f"blob {path} already exists in GCS, skipping upload")
+            logging.warning(f"blob {path} already exists in GCS, skipping upload")
             return
 
         stream = BytesIO(data)
@@ -374,7 +374,7 @@ To make example screenshots, follow these steps:
    Note: you will get a warning and a confirmation prompt if the aspect ratio is not within ~10% of 16:9.
 3. Groom the blueprints and panel visibility to your liking.
 4. Take a screenshot using the command palette.
-5. Run: just upload --name <name_of_example>
+5. Run: pixi run upload-image --name <name_of_example>
 6. Copy the output HTML tag and paste it into the README.md file.
 
 Other uses
@@ -382,7 +382,7 @@ Other uses
 
 Download an image, optimize it and create a multi-resolution stack:
 
-    just upload --name <name_of_stack> https://example.com/path/to/image.png
+    pixi run upload-image --name <name_of_stack> https://example.com/path/to/image.png
 """
 
 

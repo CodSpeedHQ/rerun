@@ -2,7 +2,7 @@
 """
 Generate an index table and rendered pages for the common APIs.
 
-NOTE: When changing anything in this file, also consider how it affects `re_build_search_index/src/ingest/python.rs`.
+NOTE: When changing anything in this file, also consider how it affects `crates/build/re_dev_tools/src/build_search_index/ingest/python.rs`.
 
 The top-level index file should look like
 ```
@@ -27,6 +27,7 @@ The Summary should look like:
 * [Helpers](helpers.md)
 ```
 """
+
 from __future__ import annotations
 
 import re
@@ -49,7 +50,7 @@ def all_archetypes() -> list[str]:
     pattern = r'"([^"]*)"'
 
     # Open the file for reading
-    with open(file_path) as file:
+    with open(file_path, encoding="utf8") as file:
         # Read the file line by line
         for line in file:
             # Use re.findall to find all quoted strings in the line
@@ -154,14 +155,15 @@ SECTION_TABLE: Final[list[Section]] = [
         class_list=[
             "archetypes.DepthImage",
             "archetypes.Image",
-            "ImageEncoded",
+            "archetypes.ImageEncoded",
             "archetypes.SegmentationImage",
+            "ImageChromaDownsampled",
         ],
         gen_page=False,
     ),
     Section(
         title="Image Helpers",
-        class_list=["ImageEncoded"],
+        class_list=["ImageChromaDownsampled"],
         show_tables=False,
     ),
     Section(
@@ -182,6 +184,7 @@ SECTION_TABLE: Final[list[Section]] = [
             "archetypes.Asset3D",
             "archetypes.Boxes2D",
             "archetypes.Boxes3D",
+            "archetypes.Ellipsoids",
             "archetypes.LineStrips2D",
             "archetypes.LineStrips3D",
             "archetypes.Mesh3D",
@@ -270,13 +273,13 @@ SECTION_TABLE: Final[list[Section]] = [
     Section(
         title="Blueprint",
         sub_title="Components",
-        mod_path="rerun.blueprint.datatypes",
+        mod_path="rerun.blueprint.components",
         show_tables=False,
     ),
     Section(
         title="Blueprint",
-        sub_title="Datatypes",
-        mod_path="rerun.blueprint.components",
+        sub_title="Views",
+        mod_path="rerun.blueprint.views",
         show_tables=False,
     ),
     ################################################################################
@@ -305,6 +308,8 @@ SECTION_TABLE: Final[list[Section]] = [
             "start_web_viewer_server",
             "escape_entity_path_part",
             "new_entity_path",
+            "thread_local_stream",
+            "recording_stream_generator_ctx",
         ],
         class_list=["RecordingStream", "LoggingHandler", "MemoryRecording"],
     ),
@@ -369,8 +374,8 @@ with mkdocs_gen_files.open(index_path, "w") as index_file:
     index_file.write(
         """
 ## Getting Started
-* [Quick start](https://www.rerun.io/docs/getting-started/python)
-* [Tutorial](https://www.rerun.io/docs/getting-started/logging-python)
+* [Quick start](https://www.rerun.io/docs/getting-started/quick-start/python)
+* [Tutorial](https://www.rerun.io/docs/getting-started/data-in/python)
 * [Examples on GitHub](https://github.com/rerun-io/rerun/tree/latest/examples/python)
 * [Troubleshooting](https://www.rerun.io/docs/getting-started/troubleshooting)
 

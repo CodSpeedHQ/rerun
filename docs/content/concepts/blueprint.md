@@ -15,11 +15,11 @@ combine to produce what you see: the "recording" and the "blueprint."
 -   The blueprint is the configuration that determines how the data from the
     recording is displayed.
 
-Both of these pieces are crucial -- without the recording there is nothing to
+Both of these pieces are crucial—without the recording there is nothing to
 show, and without the blueprint there is no way to show it. Even if you have
-used Rerun before without explicitly loading a blueprint, the viewer was
+used Rerun before without explicitly loading a blueprint, the Viewer was
 actually creating one for you. Without a blueprint, there is literally nothing
-for the viewer to display.
+for the Viewer to display.
 
 ## Loose coupling
 
@@ -35,10 +35,11 @@ data in different ways.
 
 ## What the blueprint controls
 
-Every aspect of what the viewer displays is controlled by the blueprint. This
+Every aspect of what the Viewer displays is controlled by the blueprint. This
 includes the type and content of the different views, the organization and
 layout of the different containers, and the configuration and styling properties
-of the individual data visualizers.
+of the individual data visualizers (see [Visualizers and Overrides](visualizers-and-overrides.md)
+for more details).
 
 In general, if you can modify an aspect of how something looks through the
 viewer, you are actually modifying the blueprint. (Note that while there may be
@@ -52,7 +53,7 @@ all state to the blueprint.)
 
 Blueprints may originate from multiple sources.
 
-- The "current blueprint" for a given application ID is the one that is used by the viewer to display data at any given time. It is updated for each change made to the visualization within the viewer, and may be saved to a blueprint file at any time.
+- The "current blueprint" for a given application ID is the one that is used by the Viewer to display data at any given time. It is updated for each change made to the visualization within the viewer, and may be saved to a blueprint file at any time.
 - The "default blueprint" is a snapshot that is set or updated when a blueprint is received from code or loaded from a file. The current blueprint may be reset to default blueprint at any time by using the "reset" button in the blueprint panel's header.
 - The "heuristic blueprint" is an automatically-produced blueprint based on the recording data. When no default blueprint is available, the heuristic blueprint is used when resetting the current blueprint. It is also possible to reset to the heuristic blueprint in the selection panel after selecting an application.
 
@@ -63,24 +64,24 @@ Under the hood, the blueprint is just data. It is represented by a
 difference is that it uses a specific set of blueprint archetypes and a special
 blueprint timeline. Note that even though the blueprint may be sent over the
 same connection, blueprint data is kept in an isolated store and is not mixed
-together with your recording data.
+with your recording data.
 
 Although the Rerun APIs for working with blueprint may look different from the
 regular logging APIs, they are really just syntactic sugar for logging a
 collection of blueprint-specific archetypes to a separate blueprint stream.
 
-Furthermore, when you make any change to the viewer in the UI, what is actually
-happening is the viewer is creating a new blueprint event and adding it to the
+Furthermore, when you make any change to the Viewer in the UI, what is actually
+happening is the Viewer is creating a new blueprint event and adding it to the
 end of the blueprint timeline in the blueprint store.
 
 ## Viewer operation
 
 Outside of caching that exists primarily for performance reasons, the viewer
 persists very little state frame-to-frame. The goal is for the output of the
-viewer to be a deterministic function of the blueprint and the recording.
+Viewer to be a deterministic function of the blueprint and the recording.
 
-Every frame, the viewer starts with a minimal context of an "active" blueprint,
-and an "active" recording. The viewer then uses the current revision on the
+Every frame, the Viewer starts with a minimal context of an "active" blueprint,
+and an "active" recording. The Viewer then uses the current revision on the
 blueprint timeline to query the container and space-view archetypes from the
 blueprint store. The space-view archetypes, in turn, specify the paths types
 that need to be queried from the recording store in order to render the views.
@@ -91,15 +92,16 @@ the blueprint using the next revision on the blueprint timeline.
 ## Blueprint architecture motivation
 
 Although this architecture adds some complexity and indirection, the fact that
-the viewer stores all of its meaningful frame-to-frame state in a structured
+the Viewer stores all of its meaningful frame-to-frame state in a structured
 blueprint data-store has several advantages:
 
--   Anything you modify in the viewer can be saved and shared as a blueprint.
+-   Anything you modify in the Viewer can be saved and shared as a blueprint.
 -   A blueprint can be produced programmatically using just the Rerun SDK without
-    a dependency on the viewer libraries.
+    a dependency on the Viewer libraries.
 -   The blueprint is capable of representing any data that a recording can
-    represent. This means in the future, blueprint-sourced data overrides will
-    be just as expressive as any logged data.
+    represent. This means that blueprint-sourced data
+    [overrides](visualizers-and-overrides.md#per-entity-component-override) are
+    just as expressive as any logged data.
 -   The blueprint is actually stored as a full time-series, simplifying future
     implementations of things like snapshots and undo/redo mechanisms.
 -   Debugging tools for inspecting generic Rerun data can be used to inspect

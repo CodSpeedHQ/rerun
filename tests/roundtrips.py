@@ -3,7 +3,7 @@
 """
 Run our end-to-end cross-language roundtrip tests for all SDKs.
 
-The list of archetypes is read directly from `crates/re_types/definitions/rerun/archetypes`.
+The list of archetypes is read directly from `crates/store/re_types/definitions/rerun/archetypes`.
 If you create a new archetype definition without end-to-end tests, this will fail.
 """
 
@@ -20,21 +20,21 @@ from os.path import isfile, join
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../scripts/")
 from roundtrip_utils import cmake_build, cmake_configure, cpp_build_dir, roundtrip_env, run, run_comparison  # noqa
 
-ARCHETYPES_PATH = "crates/re_types/definitions/rerun/archetypes"
+ARCHETYPES_PATHS = [
+    "crates/store/re_types/definitions/rerun/archetypes",
+    "crates/store/re_types/definitions/rerun/blueprint/archetypes",
+]
 
-opt_out = {
-    "asset3d": ["cpp", "py", "rust"],  # Don't need it, API example roundtrips cover it all
-    "bar_chart": ["cpp", "py", "rust"],  # Don't need it, API example roundtrips cover it all
-    "clear": ["cpp", "py", "rust"],  # Don't need it, API example roundtrips cover it all
-    "mesh3d": ["cpp", "py", "rust"],  # Don't need it, API example roundtrips cover it all
-    "scalar": ["cpp", "py", "rust"],  # TODO(jleibs)
-    "series_line": ["cpp", "py", "rust"],  # TODO(jleibs)
-    "series_point": ["cpp", "py", "rust"],  # TODO(jleibs)
-}
+opt_out = {}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run our end-to-end cross-language roundtrip tests for all SDK")
+    parser.add_argument(
+        "--no-run",
+        action="store_true",
+        help="Do not build or run anything. Only check that the roundtrip tests exists.",
+    )
     parser.add_argument("--no-py-build", action="store_true", help="Skip building rerun-sdk for Python")
     parser.add_argument(
         "--no-cpp-build",
@@ -53,6 +53,33 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    # Which archetypes to run?
+    if len(args.archetype) > 0:
+        archetypes = args.archetype
+    else:
+        files = [
+            f for archetype_path in ARCHETYPES_PATHS for f in listdir(archetype_path) if isfile(join(archetype_path, f))
+        ]
+        archetypes = [
+            filename for filename, extension in [os.path.splitext(file) for file in files] if extension == ".fbs"
+        ]
+        assert len(archetypes) > 0, "No archetypes found!"
+
+    # Opt out of archetypes for which there's no test.
+    for arch in archetypes:
+        for lang in ["cpp", "python", "rust"]:
+            if lang not in opt_out.get(arch, []):
+                dir_path = f"tests/{lang}/roundtrips/{arch}"
+                if not os.path.exists(dir_path):
+                    if arch in opt_out:
+                        opt_out[arch].append(lang)
+                    else:
+                        opt_out[arch] = [lang]
+
+    if args.no_run:
+        print("All archetypes have roundtrip tests.")
+        sys.exit(0)
+
     build_env = os.environ.copy()
     if "RUST_LOG" in build_env:
         del build_env["RUST_LOG"]  # The user likely only meant it for the actual tests; not the setup
@@ -63,7 +90,7 @@ def main() -> None:
         print("----------------------------------------------------------")
         print("Building rerun-sdk for Python…")
         start_time = time.time()
-        run(["just", "py-build", "--quiet"], env=build_env)
+        run(["pixi", "run", "py-build", "--quiet"], env=build_env)
         elapsed = time.time() - start_time
         print(f"rerun-sdk for Python built in {elapsed:.1f} seconds")
         print("")
@@ -80,32 +107,27 @@ def main() -> None:
         print(f"rerun-sdk for C++ built in {elapsed:.1f} seconds")
         print("")
 
-    files = [f for f in listdir(ARCHETYPES_PATH) if isfile(join(ARCHETYPES_PATH, f))]
-
-    if len(args.archetype) > 0:
-        archetypes = args.archetype
-    else:
-        archetypes = [
-            filename for filename, extension in [os.path.splitext(file) for file in files] if extension == ".fbs"
-        ]
-
     print("----------------------------------------------------------")
     print(f"Building {len(archetypes)} archetypes…")
 
     # Running CMake in parallel causes failures during rerun_sdk & arrow build.
     # TODO(andreas): Tell cmake in a single command to build everything at once.
     if not args.no_cpp_build:
+        start_time = time.time()
         for arch in archetypes:
             arch_opt_out = opt_out.get(arch, [])
             if "cpp" in arch_opt_out:
                 continue
             build(arch, "cpp", args)
+        elapsed = time.time() - start_time
+        print(f"C++ examples compiled and ran in {elapsed:.1f} seconds")
 
     with multiprocessing.Pool() as pool:
+        start_time = time.time()
         jobs = []
         for arch in archetypes:
             arch_opt_out = opt_out.get(arch, [])
-            for language in ["py", "rust"]:
+            for language in ["python", "rust"]:
                 if language in arch_opt_out:
                     continue
                 job = pool.apply_async(build, (arch, language, args))
@@ -113,9 +135,12 @@ def main() -> None:
         print(f"Waiting for {len(jobs)} build jobs to finish…")
         for job in jobs:
             job.get()
+        elapsed = time.time() - start_time
+        print(f"Python and Rust examples ran in {elapsed:.1f} seconds")
 
     print("----------------------------------------------------------")
-    print(f"Comparing {len(archetypes)} archetypes…")
+    print(f"Comparing recordings for{len(archetypes)} archetypes…")
+    start_time = time.time()
 
     for arch in archetypes:
         print()
@@ -129,12 +154,15 @@ def main() -> None:
             python_output_path = f"tests/python/roundtrips/{arch}/out.rrd"
             rust_output_path = f"tests/rust/roundtrips/{arch}/out.rrd"
 
-            if "py" not in arch_opt_out:
+            if "python" not in arch_opt_out:
                 run_comparison(python_output_path, rust_output_path, args.full_dump)
 
             if "cpp" not in arch_opt_out:
                 run_comparison(cpp_output_path, rust_output_path, args.full_dump)
 
+    print()
+    elapsed = time.time() - start_time
+    print(f"Comparisons ran in {elapsed:.1f} seconds")
     print()
     print("----------------------------------------------------------")
     print("All tests passed!")
@@ -143,7 +171,7 @@ def main() -> None:
 def build(arch: str, language: str, args: argparse.Namespace) -> None:
     if language == "cpp":
         run_roundtrip_cpp(arch, args.release)
-    elif language == "py":
+    elif language == "python":
         run_roundtrip_python(arch)
     elif language == "rust":
         run_roundtrip_rust(arch, args.release, args.target, args.target_dir)
@@ -195,7 +223,10 @@ def run_roundtrip_cpp(arch: str, release: bool) -> str:
 
     cmake_build(target_name, release)
 
-    cmd = [f"{cpp_build_dir}/tests/cpp/roundtrips/{target_name}", output_path]
+    config_dir = "Release" if release else "Debug"
+
+    target_path = f"{config_dir}/{target_name}.exe" if os.name == "nt" else target_name
+    cmd = [f"{cpp_build_dir}/tests/cpp/roundtrips/{target_path}", output_path]
     run(cmd, env=roundtrip_env(), timeout=12000)
 
     return output_path

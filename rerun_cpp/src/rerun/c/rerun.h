@@ -127,6 +127,9 @@ typedef struct rr_spawn_options {
     /// Defaults to `75%` if null.
     rr_string memory_limit;
 
+    /// Hide the normal Rerun welcome screen.
+    bool hide_welcome_screen;
+
     /// Specifies the name of the Rerun executable.
     ///
     /// You can omit the `.exe` suffix on Windows.
@@ -202,10 +205,6 @@ typedef struct {
     /// Where to log to, e.g. `world/camera`.
     rr_string entity_path;
 
-    /// Number of instances of this entity (e.g. number of points in a point
-    /// cloud).
-    uint32_t num_instances;
-
     /// Number of components.
     uint32_t num_data_cells;
 
@@ -240,7 +239,6 @@ enum {
     _RR_ERROR_CODE_CATEGORY_ARROW = 0x000001000,
     RR_ERROR_CODE_ARROW_FFI_SCHEMA_IMPORT_ERROR,
     RR_ERROR_CODE_ARROW_FFI_ARRAY_IMPORT_ERROR,
-    RR_ERROR_CODE_ARROW_DATA_CELL_ERROR,
 
     // Generic errors.
     RR_ERROR_CODE_UNKNOWN,
@@ -268,7 +266,7 @@ typedef struct rr_error {
 ///
 /// This should match the string returned by `rr_version_string`.
 /// If not, the SDK's binary and the C header are out of sync.
-#define RERUN_SDK_HEADER_VERSION "0.15.0"
+#define RERUN_SDK_HEADER_VERSION "0.18.0-alpha.1+dev"
 
 /// Returns a human-readable version string of the Rerun C SDK.
 ///
@@ -454,7 +452,7 @@ extern void rr_recording_stream_log(
 /// This method blocks until either at least one `DataLoader` starts streaming data in
 /// or all of them fail.
 ///
-/// See <https://www.rerun.io/docs/howto/open-any-file> for more information.
+/// See <https://www.rerun.io/docs/reference/data-loaders/overview> for more information.
 extern void rr_recording_stream_log_file_from_path(
     rr_recording_stream stream, rr_string path, rr_string entity_path_prefix, bool static_,
     rr_error* error
@@ -467,7 +465,7 @@ extern void rr_recording_stream_log_file_from_path(
 /// This method blocks until either at least one `DataLoader` starts streaming data in
 /// or all of them fail.
 ///
-/// See <https://www.rerun.io/docs/howto/open-any-file> for more information.
+/// See <https://www.rerun.io/docs/reference/data-loaders/overview> for more information.
 extern void rr_recording_stream_log_file_from_contents(
     rr_recording_stream stream, rr_string path, rr_bytes contents, rr_string entity_path_prefix,
     bool static_, rr_error* error

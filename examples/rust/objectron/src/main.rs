@@ -99,7 +99,7 @@ fn log_baseline_objects(
                 return None;
             }
 
-            let box_half_size: rerun::HalfSizes3D =
+            let box_half_size: rerun::HalfSize3D =
                 (glam::Vec3::from_slice(&object.scale) * 0.5).into();
             let transform = {
                 let translation = glam::Vec3::from_slice(&object.translation);
@@ -129,10 +129,9 @@ fn log_baseline_objects(
 
 fn log_video_frame(rec: &rerun::RecordingStream, ar_frame: &ArFrame) -> anyhow::Result<()> {
     let image_path = ar_frame.dir.join(format!("video/{}.jpg", ar_frame.index));
-    let img = rerun::datatypes::TensorData::from_jpeg_file(&image_path)?;
 
     rec.set_timepoint(ar_frame.timepoint.clone());
-    rec.log("world/camera", &rerun::Image::new(img))
+    rec.log("world/camera", &rerun::ImageEncoded::from_file(image_path)?)
         .map_err(Into::into)
 }
 
@@ -153,7 +152,7 @@ fn log_ar_camera(
     // input (1920x1440); we need to convert between the two.
     // See:
     // - https://github.com/google-research-datasets/Objectron/issues/39
-    // - https://github.com/google-research-datasets/Objectron/blob/master/notebooks/objectron-3dprojection-hub-tutorial.ipynb
+    // - https://github.com/google-research-datasets/Objectron/blob/c06a65165a18396e1e00091981fd1652875c97b5/notebooks/objectron-3dprojection-hub-tutorial.ipynb
     // swap px/py
     use glam::Vec3Swizzles as _;
     intrinsics.z_axis = intrinsics.z_axis.yxz();
@@ -324,7 +323,7 @@ fn run(rec: &rerun::RecordingStream, args: &Args) -> anyhow::Result<()> {
         format!(
             "Could not read the recording, have you downloaded the dataset? \
             Try running the python version first to download it automatically \
-            (`examples/python/objectron/main.py --recording {}`).",
+            (`python -m objectron --recording {}`).",
             args.recording.to_possible_value().unwrap().get_name(),
         )
     })?;

@@ -129,7 +129,7 @@ fn test_3d_points(rec: &RecordingStream) -> anyhow::Result<()> {
             (
                 Text(i.to_string().into()),
                 Position3D::new(x((i * 0.2).sin()), y((i * 0.2).cos()), z(i)),
-                Radius(t * 0.1 + (1.0 - t) * 2.0), // lerp(0.1, 2.0, t)
+                Radius::from(t * 0.1 + (1.0 - t) * 2.0), // lerp(0.1, 2.0, t)
                 Color::from_rgb(rng.gen(), rng.gen(), rng.gen()),
             )
         }))
@@ -160,7 +160,7 @@ fn test_rects(rec: &RecordingStream) -> anyhow::Result<()> {
 
     use rerun::{
         archetypes::{Boxes2D, Tensor},
-        components::{Color, HalfSizes2D},
+        components::{Color, HalfSize2D},
     };
 
     // Add an image
@@ -194,7 +194,7 @@ fn test_rects(rec: &RecordingStream) -> anyhow::Result<()> {
     rec.log(
         "rects_test/rects",
         // TODO(#3381): Should be &Boxes2D::empty()
-        &Boxes2D::from_half_sizes(std::iter::empty::<HalfSizes2D>()),
+        &Boxes2D::from_half_sizes(std::iter::empty::<HalfSize2D>()),
     )?;
 
     Ok(())
@@ -488,7 +488,7 @@ fn run(rec: &RecordingStream, args: &Args) -> anyhow::Result<()> {
     use clap::ValueEnum as _;
     let tests: HashSet<Demo> = args.test.as_ref().map_or_else(
         || Demo::value_variants().iter().copied().collect(),
-        |tests| tests.iter().cloned().collect(),
+        |tests| tests.iter().copied().collect(),
     );
 
     for test in tests {

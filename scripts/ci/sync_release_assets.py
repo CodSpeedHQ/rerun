@@ -9,10 +9,8 @@ This is expected to be run by the release & pre-release workflows.
 
 You can also run it manually if you want to update a specific release's assets:
   python scripts/ci/sync_release_assets.py --github-release prerelease --github-token <token> --update
-
-Requires the following packages:
-  pip install google-cloud-storage PyGithub
 """
+
 from __future__ import annotations
 
 import argparse
@@ -131,9 +129,16 @@ def fetch_binary_assets(
             if blob is not None and blob.name is not None:
                 name = blob.name.split("/")[-1]
                 print(f"Found Rerun cross-platform bundle: {name}")
-                assets[name] = blob
-                # NOTE: Want a versioned one too.
                 assets[f"rerun_cpp_sdk-{tag}-multiplatform.zip"] = blob
+
+                # Upload again as rerun_cpp_sdk.zip for convenience.
+                #
+                # ATTENTION: Renaming this file has tremendous ripple effects:
+                # Not only is this the convenient short name we use in examples,
+                # we also rely on https://github.com/rerun-io/rerun/releases/latest/download/rerun_cpp_sdk.zip
+                # to always give you the latest stable version of the Rerun SDK.
+                # -> The name should *not* contain the version number.
+                assets["rerun_cpp_sdk.zip"] = blob
             else:
                 all_found = False
                 print("Rerun cross-platform bundle not found")

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- Rerun SDK-bundled web viewer. -->
 <html>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -10,7 +10,11 @@
   />
 
   <head>
-    <link rel="icon" href="favicon.svg" />
+    <!-- Partially following this favicon guide, ignoring Android & Apple Touch: -->
+    <!-- https://dev.to/masakudamatsu/favicon-nightmare-how-to-maintain-sanity-3al7 -->
+    <link rel="icon" href="favicon.ico" sizes="48x48" />
+    <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -40,15 +44,11 @@
 
       /* Position canvas in center-top: */
       canvas {
-        margin-right: auto;
-        margin-left: auto;
-        display: block;
         position: absolute;
-        top: 0%;
-        left: 50%;
-        transform: translate(-50%, 0%);
-        /* canvas must be on top when visible */
-        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
       }
 
       /* Match the Rerun header bar. */
@@ -248,7 +248,7 @@
 
         const status_element = document.getElementById("status");
         function progress({ loaded, total_bytes }) {
-          if (total_bytes != null) {
+          if (total_bytes != null && total_bytes > 0) {
             status_element.innerHTML =
               Math.round(Math.min((loaded / total_bytes) * 100, 100)) + "%";
           } else {
@@ -267,8 +267,12 @@
           // Use the uncompressed size
           var content_length;
           var content_multiplier = 1;
-          // If the content is gzip encoded, try to get the uncompressed size.
-          if (response.headers.get("content-encoding") == "gzip") {
+          // If our custom size header is set, use that (see `re_web_viewer_server` crate)
+          var custom_size_header = response.headers.get("rerun-final-length");
+          if (custom_size_header != null) {
+            content_length = custom_size_header;
+          } else if (response.headers.get("content-encoding") == "gzip") {
+            // If the content is gzip encoded, try to get the uncompressed size.
             content_length = response.headers.get(
               "x-goog-meta-uncompressed-size",
             );
@@ -322,7 +326,32 @@
 
         console.debug("Wasm loaded. Starting app…");
 
-        let handle = new wasm_bindgen.WebHandle();
+        const query = new URLSearchParams(window.location.search);
+
+        /*
+          url: Option<StringOrStringArray>,
+          manifest_url: Option<String>,
+          render_backend: Option<String>,
+          hide_welcome_screen: Option<bool>,
+          panel_state_overrides: Option<PanelStateOverrides>,
+          fullscreen: Option<FullscreenOptions>,
+          enable_history: Option<bool>,
+          notebook: Option<bool>,
+          persist: Option<bool>,
+        */
+        const options = {
+          url: query.get("url"),
+          manifest_url: query.get("manifest_url"),
+          render_backend: query.get("renderer"),
+          hide_welcome_screen: query.has("hide_welcome_screen"),
+          // panel_state_overrides: undefined,
+          // fullscreen: undefined,
+          enable_history: true,
+          notebook: get_query_bool(query, "notebook", false),
+          persist: get_query_bool(query, "persist", true),
+        };
+
+        let handle = new wasm_bindgen.WebHandle(options);
 
         function check_for_panic() {
           if (handle.has_panicked()) {
@@ -352,13 +381,35 @@
 
         check_for_panic();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const forceWgpuBackend = urlParams.get("renderer");
+        handle.start("the_canvas_id").then(on_app_started).catch(on_wasm_error);
+      }
 
-        handle
-          .start("the_canvas_id", null, null, forceWgpuBackend)
-          .then(on_app_started)
-          .catch(on_wasm_error);
+      function get_query_bool(
+        /** @type {URLSearchParams} */ query,
+        /** @type {string} */ key,
+        /** @type {boolean} */ fallback,
+      ) {
+        const values = query.getAll(key);
+        if (values.length !== 1) {
+          console.warn(
+            `found ${values.length} values for "${key}" query. Expected one or none. Defaulting to "${fallback}".`,
+          );
+          return fallback;
+        }
+
+        // prettier-ignore
+        switch (values[0]) {
+          case "0": /* fallthrough */
+          case "false": return false;
+
+          case "": /* fallthrough */
+          case "1": /* fallthrough */
+          case "true": return true;
+
+          default:
+            console.warn(`unexpected value for "${key}" query. Expected one of: 0, 1, false, true, or no value. Defaulting to "${fallback}".`);
+            return fallback;
+        }
       }
 
       function on_app_started(handle) {
@@ -372,6 +423,8 @@
         if (window.location !== window.parent.location) {
           window.parent.postMessage("READY", "*");
         }
+
+        window._handle = handle;
       }
 
       function on_wasm_error(error) {

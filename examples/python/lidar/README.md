@@ -23,7 +23,7 @@ This example demonstrates the ability to read and visualize LiDAR data from the 
 The scenes in this dataset encompass data collected from a comprehensive suite of sensors on autonomous vehicles, including 6 cameras, 1 LIDAR, 5 RADAR, GPS and IMU sensors.
 
 
-It's important to note that in this example, only the LiDAR data is visualized. For a more extensive example including other sensors and annotations check out the [nuScenes example](https://www.rerun.io/examples/real-data/nuscenes).
+It's important to note that in this example, only the LiDAR data is visualized. For a more extensive example including other sensors and annotations check out the [nuScenes example](https://www.rerun.io/examples/robotics/nuscenes_dataset).
 
 ## Logging and visualizing with Rerun
 
@@ -41,7 +41,6 @@ In the following code, we first establish the desired time frame and then procee
 ## Run the code
 To run this example, make sure you have the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -49,13 +48,13 @@ git checkout latest  # Check out the commit matching the latest SDK release
 ```
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/lidar/requirements.txt
+pip install -e examples/python/lidar
 ```
 To experiment with the provided example, simply execute the main Python script:
 ```bash
-python examples/python/lidar/main.py # run the example
+python -m lidar # run the example
 ```
 If you wish to customize it, explore additional features, or save it use the CLI with the `--help` option for guidance:
 ```bash
-python examples/python/lidar/main.py --help
+python -m lidar --help
 ```

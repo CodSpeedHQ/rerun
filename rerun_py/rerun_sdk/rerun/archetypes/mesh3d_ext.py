@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy.typing as npt
-
 from .. import datatypes
 from ..error_utils import catch_and_log_exceptions
 
@@ -15,13 +13,12 @@ class Mesh3DExt:
         self: Any,
         *,
         vertex_positions: datatypes.Vec3DArrayLike,
-        indices: npt.ArrayLike | None = None,
-        mesh_properties: datatypes.MeshPropertiesLike | None = None,
+        triangle_indices: datatypes.UVec3DArrayLike | None = None,
         vertex_normals: datatypes.Vec3DArrayLike | None = None,
         vertex_colors: datatypes.Rgba32ArrayLike | None = None,
         vertex_texcoords: datatypes.Vec2DArrayLike | None = None,
         albedo_texture: datatypes.TensorDataLike | None = None,
-        mesh_material: datatypes.MaterialLike | None = None,
+        albedo_factor: datatypes.Rgba32Like | None = None,
         class_ids: datatypes.ClassIdArrayLike | None = None,
     ):
         """
@@ -32,13 +29,8 @@ class Mesh3DExt:
         vertex_positions:
             The positions of each vertex.
             If no `indices` are specified, then each triplet of positions is interpreted as a triangle.
-        indices:
-            If specified, a flattened array of indices that describe the mesh's triangles,
-            i.e. its length must be divisible by 3.
-            Mutually exclusive with `mesh_properties`.
-        mesh_properties:
-            Optional properties for the mesh as a whole (including indexed drawing).
-            Mutually exclusive with `indices`.
+        triangle_indices:
+            Optional indices for the triangles that make up the mesh.
         vertex_normals:
             An optional normal for each vertex.
             If specified, this must have as many elements as `vertex_positions`.
@@ -47,8 +39,8 @@ class Mesh3DExt:
             If specified, this must have as many elements as `vertex_positions`.
         vertex_colors:
             An optional color for each vertex.
-        mesh_material:
-            Optional material properties for the mesh as a whole.
+        albedo_factor:
+            Optional color multiplier for the whole mesh
         albedo_texture:
             Optional albedo texture. Used with `vertex_texcoords` on `Mesh3D`.
             Currently supports only sRGB(A) textures, ignoring alpha.
@@ -59,20 +51,14 @@ class Mesh3DExt:
 
         """
         with catch_and_log_exceptions(context=self.__class__.__name__):
-            if indices is not None:
-                if mesh_properties is not None:
-                    raise ValueError("indices and mesh_properties are mutually exclusive")
-                mesh_properties = datatypes.MeshProperties(indices=indices)
-
-            # You can define your own __init__ function as a member of Mesh3DExt in mesh3d_ext.py
             self.__attrs_init__(
                 vertex_positions=vertex_positions,
-                mesh_properties=mesh_properties,
+                triangle_indices=triangle_indices,
                 vertex_normals=vertex_normals,
                 vertex_colors=vertex_colors,
                 vertex_texcoords=vertex_texcoords,
                 albedo_texture=albedo_texture,
-                mesh_material=mesh_material,
+                albedo_factor=albedo_factor,
                 class_ids=class_ids,
             )
             return

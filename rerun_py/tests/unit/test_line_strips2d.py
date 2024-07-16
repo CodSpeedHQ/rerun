@@ -8,12 +8,10 @@ import pytest
 import rerun as rr
 import torch
 from rerun.components import (
-    DrawOrderLike,
     LineStrip2DArrayLike,
     LineStrip2DBatch,
-    RadiusArrayLike,
 )
-from rerun.datatypes import ClassIdArrayLike, Rgba32ArrayLike, Utf8ArrayLike, Vec2D
+from rerun.datatypes import ClassIdArrayLike, Float32ArrayLike, Rgba32ArrayLike, Utf8ArrayLike, Vec2D
 
 from .common_arrays import (
     class_ids_arrays,
@@ -83,10 +81,10 @@ def test_line_strips2d() -> None:
 
         # make Pyright happy as it's apparently not able to track typing info trough zip_longest
         strips = cast(LineStrip2DArrayLike, strips)
-        radii = cast(Optional[RadiusArrayLike], radii)
+        radii = cast(Optional[Float32ArrayLike], radii)
         colors = cast(Optional[Rgba32ArrayLike], colors)
         labels = cast(Optional[Utf8ArrayLike], labels)
-        draw_order = cast(Optional[DrawOrderLike], draw_order)
+        draw_order = cast(Optional[Float32ArrayLike], draw_order)
         class_ids = cast(Optional[ClassIdArrayLike], class_ids)
 
         print(
@@ -127,12 +125,10 @@ def test_line_strips2d() -> None:
 def test_line_segments2d(data: LineStrip2DArrayLike) -> None:
     arch = rr.LineStrips2D(data)
 
-    assert arch.strips == LineStrip2DBatch(
-        [
-            [[0, 0], [2, 1]],
-            [[4, -1], [6, 0]],
-        ]
-    )
+    assert arch.strips == LineStrip2DBatch([
+        [[0, 0], [2, 1]],
+        [[4, -1], [6, 0]],
+    ])
 
 
 def test_single_line_strip2d() -> None:
@@ -169,21 +165,17 @@ def test_line_strip2d_invalid_shapes() -> None:
     # not homogeneous numpy arrays
     with pytest.raises(ValueError):
         rr.LineStrips2D(
-            np.array(
-                [
-                    [[0, 0], (2, 1), [4, -1], (6, 0)],
-                    [[0, 3], (1, 4), [2, 2], (3, 4), [4, 2], (5, 4), [6, 3]],
-                ]
-            )
+            np.array([
+                [[0, 0], (2, 1), [4, -1], (6, 0)],
+                [[0, 3], (1, 4), [2, 2], (3, 4), [4, 2], (5, 4), [6, 3]],
+            ])
         )
     with pytest.raises(ValueError):
         rr.LineStrips2D(
-            np.array(
-                [
-                    [0, 0, 2, 1, 4, -1, 6, 0],
-                    [0, 3, 1, 4, 2, 2, 3, 4, 4, 2, 5, 4, 6, 3],
-                ]
-            ),
+            np.array([
+                [0, 0, 2, 1, 4, -1, 6, 0],
+                [0, 3, 1, 4, 2, 2, 3, 4, 4, 2, 5, 4, 6, 3],
+            ]),
         )
 
 

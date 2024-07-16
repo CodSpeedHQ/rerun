@@ -6,6 +6,7 @@ order: 1
 In this section we'll log and visualize our first non-trivial dataset, putting many of Rerun's core concepts and features to use.
 
 In a few lines of code, we'll go from a blank sheet to something you don't see every day: an animated, interactive, DNA-shaped abacus:
+
 <video width="100%" autoplay loop muted controls>
     <source src="https://static.rerun.io/c4c4ef1e4a1b25002da7c44d4316b0e07ae8d6ed_logging_data1_result.webm" type="video/webm" />
 </video>
@@ -28,7 +29,7 @@ And then to run it on Linux/Mac:
 ./build/example_dna
 ```
 
-and windows respectively:
+and Windows respectively:
 
 ```
 build\Debug\example_dna.exe
@@ -91,7 +92,7 @@ To get going we want to create a [`RecordingStream`](https://github.com/rerun-io
 When creating the `RecordingStream` we also need to specify the name of the application we're working on
 by setting it's `ApplicationId`.
 
-We then use the stream to spawn a new rerun viewer via [`spawn`](https://github.com/rerun-io/rerun/blob/d962b34b07775bbacf14883d683cca6746852b6a/rerun_cpp/src/rerun/recording_stream.hpp#L151).
+We then use the stream to spawn a new Rerun Viewer via [`spawn`](https://github.com/rerun-io/rerun/blob/d962b34b07775bbacf14883d683cca6746852b6a/rerun_cpp/src/rerun/recording_stream.hpp#L151).
 
 Add our initial `main` to `main.cpp`:
 
@@ -116,10 +117,10 @@ cmake --build build -j
 ./build/example_dna
 ```
 
-When everything finishes compiling, an empty Rerun viewer should be spawned:
-<picture>
-<img src="https://static.rerun.io/rerun-welcome-screen-0.9/cc45a0700ccf02016fb942153106db4af0c224db/full.png" alt="">
+When everything finishes compiling, an empty Rerun Viewer should be spawned:
 
+<picture>
+  <img src="https://static.rerun.io/rerun-welcome-screen-0.9/cc45a0700ccf02016fb942153106db4af0c224db/full.png" alt="">
   <source media="(max-width: 480px)" srcset="https://static.rerun.io/rerun-welcome-screen-0.9/cc45a0700ccf02016fb942153106db4af0c224db/480w.png">
   <source media="(max-width: 768px)" srcset="https://static.rerun.io/rerun-welcome-screen-0.9/cc45a0700ccf02016fb942153106db4af0c224db/768w.png">
   <source media="(max-width: 1024px)" srcset="https://static.rerun.io/rerun-welcome-screen-0.9/cc45a0700ccf02016fb942153106db4af0c224db/1024w.png">
@@ -183,7 +184,7 @@ Under the hood, the Rerun C++ SDK logs individual _components_ like positions, c
 and radii. Archetypes are just one high-level, convenient way of building such collections of components. For advanced use
 cases, it's possible to add custom components to archetypes, or even log entirely custom sets of components, bypassing
 archetypes altogether.
-For more information on how the rerun data model works, refer to our section on [Entities and Components](../../concepts/entity-component.md).
+For more information on how the Rerun data model works, refer to our section on [Entities and Components](../../concepts/entity-component.md).
 
 Notably, the [`RecordingStream::log`](https://github.com/rerun-io/rerun/blob/d962b34b07775bbacf14883d683cca6746852b6a/rerun_cpp/src/rerun/recording_stream.hpp#L236) method
 will handle any data type that implements the [`AsComponents<T>`](https://github.com/rerun-io/rerun/blob/latest/rerun_cpp/src/rerun/as_components.hpp) trait, making it easy to add your own data.
@@ -200,12 +201,12 @@ These are [_entity paths_](../../concepts/entity-component.md), which uniquely i
 
 One final observation: notice how we're logging a whole batch of points and colors all at once here.
 [Batches of data](../../concepts/batches.md) are first-class citizens in Rerun and come with all sorts of performance benefits and dedicated features.
-You're looking at one of these dedicated features right now in fact: notice how we're only logging a single radius for all these points, yet somehow it applies to all of them. We call this _splatting_.
+You're looking at one of these dedicated features right now in fact: notice how we're only logging a single radius for all these points, yet somehow it applies to all of them. We call this _clamping_.
 
 ---
 
 A _lot_ is happening in these two simple function calls.
-Good news is: once you've digested all of the above, logging any other Entity will simply be more of the same. In fact, let's go ahead and log everything else in the scene now.
+Good news is: once you've digested all of the above, logging any other entity will simply be more of the same. In fact, let's go ahead and log everything else in the scene now.
 
 ## Adding the missing pieces
 
@@ -395,7 +396,7 @@ Rerun has you covered:
 
 You can also save a recording (or a portion of it) as you're visualizing it, directly from the viewer.
 
-⚠️ [RRD files don't yet handle versioning!](https://github.com/rerun-io/rerun/issues/873) ⚠️
+⚠️ [RRD files are not yet stable across different versions!](https://github.com/rerun-io/rerun/issues/6410) ⚠️
 
 ### Closing
 

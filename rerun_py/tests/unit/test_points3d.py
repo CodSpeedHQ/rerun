@@ -10,9 +10,15 @@ from rerun.components import (
     Color,
     ColorBatch,
     Position3DBatch,
-    RadiusArrayLike,
 )
-from rerun.datatypes import ClassIdArrayLike, KeypointIdArrayLike, Rgba32ArrayLike, Utf8ArrayLike, Vec3DArrayLike
+from rerun.datatypes import (
+    ClassIdArrayLike,
+    Float32ArrayLike,
+    KeypointIdArrayLike,
+    Rgba32ArrayLike,
+    Utf8ArrayLike,
+    Vec3DArrayLike,
+)
 
 from .common_arrays import (
     class_ids_arrays,
@@ -25,11 +31,7 @@ from .common_arrays import (
     labels_expected,
     radii_arrays,
     radii_expected,
-)
-from .common_arrays import (
     vec3ds_arrays as positions_arrays,
-)
-from .common_arrays import (
     vec3ds_expected as positions_expected,
 )
 
@@ -49,7 +51,7 @@ def test_points3d() -> None:
 
         # make Pyright happy as it's apparently not able to track typing info trough zip_longest
         positions = cast(Vec3DArrayLike, positions)
-        radii = cast(Optional[RadiusArrayLike], radii)
+        radii = cast(Optional[Float32ArrayLike], radii)
         colors = cast(Optional[Rgba32ArrayLike], colors)
         labels = cast(Optional[Utf8ArrayLike], labels)
         class_ids = cast(Optional[ClassIdArrayLike], class_ids)
@@ -122,12 +124,10 @@ def test_point3d_single_color(data: Rgba32ArrayLike) -> None:
 def test_point3d_multiple_colors(data: Rgba32ArrayLike) -> None:
     pts = rr.Points3D(positions=np.zeros((5, 3)), colors=data)
 
-    assert pts.colors == ColorBatch(
-        [
-            Color([0, 128, 0, 255]),
-            Color([128, 0, 0, 255]),
-        ]
-    )
+    assert pts.colors == ColorBatch([
+        Color([0, 128, 0, 255]),
+        Color([128, 0, 0, 255]),
+    ])
 
 
 if __name__ == "__main__":

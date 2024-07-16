@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Generic, Iterable, Protocol, TypeVar
 
+import numpy as np
+import numpy.typing as npt
 import pyarrow as pa
 from attrs import define, fields
 
@@ -18,12 +20,7 @@ class ComponentBatchLike(Protocol):
         ...
 
     def as_arrow_array(self) -> pa.Array:
-        """
-        Returns a `pyarrow.Array` of the component data.
-
-        Each element in the array corresponds to an instance of the component. Single-instanced
-        components and splats must still be represented as a 1-element array.
-        """
+        """Returns a `pyarrow.Array` of the component data."""
         ...
 
 
@@ -66,7 +63,7 @@ class Archetype:
 
     @classmethod
     def archetype_name(cls) -> str:
-        return "rerun.archetypes." + cls.__name__
+        return ".".join(cls.__module__.rsplit(".", 1)[:-1] + [cls.__name__])
 
     @classmethod
     def indicator(cls) -> ComponentBatchLike:
@@ -270,6 +267,48 @@ class BaseBatch(Generic[T]):
         return self.pa_array
 
 
+class PartitionedComponentBatch(ComponentBatchLike):
+    """
+    A ComponentBatch array that has been repartitioned into multiple segments.
+
+    This is useful for reinterpreting a single contiguous batch as multiple sub-batches
+    to use with the `log_temporal_batch` API.
+    """
+
+    def __init__(self, component_batch: ComponentBatchLike, lengths: npt.ArrayLike):
+        """
+        Construct a new partitioned component batch.
+
+        Parameters
+        ----------
+        component_batch : ComponentBatchLike
+            The component batch to partition.
+        lengths : npt.ArrayLike
+            The lengths of the partitions.
+
+        """
+        self.component_batch = component_batch
+        self.lengths = lengths
+
+    def component_name(self) -> str:
+        """
+        The name of the component.
+
+        Part of the `ComponentBatchLike` logging interface.
+        """
+        return self.component_batch.component_name()
+
+    def as_arrow_array(self) -> pa.Array:
+        """
+        The component as an arrow batch.
+
+        Part of the `ComponentBatchLike` logging interface.
+        """
+        array = self.component_batch.as_arrow_array()
+        offsets = np.concatenate((np.array([0], dtype="int32"), np.cumsum(self.lengths, dtype="int32")))
+        return pa.ListArray.from_arrays(offsets, array)
+
+
 class ComponentBatchMixin(ComponentBatchLike):
     def component_name(self) -> str:
         """
@@ -278,6 +317,51 @@ class ComponentBatchMixin(ComponentBatchLike):
         Part of the `ComponentBatchLike` logging interface.
         """
         return self._ARROW_TYPE._TYPE_NAME  # type: ignore[attr-defined, no-any-return]
+
+    def partition(self, lengths: npt.ArrayLike) -> PartitionedComponentBatch:
+        """
+        Partitions the component into multiple sub-batches. This wraps the inner arrow
+        array in a `pyarrow.ListArray` where the different lists have the lengths specified.
+
+        Lengths must sum to the total length of the component batch.
+
+        Parameters
+        ----------
+        lengths : npt.ArrayLike
+            The offsets to partition the component at.
+
+        Returns
+        -------
+        The partitioned component.
+
+        """  # noqa: D205
+        return PartitionedComponentBatch(self, lengths)
+
+
+class ComponentMixin(ComponentBatchLike):
+    """
+    Makes components adhere to the ComponentBatchLike interface.
+
+    A single component will always map to a batch of size 1.
+
+    The class using the mixin must define the `_BATCH_TYPE` field, which should be a subclass of `BaseBatch`.
+    """
+
+    def component_name(self) -> str:
+        """
+        The name of the component.
+
+        Part of the `ComponentBatchLike` logging interface.
+        """
+        return self._BATCH_TYPE._ARROW_TYPE._TYPE_NAME  # type: ignore[attr-defined, no-any-return]
+
+    def as_arrow_array(self) -> pa.Array:
+        """
+        The component as an arrow batch.
+
+        Part of the `ComponentBatchLike` logging interface.
+        """
+        return self._BATCH_TYPE([self]).as_arrow_array()  # type: ignore[attr-defined, no-any-return]
 
 
 @catch_and_log_exceptions(context="creating empty array")

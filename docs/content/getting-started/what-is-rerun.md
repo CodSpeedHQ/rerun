@@ -3,7 +3,7 @@ title: What is Rerun?
 order: 0
 ---
 
-Rerun is an SDK and viewer for visualizing and interacting with multimodal data streams.
+Rerun is an SDK and Viewer for visualizing and interacting with multimodal data streams.
 The SDK lets you send data from anywhere, and the viewer,
 which consists of an in-memory database and a visualization engine,
 collects the data and aligns it so that you can scroll back and forth in time to understand what happened.
@@ -20,6 +20,7 @@ Rerun is used by engineers and researchers in fields like robotics,
 spatial computing, 2D/3D simulation, and finance to verify, debug, and demo.
 
 ## How do you use it?
+
 <picture>
   <img src="https://static.rerun.io/how_to_use/fd75fa302617cd0afefc9ba6e5e1e13055fced04/full.png" alt="">
   <source media="(max-width: 480px)" srcset="https://static.rerun.io/how_to_use/fd75fa302617cd0afefc9ba6e5e1e13055fced04/480w.png">
@@ -37,7 +38,6 @@ spatial computing, 2D/3D simulation, and finance to verify, debug, and demo.
 That's a big question for a welcome page. The short answer is that
 Rerun goes to extreme lengths to make handling and visualizing
 multimodal data streams easy and performant.
-
 
 ## Can't find what you're looking for?
 

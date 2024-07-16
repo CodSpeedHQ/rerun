@@ -41,8 +41,8 @@ rr.log(
         vertex_normals=mesh.vertex_normals,
         vertex_texcoords=vertex_texcoords,
         albedo_texture=albedo_texture,
-        indices=mesh.faces,
-        mesh_material=mesh_material,
+        triangle_indices=mesh.faces,
+        albedo_factor=albedo_factor,
     ),
 )
 ```
@@ -61,7 +61,6 @@ rr.log(
 ## Run the code
 To run this example, make sure you have the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -69,17 +68,17 @@ git checkout latest  # Check out the commit matching the latest SDK release
 ```
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/raw_mesh/requirements.txt
+pip install -e examples/python/raw_mesh
 ```
 To experiment with the provided example, simply execute the main Python script:
 ```bash
-python examples/python/raw_mesh/main.py # run the example
+python -m raw_mesh # run the example
 ```
 You can specify scene:
 ```bash
-python examples/python/objectron/main.py --scene {lantern,avocado,buggy,brain_stem}
+python -m raw_mesh --scene {lantern,avocado,buggy,brain_stem}
 ```
 If you wish to customize it, explore additional features, or save it use the CLI with the `--help` option for guidance:
 ```bash
-python examples/python/raw_mesh/main.py --help
+python -m raw_mesh --help
 ```

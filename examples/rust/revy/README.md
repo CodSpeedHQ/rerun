@@ -11,9 +11,7 @@ thumbnail_dimensions = [480, 480]
   <source media="(max-width: 480px)" srcset="https://static.rerun.io/revy/d451ab9e75a1bcdf140f592feaf15e0cf0041259/480w.png">
   <source media="(max-width: 768px)" srcset="https://static.rerun.io/revy/d451ab9e75a1bcdf140f592feaf15e0cf0041259/768w.png">
   <source media="(max-width: 1024px)" srcset="https://static.rerun.io/revy/d451ab9e75a1bcdf140f592feaf15e0cf0041259/1024w.png">
-  <source media="(max-width: 1200px)" srcset="https://static.rerun.io/revy/d451ab9e75a1bcdf140f592feaf15e0cf0041259/1200w.png">
 </picture>
-
 
 ## Overview
 
@@ -77,7 +75,7 @@ For more information, check out the [Revy repository](https://github.com/rerun-i
 
 2. Add `revy` to your dependencies:
     ```toml
-    revy = "0.15"  # always matches the rerun version
+    revy = "0.15"  # always matches the Rerun version
     ```
 
 3. Initialize the `rerun` plugin:

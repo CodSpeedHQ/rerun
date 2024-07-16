@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Iterable, Optional, Union
+from typing import Iterable, Optional, Union
 
 import rerun_bindings as bindings
 
+from .._baseclasses import AsComponents, ComponentBatchLike
 from .._spawn import _spawn_viewer
-from ..datatypes import EntityPathLike, Utf8ArrayLike, Utf8Like
+from ..datatypes import BoolLike, EntityPathLike, Float32ArrayLike, Utf8ArrayLike, Utf8Like
 from ..memory import MemoryRecording
-from ..notebook import as_html
 from ..recording_stream import RecordingStream
 from .archetypes import ContainerBlueprint, PanelBlueprint, SpaceViewBlueprint, SpaceViewContents, ViewportBlueprint
-from .components import ColumnShareArrayLike, RowShareArrayLike
+from .components import PanelState, PanelStateLike
 from .components.container_kind import ContainerKindLike
 
 SpaceViewContentsLike = Union[Utf8ArrayLike, SpaceViewContents]
@@ -41,6 +41,10 @@ class SpaceView:
         origin: EntityPathLike,
         contents: SpaceViewContentsLike,
         name: Utf8Like | None,
+        visible: BoolLike | None = None,
+        properties: dict[str, AsComponents] = {},
+        defaults: list[Union[AsComponents, ComponentBatchLike]] = [],
+        overrides: dict[EntityPathLike, list[ComponentBatchLike]] = {},
     ):
         """
         Construct a blueprint for a new space view.
@@ -58,6 +62,23 @@ class SpaceView:
         contents
             The contents of the space view specified as a query expression. This is either a single expression,
             or a list of multiple expressions. See [rerun.blueprint.archetypes.SpaceViewContents][].
+        visible:
+            Whether this space view is visible.
+
+            Defaults to true if not specified.
+        properties
+            Dictionary of property archetypes to add to space view's internal hierarchy.
+        defaults:
+            List of default components or component batches to add to the space view. When an archetype
+            in the view is missing a component included in this set, the value of default will be used
+            instead of the normal fallback for the visualizer.
+        overrides:
+            Dictionary of overrides to apply to the space view. The key is the path to the entity where the override
+            should be applied. The value is a list of component or component batches to apply to the entity.
+
+            Important note: the path must be a fully qualified entity path starting at the root. The override paths
+            do not yet support `$origin` relative paths or glob expressions.
+            This will be addressed in: [https://github.com/rerun-io/rerun/issues/6673][].
 
         """
         self.id = uuid.uuid4()
@@ -65,6 +86,10 @@ class SpaceView:
         self.name = name
         self.origin = origin
         self.contents = contents
+        self.visible = visible
+        self.properties = properties
+        self.defaults = defaults
+        self.overrides = overrides
 
     def blueprint_path(self) -> str:
         """
@@ -100,13 +125,31 @@ class SpaceView:
             class_identifier=self.class_identifier,
             display_name=self.name,
             space_origin=self.origin,
+            visible=self.visible,
         )
 
         stream.log(self.blueprint_path(), arch, recording=stream)  # type: ignore[attr-defined]
 
-    def _repr_html_(self) -> Any:
-        """IPython interface to conversion to html."""
-        return as_html(blueprint=self)
+        for prop_name, prop in self.properties.items():
+            stream.log(f"{self.blueprint_path()}/{prop_name}", prop, recording=stream)  # type: ignore[attr-defined]
+
+        for default in self.defaults:
+            if hasattr(default, "as_component_batches"):
+                stream.log(f"{self.blueprint_path()}/defaults", default, recording=stream)  # type: ignore[attr-defined]
+            elif hasattr(default, "component_name"):
+                stream.log(f"{self.blueprint_path()}/defaults", [default], recording=stream)  # type: ignore[attr-defined]
+            else:
+                raise ValueError(f"Provided default: {default} is neither a component nor a component batch.")
+
+        for path, components in self.overrides.items():
+            stream.log(  # type: ignore[attr-defined]
+                f"{self.blueprint_path()}/SpaceViewContents/individual_overrides/{path}", components, recording=stream
+            )
+
+    def _ipython_display_(self) -> None:
+        from rerun.notebook import Viewer
+
+        Viewer(blueprint=self).display()
 
 
 class Container:
@@ -128,8 +171,8 @@ class Container:
         *args: Container | SpaceView,
         contents: Optional[Iterable[Container | SpaceView]] = None,
         kind: ContainerKindLike,
-        column_shares: Optional[ColumnShareArrayLike] = None,
-        row_shares: Optional[RowShareArrayLike] = None,
+        column_shares: Optional[Float32ArrayLike] = None,
+        row_shares: Optional[Float32ArrayLike] = None,
         grid_columns: Optional[int] = None,
         active_tab: Optional[int | str] = None,
         name: Utf8Like | None,
@@ -222,9 +265,22 @@ class Container:
 
         stream.log(self.blueprint_path(), arch)  # type: ignore[attr-defined]
 
-    def _repr_html_(self) -> Any:
-        """IPython interface to conversion to html."""
-        return as_html(blueprint=self)
+    def _ipython_display_(self) -> None:
+        from rerun.notebook import Viewer
+
+        Viewer(blueprint=self).display()
+
+
+def _to_state(expanded: bool | None, state: PanelStateLike | None) -> PanelStateLike | None:
+    """Handle the case where `expanded` is used over `state`."""
+
+    if expanded is not None and state is not None:
+        raise ValueError("Cannot set both 'expanded' and 'state'")
+    if state is not None:
+        return state
+    if expanded is not None:
+        return PanelState.Expanded if expanded else PanelState.Collapsed
+    return None
 
 
 class Panel:
@@ -233,6 +289,7 @@ class Panel:
 
     Consider using one of the subclasses instead of this class directly:
 
+    - [TopPanel][rerun.blueprint.TopPanel]
     - [BlueprintPanel][rerun.blueprint.BlueprintPanel]
     - [SelectionPanel][rerun.blueprint.SelectionPanel]
     - [TimePanel][rerun.blueprint.TimePanel]
@@ -240,7 +297,7 @@ class Panel:
     These are ergonomic helpers on top of [rerun.blueprint.archetypes.PanelBlueprint][].
     """
 
-    def __init__(self, *, blueprint_path: str, expanded: bool | None = None):
+    def __init__(self, *, blueprint_path: str, expanded: bool | None = None, state: PanelStateLike | None = None):
         """
         Construct a new panel.
 
@@ -249,11 +306,13 @@ class Panel:
         blueprint_path:
             The blueprint path of the panel.
         expanded:
-            Whether the panel is expanded or not.
+            Deprecated. Use `state` instead.
+        state:
+            Whether the panel is expanded, collapsed, or hidden.
 
         """
         self._blueprint_path = blueprint_path
-        self.expanded = expanded
+        self.state = _to_state(expanded, state)
 
     def blueprint_path(self) -> str:
         """
@@ -267,58 +326,91 @@ class Panel:
     def _log_to_stream(self, stream: RecordingStream) -> None:
         """Internal method to convert to an archetype and log to the stream."""
         arch = PanelBlueprint(
-            expanded=self.expanded,
+            state=self.state,
         )
 
         stream.log(self.blueprint_path(), arch)  # type: ignore[attr-defined]
 
 
+class TopPanel(Panel):
+    """The state of the top panel."""
+
+    def __init__(self, *, expanded: bool | None = None, state: PanelStateLike | None = None):
+        """
+        Construct a new top panel.
+
+        Parameters
+        ----------
+        expanded:
+            Deprecated. Use `state` instead.
+        state:
+            Whether the panel is expanded, collapsed, or hidden.
+
+            Collapsed and hidden both fully hide the top panel.
+
+        """
+        super().__init__(blueprint_path="top_panel", expanded=expanded, state=state)
+
+
 class BlueprintPanel(Panel):
     """The state of the blueprint panel."""
 
-    def __init__(self, *, expanded: bool | None = None):
+    def __init__(self, *, expanded: bool | None = None, state: PanelStateLike | None = None):
         """
         Construct a new blueprint panel.
 
         Parameters
         ----------
         expanded:
-            Whether the panel is expanded or not.
+            Deprecated. Use `state` instead.
+        state:
+            Whether the panel is expanded, collapsed, or hidden.
+
+            Collapsed and hidden both fully hide the blueprint panel.
 
         """
-        super().__init__(blueprint_path="blueprint_panel", expanded=expanded)
+        super().__init__(blueprint_path="blueprint_panel", expanded=expanded, state=state)
 
 
 class SelectionPanel(Panel):
     """The state of the selection panel."""
 
-    def __init__(self, *, expanded: bool | None = None):
+    def __init__(self, *, expanded: bool | None = None, state: PanelStateLike | None = None):
         """
         Construct a new selection panel.
 
         Parameters
         ----------
         expanded:
-            Whether the panel is expanded or not.
+            Deprecated. Use `state` instead.
+        state:
+            Whether the panel is expanded, collapsed, or hidden.
+
+            Collapsed and hidden both fully hide the selection panel.
 
         """
-        super().__init__(blueprint_path="selection_panel", expanded=expanded)
+        super().__init__(blueprint_path="selection_panel", expanded=expanded, state=state)
 
 
 class TimePanel(Panel):
     """The state of the time panel."""
 
-    def __init__(self, *, expanded: bool | None = None):
+    def __init__(self, *, expanded: bool | None = None, state: PanelStateLike | None = None):
         """
         Construct a new time panel.
 
         Parameters
         ----------
         expanded:
-            Whether the panel is expanded or not.
+            Deprecated. Use `state` instead.
+        state:
+            Whether the panel is expanded, collapsed, or hidden.
+
+            Expanded fully shows the panel, collapsed shows a simplified panel,
+            hidden fully hides the panel.
 
         """
-        super().__init__(blueprint_path="time_panel", expanded=expanded)
+        super().__init__(blueprint_path="time_panel", expanded=expanded, state=state)
 
 
 ContainerLike = Union[Container, SpaceView]
@@ -329,7 +421,7 @@ These types all implement a `to_container()` method that wraps them in the neces
 helper classes.
 """
 
-BlueprintPart = Union[ContainerLike, BlueprintPanel, SelectionPanel, TimePanel]
+BlueprintPart = Union[ContainerLike, TopPanel, BlueprintPanel, SelectionPanel, TimePanel]
 """
 The types that make up a blueprint.
 """
@@ -376,7 +468,9 @@ class Blueprint:
             Defaults to `False` unless no Containers or SpaceViews are provided, in which case it defaults to `True`.
             If you want to create a completely empty Blueprint, you must explicitly set this to `False`.
         collapse_panels:
-            Whether to collapse the panels in the viewer. Defaults to `False`.
+            Whether to collapse panels in the viewer. Defaults to `False`.
+
+            This fully hides the blueprint/selection panels, and shows the simplified time panel.
 
         """
         from .containers import Tabs
@@ -388,6 +482,10 @@ class Blueprint:
         for part in parts:
             if isinstance(part, (Container, SpaceView)):
                 contents.append(part)
+            elif isinstance(part, TopPanel):
+                if hasattr(self, "top_panel"):
+                    raise ValueError("Only one top panel can be provided")
+                self.top_panel = part
             elif isinstance(part, BlueprintPanel):
                 if hasattr(self, "blueprint_panel"):
                     raise ValueError("Only one blueprint panel can be provided")
@@ -438,24 +536,28 @@ class Blueprint:
 
         stream.log("viewport", viewport_arch)  # type: ignore[attr-defined]
 
+        if hasattr(self, "top_panel"):
+            self.top_panel._log_to_stream(stream)
+
         if hasattr(self, "blueprint_panel"):
             self.blueprint_panel._log_to_stream(stream)
         elif self.collapse_panels:
-            BlueprintPanel(expanded=False)._log_to_stream(stream)
+            BlueprintPanel(state="collapsed")._log_to_stream(stream)
 
         if hasattr(self, "selection_panel"):
             self.selection_panel._log_to_stream(stream)
         elif self.collapse_panels:
-            SelectionPanel(expanded=False)._log_to_stream(stream)
+            SelectionPanel(state="collapsed")._log_to_stream(stream)
 
         if hasattr(self, "time_panel"):
             self.time_panel._log_to_stream(stream)
         elif self.collapse_panels:
-            TimePanel(expanded=False)._log_to_stream(stream)
+            TimePanel(state="collapsed")._log_to_stream(stream)
 
-    def _repr_html_(self) -> Any:
-        """IPython interface to conversion to html."""
-        return as_html(blueprint=self)
+    def _ipython_display_(self) -> None:
+        from rerun.notebook import Viewer
+
+        Viewer(blueprint=self).display()
 
     def connect(
         self,
@@ -530,7 +632,9 @@ class Blueprint:
 
         bindings.save_blueprint(path, blueprint_stream.to_native())
 
-    def spawn(self, application_id: str, port: int = 9876, memory_limit: str = "75%") -> None:
+    def spawn(
+        self, application_id: str, port: int = 9876, memory_limit: str = "75%", hide_welcome_screen: bool = False
+    ) -> None:
         """
         Spawn a Rerun viewer with this blueprint.
 
@@ -545,9 +649,11 @@ class Blueprint:
             An upper limit on how much memory the Rerun Viewer should use.
             When this limit is reached, Rerun will drop the oldest data.
             Example: `16GB` or `50%` (of system total).
+        hide_welcome_screen:
+            Hide the normal Rerun welcome screen.
 
         """
-        _spawn_viewer(port=port, memory_limit=memory_limit)
+        _spawn_viewer(port=port, memory_limit=memory_limit, hide_welcome_screen=hide_welcome_screen)
         self.connect(application_id=application_id, addr=f"127.0.0.1:{port}")
 
 

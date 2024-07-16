@@ -1,18 +1,22 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-import numpy as np
-import pyarrow as pa
-
-if TYPE_CHECKING:
-    from . import ClearIsRecursiveArrayLike
+from typing import Any
 
 
 class ClearIsRecursiveExt:
     """Extension for [ClearIsRecursive][rerun.components.ClearIsRecursive]."""
 
-    @staticmethod
-    def native_to_pa_array_override(data: ClearIsRecursiveArrayLike, data_type: pa.DataType) -> pa.Array:
-        array = np.asarray(data, dtype=np.bool_).flatten()
-        return pa.array(array, type=data_type)
+    def __init__(
+        self: Any,
+        recursive: bool = True,
+    ):
+        """
+        Disconnect an entity from its parent.
+
+        Parameters
+        ----------
+        recursive:
+            If true, also clears all recursive children entities.
+
+        """
+        self.__attrs_init__(recursive)

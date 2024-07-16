@@ -62,13 +62,13 @@ Check the [general doc page on types](https://www.rerun.io/docs/reference/types)
 
 ### Overview
 
-To avoid compatibility issues across different platforms, compiler versions and C++ standard library versions
-the C++ SDK is expected to be built from source.
-
 From a build system perspective, the SDK consists of three dependencies:
 
-* [SDK source](https://github.com/rerun-io/rerun/tree/latest/rerun_cpp/src/)
+* [C++ SDK source](https://github.com/rerun-io/rerun/tree/latest/rerun_cpp/src/)
   * This includes **both** source and header files!
+  * To avoid compatibility issues across different platforms, compiler versions and C++ standard library versions
+we recommend to build the C++ SDK directly from source.
+Note that this also what happens when you follow the CMake setup in the [quickstart guide](https://www.rerun.io/docs/getting-started/quick-start/cpp).
 * [rerun_c](https://github.com/rerun-io/rerun/tree/latest/crates/rerun_c/) static libraries
   * Rerun C is a minimal C SDK and forms the bridge to the shared Rust codebase
   * Due to the rigidity of the C ABI and lack of complex standard library types in the interface,
@@ -109,6 +109,34 @@ Make sure to compile with C++17 or newer.
 #### Bazel
 
 There's a user provided minimal Bazel example here: https://github.com/kyle-figure/bazel-minimal-rerun/
+
+### Install with conda package
+
+If you are using a package manager that supports conda packages such as `conda` or `pixi` to manage your C++ dependencies,
+the Rerun C++ SDK is available from conda-forge channel in the [`librerun-sdk` package]().
+After you installed the `librerun-sdk` package. The Rerun Viewer is instead provided by the
+`rerun-sdk` package, and you can install both with:
+
+```bash
+conda install -c conda-forge librerun-sdk rerun-sdk
+```
+
+or
+
+```bash
+pixi add librerun-sdk rerun-sdk
+```
+
+Once the package is available, you can find and consume it in your CMake project
+as you consume any other installed C++ library that provides a CMake config file:
+
+```cmake
+find_package(rerun_sdk REQUIRED)
+
+# …
+
+target_link_libraries(<yourtarget> PRIVATE rerun_sdk)
+```
 
 
 ## Development in the Rerun repository

@@ -44,15 +44,14 @@ Consider the following example:
 -   The last rule matching `/world` is `- /world`, so it is excluded.
 -   The last rule matching `/world/house` is `+ /world/**`, so it is included.
 
-## In the viewer
+## In the Viewer
 
 In the viewer, an entity query is typically displayed as a multi-line
 edit box, with each query expression shown on its own line. You can find the
 query editor in the right-hand selection panel when selecting a space view.
 
 <picture>
-<img src="https://static.rerun.io/helix_query/e39ed9fa364724d201f19a0ae54f34d4df761c5b/full.png" alt="">
-
+  <img src="https://static.rerun.io/helix_query/e39ed9fa364724d201f19a0ae54f34d4df761c5b/full.png" alt="">
   <source media="(max-width: 480px)" srcset="https://static.rerun.io/helix_query/e39ed9fa364724d201f19a0ae54f34d4df761c5b/480w.png">
   <source media="(max-width: 768px)" srcset="https://static.rerun.io/helix_query/e39ed9fa364724d201f19a0ae54f34d4df761c5b/768w.png">
   <source media="(max-width: 1024px)" srcset="https://static.rerun.io/helix_query/e39ed9fa364724d201f19a0ae54f34d4df761c5b/1024w.png">

@@ -1,26 +1,67 @@
-# This file is read in `compare_snippet_output.py` and the `snippets` command in `re_build_examples`.
+# This file is read in `compare_snippet_output.py` and the `snippets` command in `re_dev_tools`/`build_examples`.
 
 # These entries won't run at all.
 #
 # You should only ever use this if the test isn't implemented and cannot yet be implemented
 # for one or more specific SDKs.
 [opt_out.run]
-any_values = ["cpp", "rust"] # Not yet implemented
-extra_values = ["cpp", "rust"] # Missing examples
-image_advanced = ["cpp", "rust"] # Missing examples
-log_line = [ # Not a complete example -- just a single log line
-  "cpp",
-  "rust",
-  "py",
+concepts = [
+  "cpp",  # Blueprint API doesn't exist for C++/Rust
+  "rust", # Blueprint API doesn't exist for C++/Rust
 ]
-timelines_example = [ # TODO(ab): incomplete code, need hideable stubs, see https://github.com/rerun-io/landing/issues/515
-  "py",
-  "cpp",
-  "rust",
+views = [
+  "cpp",  # TODO(#5520): C++ views are not yet implemented
+  "rust", # TODO(#5521): Rust views are not yet implemented
 ]
 
-# This is this script, it's not an example.
-roundtrips = ["cpp", "py", "rust"]
+"archetypes/image_advanced" = ["cpp", "rust"] # Missing examples
+"migration/log_line" = [ # Not a complete example -- just a single log line
+  "cpp",
+  "rust",
+  "py",
+]
+"tutorials/annotation-context" = [ # Not a complete example
+  "cpp",
+  "rust",
+  "py",
+]
+"tutorials/any_values" = [ # Not yet implemented
+  "cpp",
+  "rust",
+]
+"tutorials/custom-recording-id" = [ # Not a complete examples
+  "cpp",
+  "rust",
+  "py",
+]
+"tutorials/default-off-session" = [ # Not a complete examples
+  "cpp",
+  "rust",
+  "py",
+]
+"tutorials/extra_values" = ["cpp", "rust"] # Missing examples
+"tutorials/log-file" = [ # Not a complete examples
+  "cpp",
+  "rust",
+  "py",
+]
+"tutorials/timelines_example" = [ # Not a complete examples
+  "cpp",
+  "rust",
+  "py",
+]
+"tutorials/fixed_window_plot" = [
+  "cpp",  # Not implemented
+  "rust", # Not implemented
+  "py",   # Doesn't terminate
+]
+"tutorials/temporal_batch" = [
+  "cpp", # Not impolemented yet
+]
+"tutorials/visualizer-overrides" = [
+  "cpp",  # Not implemented
+  "rust", # Not implemented
+]
 
 
 # These entries will run but their results won't be compared to the baseline.
@@ -28,63 +69,77 @@ roundtrips = ["cpp", "py", "rust"]
 # You should only ever use this if the test cannot yet be implemented in a way that yields the right
 # data, but you still want to check whether the test runs properly and outputs _something_.
 [opt_out.compare]
-arrow3d_simple = [ # TODO(#3206): examples use different RNGs
+concepts = [ # Only python
   "cpp",
   "py",
   "rust",
 ]
-asset3d_out_of_tree = [ # float issues since calculation is done slightly differently (also, Python uses doubles)
+quick_start = [ # These examples don't have exactly the same implementation.
   "cpp",
   "py",
   "rust",
 ]
-mesh3d_partial_updates = ["cpp", "py", "rust"] # float precision issues
-pinhole_simple = [ # TODO(#3206): examples use different RNGs
+"archetypes/arrow3d_simple" = [ # TODO(#3206): examples use different RNGs
   "cpp",
   "py",
   "rust",
 ]
-point2d_random = [ # TODO(#3206): examples use different RNGs
+"archetypes/asset3d_out_of_tree" = [ # float issues since calculation is done slightly differently (also, Python uses doubles)
   "cpp",
   "py",
   "rust",
 ]
-point3d_random = [ # TODO(#3206): examples use different RNGs
+"archetypes/bar_chart" = [ # On Windows this logs f64 instead of u64 unless a numpy array with explicit type is used.
+  "py",
+]
+"archetypes/mesh3d_partial_updates" = [
+  "cpp",
+  "py",
+  "rust",
+] # float precision issues
+"archetypes/pinhole_simple" = [ # TODO(#3206): examples use different RNGs
   "cpp",
   "py",
   "rust",
 ]
-quick_start_connect = [ # These example don't have exactly the same implementation.
+"archetypes/point2d_random" = [ # TODO(#3206): examples use different RNGs
   "cpp",
   "py",
   "rust",
 ]
-quick_start_spawn = [ # These example don't have exactly the same implementation.
+"archetypes/point3d_random" = [ # TODO(#3206): examples use different RNGs
   "cpp",
   "py",
   "rust",
 ]
-scalar_multiple_plots = [ # trigonometric functions have slightly different outcomes
+"archetypes/scalar_multiple_plots" = [ # trigonometric functions have slightly different outcomes
   "cpp",
 ]
-tensor_simple = ["cpp", "py", "rust"] # TODO(#3206): examples use different RNGs
-text_log_integration = [ # The entity path will differ because the Rust code is part of a library
+"archetypes/tensor_simple" = [ # TODO(#3206): examples use different RNGs
   "cpp",
   "py",
   "rust",
 ]
-series_point_style = [ # TODO(#5116): trigonometric functions have slightly different outcomes
+"archetypes/series_point_style" = [ # TODO(#5116): trigonometric functions have slightly different outcomes
   "cpp",
   "py",
   "rust",
 ]
-series_line_style = [ # TODO(#5116):trigonometric functions have slightly different outcomes
+"archetypes/series_line_style" = [ # TODO(#5116):trigonometric functions have slightly different outcomes
   "cpp",
   "py",
   "rust",
+]
+"archetypes/text_log_integration" = [ # The entity path will differ because the Rust code is part of a library
+  "cpp",
+  "py",
+  "rust",
+]
+"archetypes/transform3d_hierarchy" = [ # Uses a lot of trigonometry which is surprisingly easy to get the same on Rust & C++, but not on Python/Numpy
+  "py",
 ]
 
 # `$config_dir` will be replaced with the absolute path of `docs/snippets`.
 [extra_args]
-asset3d_simple = ["$config_dir/assets/cube.glb"]
-asset3d_out_of_tree = ["$config_dir/assets/cube.glb"]
+"archetypes/asset3d_simple" = ["$config_dir/../assets/cube.glb"]
+"archetypes/asset3d_out_of_tree" = ["$config_dir/../assets/cube.glb"]

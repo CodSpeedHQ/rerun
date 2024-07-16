@@ -9,11 +9,11 @@ channel = "release"
 Visualize object detection and segmentation using the [Huggingface's Transformers](https://huggingface.co/docs/transformers/index) and [CSRT](https://arxiv.org/pdf/1611.08461.pdf) from OpenCV.
 
 <picture data-inline-viewer="examples/detect_and_track_objects">
-  <source media="(max-width: 480px)" srcset="https://static.rerun.io/detect_and_track_objects/59f5b97a8724f9037353409ab3d0b7cb47d1544b/480w.png">
-  <source media="(max-width: 768px)" srcset="https://static.rerun.io/detect_and_track_objects/59f5b97a8724f9037353409ab3d0b7cb47d1544b/768w.png">
-  <source media="(max-width: 1024px)" srcset="https://static.rerun.io/detect_and_track_objects/59f5b97a8724f9037353409ab3d0b7cb47d1544b/1024w.png">
-  <source media="(max-width: 1200px)" srcset="https://static.rerun.io/detect_and_track_objects/59f5b97a8724f9037353409ab3d0b7cb47d1544b/1200w.png">
-  <img src="https://static.rerun.io/detect_and_track_objects/59f5b97a8724f9037353409ab3d0b7cb47d1544b/full.png" alt="">
+  <img src="https://static.rerun.io/detact_and_track_objects/ce1939b8f2d22b36c4ca8b36dc0441e106b51da5/full.png" alt="">
+  <source media="(max-width: 480px)" srcset="https://static.rerun.io/detact_and_track_objects/ce1939b8f2d22b36c4ca8b36dc0441e106b51da5/480w.png">
+  <source media="(max-width: 768px)" srcset="https://static.rerun.io/detact_and_track_objects/ce1939b8f2d22b36c4ca8b36dc0441e106b51da5/768w.png">
+  <source media="(max-width: 1024px)" srcset="https://static.rerun.io/detact_and_track_objects/ce1939b8f2d22b36c4ca8b36dc0441e106b51da5/1024w.png">
+  <source media="(max-width: 1200px)" srcset="https://static.rerun.io/detact_and_track_objects/ce1939b8f2d22b36c4ca8b36dc0441e106b51da5/1200w.png">
 </picture>
 
 ## Used Rerun types
@@ -146,12 +146,11 @@ def main() -> None:
     setup_logging() # setup logging
     track_objects(video_path, max_frame_count=args.max_frame) # start tracking
 ```
-In the viewer you can adjust the filter level and look at the messages time-synchronized with respect to other logged data.
+In the Viewer you can adjust the filter level and look at the messages time-synchronized with respect to other logged data.
 
 ## Run the code
 To run this example, make sure you have the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -160,15 +159,15 @@ git checkout latest  # Check out the commit matching the latest SDK release
 
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/detect_and_track_objects/requirements.txt
+pip install -e examples/python/detect_and_track_objects
 ```
 To experiment with the provided example, simply execute the main Python script:
 ```bash
-python examples/python/detect_and_track_objects/main.py # run the example
+python -m detect_and_track_objects # run the example
 ```
 
 If you wish to customize it for various videos, adjust the maximum frames, explore additional features, or save it use the CLI with the `--help` option for guidance:
 
 ```bash
-python examples/python/detect_and_track_objects/main.py --help
+python -m detect_and_track_objects --help
 ```

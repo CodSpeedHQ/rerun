@@ -1,1 +1,0 @@
-../../../../docs/snippets/all/quick_start_spawn.py

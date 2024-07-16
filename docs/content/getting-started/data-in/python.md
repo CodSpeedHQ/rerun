@@ -6,6 +6,7 @@ order: 2
 In this section we'll log and visualize our first non-trivial dataset, putting many of Rerun's core concepts and features to use.
 
 In a few lines of code, we'll go from a blank sheet to something you don't see every day: an animated, interactive, DNA-shaped abacus:
+
 <video width="100%" autoplay loop muted controls>
     <source src="https://static.rerun.io/c4c4ef1e4a1b25002da7c44d4316b0e07ae8d6ed_logging_data1_result.webm" type="video/webm" />
 </video>
@@ -13,7 +14,7 @@ In a few lines of code, we'll go from a blank sheet to something you don't see e
 This guide aims to go wide instead of deep.
 There are links to other doc pages where you can learn more about specific topics.
 
-At any time, you can checkout the complete code listing for this tutorial [here](https://github.com/rerun-io/rerun/tree/latest/examples/python/dna/main.py) to better keep track of the overall picture.
+At any time, you can checkout the complete code listing for this tutorial [here](https://github.com/rerun-io/rerun/tree/latest/examples/python/dna/dna.py) to better keep track of the overall picture.
 
 ## Prerequisites
 
@@ -43,7 +44,7 @@ Among other things, a stable [`ApplicationId`](https://ref.rerun.io/docs/python/
 
 Check out the reference to learn more about how Rerun deals with [applications and recordings](../../concepts/apps-and-recordings.md).
 
-## Starting the viewer
+## Starting the Viewer
 
 Next up, we want to spawn the [Rerun Viewer](../../reference/viewer/overview.md) itself.
 
@@ -53,7 +54,7 @@ To do this, you can add the line:
 rr.spawn()
 ```
 
-Now you can run your application just as you would any other python script:
+Now you can run your application just as you would any other Python script:
 
 ```
 (venv) $ python dna_example.py
@@ -69,8 +70,8 @@ And with that, we're ready to start sending out data:
   <source media="(max-width: 1200px)" srcset="https://static.rerun.io/logging_data2_empty/2915f4ef35db229caee6e5cb380b47aa4ecc0b33/1200w.png">
 </picture>
 
-By default, the SDK will start a viewer in another process and automatically pipe the data through.
-There are other means of sending data to a viewer as we'll see at the end of this section, but for now this default will work great as we experiment.
+By default, the SDK will start a Viewer in another process and automatically pipe the data through.
+There are other means of sending data to a Viewer as we'll see at the end of this section, but for now this default will work great as we experiment.
 
 ## Logging our first points
 
@@ -80,7 +81,7 @@ Add the following to your file:
 ```python
 NUM_POINTS = 100
 
-# points and colors are both np.array((NUM_POINTS, 3))
+# Points and colors are both np.array((NUM_POINTS, 3))
 points1, colors1 = build_color_spiral(NUM_POINTS)
 points2, colors2 = build_color_spiral(NUM_POINTS, angular_offset=tau*0.5)
 
@@ -89,7 +90,7 @@ rr.log("dna/structure/right", rr.Points3D(points2, colors=colors2, radii=0.08))
 ```
 
 Run your script once again and you should now see this scene in the viewer.
-Note that if the viewer was still running, Rerun will simply connect to this existing session and replace the data with this new [_recording_](../../concepts/apps-and-recordings.md).
+Note that if the Viewer was still running, Rerun will simply connect to this existing session and replace the data with this new [_recording_](../../concepts/apps-and-recordings.md).
 
 <picture>
   <img src="https://static.rerun.io/logging_data3_first_points/95c9c556160159eb2e47fb160ced89c899f2fcef/full.png" alt="">
@@ -118,7 +119,7 @@ and radii. Archetypes are just one high-level, convenient way of building such c
 cases, it's possible to add custom components to archetypes, or even log entirely custom sets of components, bypassing
 archetypes altogether.
 
-For more information on how the rerun data model works, refer to our section on [Entities and Components](../../concepts/entity-component.md).
+For more information on how the Rerun data model works, refer to our section on [Entities and Components](../../concepts/entity-component.md).
 
 Our [Python SDK](https://ref.rerun.io/docs/python) integrates with the rest of the Python ecosystem: the points and colors returned by [`build_color_spiral`](https://ref.rerun.io/docs/python/stable/common/demo_utilities/#rerun.utilities.data.build_color_spiral) in this example are vanilla `numpy` arrays.
 Rerun takes care of mapping those arrays to actual Rerun components depending on the context (e.g. we're calling [`rr.Points3D`](https://ref.rerun.io/docs/python/stable/common/archetypes/#rerun.archetypes.Points3D) in this case).
@@ -134,12 +135,12 @@ These are [_entity paths_](../../concepts/entity-component.md), which uniquely i
 
 One final observation: notice how we're logging a whole batch of points and colors all at once here.
 [Batches of data](../../concepts/batches.md) are first-class citizens in Rerun and come with all sorts of performance benefits and dedicated features.
-You're looking at one of these dedicated features right now in fact: notice how we're only logging a single radius for all these points, yet somehow it applies to all of them. We call this _splatting_.
+You're looking at one of these dedicated features right now in fact: notice how we're only logging a single radius for all these points, yet somehow it applies to all of them. We call this _clamping_.
 
 ---
 
 A _lot_ is happening in these two simple function calls.
-Good news is: once you've digested all of the above, logging any other Entity will simply be more of the same. In fact, let's go ahead and log everything else in the scene now.
+Good news is: once you've digested all of the above, logging any other entity will simply be more of the same. In fact, let's go ahead and log everything else in the scene now.
 
 ## Adding the missing pieces
 
@@ -285,7 +286,7 @@ Rerun offers several solutions for such use cases.
 
 ### Logging data over the network
 
-At any time, you can start a Rerun Viewer by running `rerun`. This viewer is in fact a server that's ready to accept data over TCP (it's listening on `0.0.0.0:9876` by default).
+At any time, you can start a Rerun Viewer by running `rerun`. This Viewer is in fact a server that's ready to accept data over TCP (it's listening on `0.0.0.0:9876` by default).
 
 On the logger side, simply use [`rr.connect`](https://ref.rerun.io/docs/python/stable/common/initialization_functions/#rerun.connect) instead of [`rr.spawn`](https://ref.rerun.io/docs/python/stable/common/initialization_functions/#rerun.spawn) to start sending the data over to any TCP address.
 
@@ -302,7 +303,7 @@ Rerun has you covered:
 
 You can also save a recording (or a portion of it) as you're visualizing it, directly from the viewer.
 
-⚠️ [RRD files don't yet handle versioning!](https://github.com/rerun-io/rerun/issues/873) ⚠️
+⚠️ [RRD files are not yet stable across different versions!](https://github.com/rerun-io/rerun/issues/6410) ⚠️
 
 ## Closing
 

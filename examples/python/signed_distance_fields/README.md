@@ -1,5 +1,5 @@
 <!--[metadata]
-title = "Signed Distance Fields"
+title = "Signed distance fields"
 tags = ["3D", "mesh", "tensor"]
 thumbnail = "https://static.rerun.io/signed_distance_fields/99f6a886ed6f41b6a8e9023ba917a98668eaee70/480w.png"
 thumbnail_dimensions = [480, 294]
@@ -15,21 +15,21 @@ Visualize the results of the Generate Signed Distance Fields for arbitrary meshe
   <img src="https://static.rerun.io/signed_distance_fields/99f6a886ed6f41b6a8e9023ba917a98668eaee70/full.png" alt="Signed Distance Fields example screenshot">
 </picture>
 
-# Used Rerun types
+## Used Rerun types
 [`Tensor`](https://www.rerun.io/docs/reference/types/archetypes/tensor), [`Asset3D`](https://www.rerun.io/docs/reference/types/archetypes/asset3d), [`Points3D`](https://www.rerun.io/docs/reference/types/archetypes/points3d), [`AnnotationContext`](https://www.rerun.io/docs/reference/types/archetypes/annotation_context), [`TextLog`](https://www.rerun.io/docs/reference/types/archetypes/text_log)
 
-# Background
+## Background
 
 This example illustrates the visualization of the results obtained from generating Signed Distance Fields (SDFs) for arbitrary meshes using both traditional methods and the approach described in the [DeepSDF paper](https://arxiv.org/abs/1901.05103).
 DeepSDF introduces a learned continuous representation of shapes using SDFs, enabling high-quality shape representation, interpolation, and completion from partial and noisy 3D input data.
 This novel approach offers improved performance and reduced model size compared to previous methods.
 The generated SDFs help with accurate 3D reconstruction and visualization.
 
-# Logging and visualizing with Rerun
+## Logging and visualizing with Rerun
 
 The visualizations in this example were created with the following Rerun code:
 
-## 3D asset
+### 3D asset
 
 ```python
 # Internally, `mesh_to_sdf` will normalize everything to a unit sphere centered around the center of mass.
@@ -46,7 +46,7 @@ mesh3d.transform = rr.OutOfTreeTransform3DBatch(rr.TranslationRotationScale3D(tr
 rr.log("world/mesh", mesh3d)
 ```
 
-## Sample SDF
+### Sample SDF
 
 The sampled points and their corresponding signed distances are visualized using the [`Points3D`](https://www.rerun.io/docs/reference/types/archetypes/points3d) archetype within the `world/sdf/points` entity.
 
@@ -59,7 +59,7 @@ rr.log("world/sdf", rr.AnnotationContext([(0, "inside", (255, 0, 0)), (1, "outsi
 rr.log("world/sdf/points", rr.Points3D(points, class_ids=np.array(sdf > 0, dtype=np.uint8))) # Visualizing Sample SDF
 ```
 
-## Volumetric SDF
+### Volumetric SDF
 
 The computed distances for each voxel are visualized using the [`Tensor`](https://www.rerun.io/docs/reference/types/archetypes/tensor) archetype to the `tensor` entity, which represents a 3D grid with dimensions for width, height, and depth.
 
@@ -67,12 +67,11 @@ The computed distances for each voxel are visualized using the [`Tensor`](https:
 rr.log("tensor", rr.Tensor(voxvol, dim_names=["width", "height", "depth"])) # Visualizing Volumetric SDF
 ```
 
-# Run the code
+## Run the code
 > _Known issue_: On macOS, this example may present artefacts in the SDF and/or fail.
 
 To run this example, make sure you have the Rerun repository checked out and the latest SDK installed:
 ```bash
-# Setup
 pip install --upgrade rerun-sdk  # install the latest Rerun SDK
 git clone git@github.com:rerun-io/rerun.git  # Clone the repository
 cd rerun
@@ -80,17 +79,17 @@ git checkout latest  # Check out the commit matching the latest SDK release
 ```
 Install the necessary libraries specified in the requirements file:
 ```bash
-pip install -r examples/python/signed_distance_fields/requirements.txt
+pip install -e examples/python/signed_distance_fields
 ```
 To experiment with the provided example, simply execute the main Python script:
 ```bash
-python examples/python/signed_distance_fields/main.py # run the example
+python -m signed_distance_fields # run the example
 ```
 You can specify the mesh:
 ```bash
-python examples/python/signed_distance_fields/main.py --mesh {lantern,avocado,buggy,brain_stem}
+python -m signed_distance_fields --mesh {lantern,avocado,buggy,brain_stem}
 ```
 If you wish to customize it, explore additional features, or save it use the CLI with the `--help` option for guidance:
 ```bash
-python examples/python/signed_distance_fields/main.py --help
+python -m signed_distance_fields --help
 ```

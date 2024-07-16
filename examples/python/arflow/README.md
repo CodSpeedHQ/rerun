@@ -11,7 +11,7 @@ This is an external project that uses Rerun as a core component.
 ## External project presentation
 
 
-[Paper](https://doi.org/10.1145/3638550.3643617) | [BibTeX](#bibtex) | [Project Page](https://cake.wpi.edu/ARFlow/) | [Video](https://youtu.be/mml8YrCgfTk)
+[Paper](https://doi.org/10.1145/3638550.3643617) | [BibTeX](#citation) | [Project Page](https://cake.wpi.edu/ARFlow/) | [Video](https://youtu.be/mml8YrCgfTk)
 
 
 ARFlow is designed to lower the barrier for AR researchers to evaluate ideas in hours instead of weeks or months, following:
@@ -26,7 +26,7 @@ Watch our demo video:
 
 ## Get started
 
-Please check our [project repo](https://github.com/cake-lab/ARFlow/blob/main/README.md), and refer to the individual [server](https://github.com/cake-lab/ARFlow/blob/main/python/README.md) and [client](https://github.com/cake-lab/ARFlow/blob/main/unity/README.md) installation guides.
+Please see [the original project repo](https://github.com/cake-lab/ARFlow/blob/main/README.md), and refer to the individual [server](https://github.com/cake-lab/ARFlow/blob/main/python/README.md) and [client](https://github.com/cake-lab/ARFlow/blob/main/unity/README.md) installation guides.
 
 ## Citation
 

@@ -6,6 +6,7 @@ order: 3
 In this section we'll log and visualize our first non-trivial dataset, putting many of Rerun's core concepts and features to use.
 
 In a few lines of code, we'll go from a blank sheet to something you don't see every day: an animated, interactive, DNA-shaped abacus:
+
 <video width="100%" autoplay loop muted controls>
     <source src="https://static.rerun.io/c4c4ef1e4a1b25002da7c44d4316b0e07ae8d6ed_logging_data1_result.webm" type="video/webm" />
 </video>
@@ -42,9 +43,9 @@ use rerun::{
 };
 ```
 
-## Starting the viewer
+## Starting the Viewer
 
-Just run `rerun` to start the [Rerun Viewer](../../reference/viewer/overview.md). It will wait for your application to log some data to it. This viewer is in fact a server that's ready to accept data over TCP (it's listening on `0.0.0.0:9876` by default).
+Just run `rerun` to start the [Rerun Viewer](../../reference/viewer/overview.md). It will wait for your application to log some data to it. This Viewer is in fact a server that's ready to accept data over TCP (it's listening on `0.0.0.0:9876` by default).
 
 Checkout `rerun --help` for more options.
 
@@ -60,7 +61,7 @@ Checkout `rerun --help` for more options.
 
 To get going we want to create a [`RecordingStream`](https://docs.rs/rerun/latest/rerun/struct.RecordingStream.html):
 We can do all of this with the [`rerun::RecordingStreamBuilder::new`](https://docs.rs/rerun/latest/rerun/struct.RecordingStreamBuilder.html#method.new) function which allows us to name the dataset we're working on by setting its [`ApplicationId`](https://docs.rs/rerun/latest/rerun/struct.ApplicationId.html).
-We then connect it to the already running viewer via [`connect`](https://docs.rs/rerun/latest/rerun/struct.RecordingStreamBuilder.html#method.connect), returning the `RecordingStream` upon success.
+We then connect it to the already running Viewer via [`connect`](https://docs.rs/rerun/latest/rerun/struct.RecordingStreamBuilder.html#method.connect), returning the `RecordingStream` upon success.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -130,7 +131,7 @@ Under the hood, the Rerun [Rust SDK](https://ref.rerun.io/docs/rust) logs indivi
 and radii. Archetypes are just one high-level, convenient way of building such collections of components. For advanced use
 cases, it's possible to add custom components to archetypes, or even log entirely custom sets of components, bypassing
 archetypes altogether.
-For more information on how the rerun data model works, refer to our section on [Entities and Components](../../concepts/entity-component.md).
+For more information on how the Rerun data model works, refer to our section on [Entities and Components](../../concepts/entity-component.md).
 
 Notably, the [`RecordingStream::log`](https://docs.rs/rerun/latest/rerun/struct.RecordingStream.html#method.log) method
 
@@ -150,12 +151,12 @@ These are [_entity paths_](../../concepts/entity-component.md), which uniquely i
 
 One final observation: notice how we're logging a whole batch of points and colors all at once here.
 [Batches of data](../../concepts/batches.md) are first-class citizens in Rerun and come with all sorts of performance benefits and dedicated features.
-You're looking at one of these dedicated features right now in fact: notice how we're only logging a single radius for all these points, yet somehow it applies to all of them. We call this _splatting_.
+You're looking at one of these dedicated features right now in fact: notice how we're only logging a single radius for all these points, yet somehow it applies to all of them. We call this _clamping_.
 
 ---
 
 A _lot_ is happening in these two simple function calls.
-Good news is: once you've digested all of the above, logging any other Entity will simply be more of the same. In fact, let's go ahead and log everything else in the scene now.
+Good news is: once you've digested all of the above, logging any other entity will simply be more of the same. In fact, let's go ahead and log everything else in the scene now.
 
 ## Adding the missing pieces
 
@@ -338,12 +339,12 @@ Rerun has you covered:
 
 You can also save a recording (or a portion of it) as you're visualizing it, directly from the viewer.
 
-⚠️ [RRD files don't yet handle versioning!](https://github.com/rerun-io/rerun/issues/873) ⚠️
+⚠️ [RRD files are not yet stable across different versions!](https://github.com/rerun-io/rerun/issues/6410) ⚠️
 
-### Spawning the viewer from your process
+### Spawning the Viewer from your process
 
-If the Rerun Viewer is [installed](../installing-viewer.md) and available in your `PATH`, you can use [`RecordingStream::spawn`](https://docs.rs/rerun/latest/rerun/struct.RecordingStream.html#method.spawn) to automatically start a viewer in a new process and connect to it over TCP.
-If an external viewer was already running, `spawn` will connect to that one instead of spawning a new one.
+If the Rerun Viewer is [installed](../installing-viewer.md) and available in your `PATH`, you can use [`RecordingStream::spawn`](https://docs.rs/rerun/latest/rerun/struct.RecordingStream.html#method.spawn) to automatically start a Viewer in a new process and connect to it over TCP.
+If an external Viewer was already running, `spawn` will connect to that one instead of spawning a new one.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -356,7 +357,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-Alternatively, you can use [`rerun::native_viewer::show`](https://docs.rs/rerun/latest/rerun/native_viewer/fn.show.html) to start a viewer on the main thread (for platform-compatibility reasons) and feed it data from memory.
+Alternatively, you can use [`rerun::native_viewer::show`](https://docs.rs/rerun/latest/rerun/native_viewer/fn.show.html) to start a Viewer on the main thread (for platform-compatibility reasons) and feed it data from memory.
 This requires the `native_viewer` feature to be enabled in `Cargo.toml`:
 
 ```toml
@@ -375,7 +376,7 @@ let (rec, storage) = rerun::RecordingStreamBuilder::new("rerun_example_dna_abacu
 rerun::native_viewer::show(storage.take())?;
 ```
 
-The viewer will block the main thread until it is closed.
+The Viewer will block the main thread until it is closed.
 
 ### Closing
 
