@@ -6,25 +6,54 @@ use re_space_view::DataResultQuery as _;
 use re_types::{
     archetypes::Pinhole,
     components::{
-        DisconnectedSpace, ImagePlaneDistance, PinholeProjection, RotationAxisAngle, RotationQuat,
-        Scale3D, Transform3D, TransformMat3x3, TransformRelation, Translation3D, ViewCoordinates,
+        DisconnectedSpace, ImagePlaneDistance, OutOfTreeTransform, PinholeProjection,
+        RotationAxisAngle, RotationQuat, Scale3D, Transform3D, TransformMat3x3, TransformRelation,
+        Translation3D, ViewCoordinates,
     },
     ComponentNameSet, Loggable as _,
 };
 use re_viewer_context::{IdentifiedViewSystem, ViewContext, ViewContextSystem};
 
-use crate::visualizers::image_view_coordinates;
+use crate::visualizers::{entity_iterator::clamped_or_nothing, image_view_coordinates};
 
-#[derive(Clone)]
-struct TransformInfo {
+#[derive(Clone, Debug)]
+pub struct TransformInfo {
     /// The transform from the entity to the reference space.
+    ///
+    /// Does not include out-of-tree transforms!
     pub reference_from_entity: glam::Affine3A,
+
+    /// Like [`TransformInfo::reference_from_entity`], but if this entity has a pinhole camera, it won't affect the transform.
+    ///
+    /// Normally, the transform we compute for an entity with a pinhole transform places all objects
+    /// in front (defined by view coordinates) of the camera with a given image plane distance.
+    /// In some cases like drawing the lines for a frustum or arrows for the 3D transform, this is not the desired transformation.
+    ///
+    /// TODO(andreas): This a lot of overhead for when we don't need it (which is most of the time!).
+    ///
+    /// TODO(#2663, #1025): Going forward we should have separate transform hierarchies for 2D (i.e. projected) and 3D,
+    /// which would remove the need for this.
+    pub reference_from_entity_ignoring_3d_from_2d_pinhole: glam::Affine3A,
+
+    /// Optional list of out of tree transforms that are applied to the instances of this entity.
+    pub out_of_tree_transforms: Vec<glam::Affine3A>,
 
     /// The pinhole camera ancestor of this entity if any.
     ///
     /// None indicates that this entity is under the eye camera with no Pinhole camera in-between.
     /// Some indicates that the entity is under a pinhole camera at the given entity path that is not at the root of the space view.
     pub parent_pinhole: Option<EntityPath>,
+}
+
+impl Default for TransformInfo {
+    fn default() -> Self {
+        Self {
+            reference_from_entity: glam::Affine3A::IDENTITY,
+            reference_from_entity_ignoring_3d_from_2d_pinhole: glam::Affine3A::IDENTITY,
+            out_of_tree_transforms: Vec::new(),
+            parent_pinhole: None,
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -98,12 +127,10 @@ impl ViewContextSystem for TransformContext {
 
         debug_assert_transform_field_order(ctx.viewer_ctx.reflection);
 
-        let entity_tree = ctx.recording().tree();
-
         self.space_origin = query.space_origin.clone();
 
         // Find the entity path tree for the root.
-        let Some(mut current_tree) = &entity_tree.subtree(query.space_origin) else {
+        let Some(current_tree) = &ctx.recording().tree().subtree(query.space_origin) else {
             // It seems the space path is not part of the object tree!
             // This happens frequently when the viewer remembers space views from a previous run that weren't shown yet.
             // Naturally, in this case we don't have any transforms yet.
@@ -119,11 +146,32 @@ impl ViewContextSystem for TransformContext {
             current_tree,
             ctx.recording(),
             &time_query,
-            glam::Affine3A::IDENTITY,
-            &None, // Ignore potential pinhole camera at the root of the space view, since it regarded as being "above" this root.
+            // Ignore potential pinhole camera at the root of the space view, since it regarded as being "above" this root.
+            TransformInfo::default(),
         );
 
         // Walk up from the reference to the highest reachable parent.
+        self.gather_parent_transforms(ctx, query, current_tree, &time_query);
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+impl TransformContext {
+    /// Gather transforms for everything _above_ the root.
+    fn gather_parent_transforms<'a>(
+        &mut self,
+        ctx: &'a ViewContext<'a>,
+        query: &re_viewer_context::ViewQuery<'_>,
+        mut current_tree: &'a EntityTree,
+        time_query: &LatestAtQuery,
+    ) {
+        re_tracing::profile_function!();
+
+        let entity_tree = ctx.recording().tree();
+
         let mut encountered_pinhole = None;
         let mut reference_from_ancestor = glam::Affine3A::IDENTITY;
         while let Some(parent_path) = current_tree.path.parent() {
@@ -139,10 +187,10 @@ impl ViewContextSystem for TransformContext {
 
             // Note that the transform at the reference is the first that needs to be inverted to "break out" of its hierarchy.
             // Generally, the transform _at_ a node isn't relevant to it's children, but only to get to its parent in turn!
-            match transform_at(
+            let new_transform = match transform_at(
                 current_tree,
                 ctx.recording(),
-                &time_query,
+                time_query,
                 // TODO(#1025): See comment in transform_at. This is a workaround for precision issues
                 // and the fact that there is no meaningful image plane distance for 3D->2D views.
                 |_| 500.0,
@@ -153,33 +201,63 @@ impl ViewContextSystem for TransformContext {
                         Some((parent_tree.path.clone(), unreachable_reason));
                     break;
                 }
-                Ok(None) => {}
-                Ok(Some(parent_from_child)) => {
-                    reference_from_ancestor *= parent_from_child.inverse();
-                }
-            }
+                Ok((transform_at_entity, entity_from_2d_pinhole_content)) => {
+                    let mut new_transform = TransformInfo {
+                        reference_from_entity: reference_from_ancestor,
+                        reference_from_entity_ignoring_3d_from_2d_pinhole: reference_from_ancestor,
+                        out_of_tree_transforms: Vec::new(),
+                        parent_pinhole: encountered_pinhole.clone(),
+                    };
 
-            // (skip over everything at and under `current_tree` automatically)
+                    // Need to take care of the fact that we're walking the other direction of the tree here compared to `gather_descendants_transforms`!
+                    if let Some(entity_from_2d_pinhole_content) = entity_from_2d_pinhole_content {
+                        debug_assert!(encountered_pinhole.as_ref() == Some(&current_tree.path));
+                        new_transform.reference_from_entity *=
+                            entity_from_2d_pinhole_content.0.inverse();
+                    }
+
+                    match transform_at_entity {
+                        TransformsAtEntity::None => {}
+                        TransformsAtEntity::TreeTransform(child_from_entity) => {
+                            let entity_from_child = child_from_entity.inverse();
+                            new_transform.reference_from_entity *= entity_from_child;
+                            new_transform.reference_from_entity_ignoring_3d_from_2d_pinhole *=
+                                entity_from_child;
+                        }
+                        TransformsAtEntity::OutOfTreeTransforms(out_of_tree_transforms) => {
+                            new_transform.out_of_tree_transforms = out_of_tree_transforms
+                                .iter()
+                                .map(|&t| t.inverse())
+                                .collect();
+                        }
+                    }
+
+                    // If we're going up the tree and encounter a pinhole, we need to apply it, it means that our reference is 2D.
+                    // So it's not actually a "3d_from_2d" but rather a "2d_from_3d", consequently
+                    // `reference_from_entity_ignoring_3d_from_2d_pinhole`is always the same as `reference_from_entity`.
+                    new_transform.reference_from_entity_ignoring_3d_from_2d_pinhole =
+                        new_transform.reference_from_entity;
+
+                    new_transform
+                }
+            };
+
+            reference_from_ancestor = new_transform.reference_from_entity;
+
+            // (this skips over everything at and under `current_tree` automatically)
             self.gather_descendants_transforms(
                 ctx,
                 query,
                 parent_tree,
                 ctx.recording(),
-                &time_query,
-                reference_from_ancestor,
-                &encountered_pinhole,
+                time_query,
+                new_transform,
             );
 
             current_tree = parent_tree;
         }
     }
 
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-}
-
-impl TransformContext {
     #[allow(clippy::too_many_arguments)]
     fn gather_descendants_transforms(
         &mut self,
@@ -188,24 +266,22 @@ impl TransformContext {
         subtree: &EntityTree,
         entity_db: &EntityDb,
         query: &LatestAtQuery,
-        reference_from_entity: glam::Affine3A,
-        encountered_pinhole: &Option<EntityPath>,
+        transform: TransformInfo,
     ) {
+        let encountered_pinhole = transform.parent_pinhole.clone();
+        let reference_from_parent = transform.reference_from_entity;
+        let reference_from_parent_ignoring_3d_from_2d_pinhole =
+            transform.reference_from_entity_ignoring_3d_from_2d_pinhole;
         match self.transform_per_entity.entry(subtree.path.clone()) {
             std::collections::hash_map::Entry::Occupied(_) => {
                 return;
             }
             std::collections::hash_map::Entry::Vacant(e) => {
-                e.insert(TransformInfo {
-                    reference_from_entity,
-                    parent_pinhole: encountered_pinhole.clone(),
-                });
+                e.insert(transform);
             }
         }
 
         for child_tree in subtree.children.values() {
-            let mut encountered_pinhole = encountered_pinhole.clone();
-
             let lookup_image_plane = |p: &_| {
                 let query_result = ctx.viewer_ctx.lookup_query_result(view_query.space_view_id);
 
@@ -223,7 +299,8 @@ impl TransformContext {
                     .into()
             };
 
-            let reference_from_child = match transform_at(
+            let mut encountered_pinhole = encountered_pinhole.clone();
+            let new_transform = match transform_at(
                 child_tree,
                 entity_db,
                 query,
@@ -235,17 +312,44 @@ impl TransformContext {
                         .push((child_tree.path.clone(), unreachable_reason));
                     continue;
                 }
-                Ok(None) => reference_from_entity,
-                Ok(Some(child_from_parent)) => reference_from_entity * child_from_parent,
+
+                Ok((transform_at_entity, entity_from_2d_pinhole_content)) => {
+                    let mut new_transform = TransformInfo {
+                        reference_from_entity: reference_from_parent,
+                        reference_from_entity_ignoring_3d_from_2d_pinhole:
+                            reference_from_parent_ignoring_3d_from_2d_pinhole,
+                        out_of_tree_transforms: Vec::new(),
+                        parent_pinhole: encountered_pinhole.clone(),
+                    };
+
+                    match transform_at_entity {
+                        TransformsAtEntity::None => {}
+                        TransformsAtEntity::TreeTransform(parent_from_entity) => {
+                            new_transform.reference_from_entity *= parent_from_entity;
+                            new_transform.reference_from_entity_ignoring_3d_from_2d_pinhole *=
+                                parent_from_entity;
+                        }
+                        TransformsAtEntity::OutOfTreeTransforms(out_of_tree_transforms) => {
+                            new_transform.out_of_tree_transforms = out_of_tree_transforms;
+                        }
+                    }
+
+                    if let Some(entity_from_2d_pinhole_content) = entity_from_2d_pinhole_content {
+                        debug_assert!(encountered_pinhole.as_ref() == Some(&child_tree.path));
+                        new_transform.reference_from_entity *= entity_from_2d_pinhole_content.0;
+                    }
+
+                    new_transform
+                }
             };
+
             self.gather_descendants_transforms(
                 ctx,
                 view_query,
                 child_tree,
                 entity_db,
                 query,
-                reference_from_child,
-                &encountered_pinhole,
+                new_transform,
             );
         }
     }
@@ -254,51 +358,11 @@ impl TransformContext {
         &self.space_origin
     }
 
-    /// Retrieves the transform of on entity from its local system to the space of the reference.
+    /// Retrieves transform information for a given entity.
     ///
-    /// Returns None if the path is not reachable.
-    pub fn reference_from_entity(&self, ent_path: &EntityPath) -> Option<glam::Affine3A> {
-        self.transform_per_entity
-            .get(ent_path)
-            .map(|i| i.reference_from_entity)
-    }
-
-    /// Like [`Self::reference_from_entity`], but if `ent_path` has a pinhole camera, it won't affect the transform.
-    ///
-    /// Normally, the transform we compute for an entity with a pinhole transform places all objects
-    /// in front (defined by view coordinates) of the camera with a given image plane distance.
-    /// In some cases like drawing the lines for a frustum or arrows for the 3D transform, this is not the desired transformation.
-    /// Returns None if the path is not reachable.
-    ///
-    /// TODO(#2663, #1025): Going forward we should have separate transform hierarchies for 2D (i.e. projected) and 3D,
-    /// which would remove the need for this.
-    pub fn reference_from_entity_ignoring_pinhole(
-        &self,
-        ent_path: &EntityPath,
-        entity_db: &EntityDb,
-        query: &LatestAtQuery,
-    ) -> Option<glam::Affine3A> {
-        let transform_info = self.transform_per_entity.get(ent_path)?;
-        if let (true, Some(parent)) = (
-            transform_info.parent_pinhole.as_ref() == Some(ent_path),
-            ent_path.parent(),
-        ) {
-            self.reference_from_entity(&parent).map(|t| {
-                t * get_parent_from_child_transform(ent_path, entity_db, query).unwrap_or_default()
-            })
-        } else {
-            Some(transform_info.reference_from_entity)
-        }
-    }
-
-    /// Retrieves the ancestor (or self) pinhole under which this entity sits.
-    ///
-    /// None indicates either that the entity does not exist in this hierarchy or that this entity is under the eye camera with no Pinhole camera in-between.
-    /// Some indicates that the entity is under a pinhole camera at the given entity path that is not at the root of the space view.
-    pub fn parent_pinhole(&self, ent_path: &EntityPath) -> Option<&EntityPath> {
-        self.transform_per_entity
-            .get(ent_path)
-            .and_then(|i| i.parent_pinhole.as_ref())
+    /// Returns `None` if it's not reachable from the view's origin.
+    pub fn transform_info_for_entity(&self, ent_path: &EntityPath) -> Option<&TransformInfo> {
+        self.transform_per_entity.get(ent_path)
     }
 }
 
@@ -341,11 +405,87 @@ But they are instead ordered like this:\n{actual_order:?}"
 #[cfg(not(debug_assertions))]
 fn debug_assert_transform_field_order(_: &re_types::reflection::Reflection) {}
 
-fn get_parent_from_child_transform(
+fn assemble_transform(
+    translation: Option<&Translation3D>,
+    rotation_quat: Option<&RotationQuat>,
+    rotation_axis_angle: Option<&RotationAxisAngle>,
+    scale: Option<&Scale3D>,
+    mat3x3: Option<&TransformMat3x3>,
+    transform_relation: TransformRelation,
+) -> glam::Affine3A {
+    // Order see `debug_assert_transform_field_order`
+    let mut transform = glam::Affine3A::IDENTITY;
+
+    if let Some(translation) = translation {
+        transform = glam::Affine3A::from(*translation);
+    }
+    if let Some(rotation_quat) = rotation_quat {
+        transform *= glam::Affine3A::from(*rotation_quat);
+    }
+    if let Some(rotation_axis_angle) = rotation_axis_angle {
+        transform *= glam::Affine3A::from(*rotation_axis_angle);
+    }
+    if let Some(scale) = scale {
+        transform *= glam::Affine3A::from(*scale);
+    }
+    if let Some(mat3x3) = mat3x3 {
+        transform *= glam::Affine3A::from(*mat3x3);
+    }
+
+    if transform_relation == TransformRelation::ChildFromParent {
+        transform = transform.inverse();
+    }
+
+    transform
+}
+
+/// Utility representing the possible resolved transforms at an entity.
+enum TransformsAtEntity {
+    None,
+    TreeTransform(glam::Affine3A),
+    OutOfTreeTransforms(Vec<glam::Affine3A>),
+}
+
+struct ObjFrom2DPinholeContent(glam::Affine3A);
+
+impl TransformsAtEntity {
+    fn is_none(&self) -> bool {
+        matches!(self, Self::None)
+    }
+}
+
+/// Utility method to implement fallback provider of `OutOfTreeTransform`.
+pub fn fallback_for_out_of_tree_transform(ctx: &re_viewer_context::QueryContext<'_>) -> bool {
+    let result = ctx.recording().latest_at(
+        ctx.query,
+        ctx.target_entity_path,
+        [
+            Transform3D::name(),
+            Translation3D::name(),
+            RotationAxisAngle::name(),
+            RotationQuat::name(),
+            Scale3D::name(),
+            TransformMat3x3::name(),
+        ],
+    );
+    if result.components.is_empty() {
+        return false;
+    }
+
+    result
+        .components
+        .values()
+        .map(|result| result.num_instances())
+        .max()
+        .unwrap_or(0)
+        > 1
+}
+
+fn query_and_resolve_transforms_at_entity(
     entity_path: &EntityPath,
     entity_db: &EntityDb,
     query: &LatestAtQuery,
-) -> Option<glam::Affine3A> {
+) -> TransformsAtEntity {
     let resolver = entity_db.resolver();
     // TODO(#6743): Doesn't take into account overrides.
     let result = entity_db.latest_at(
@@ -359,38 +499,84 @@ fn get_parent_from_child_transform(
             Scale3D::name(),
             TransformMat3x3::name(),
             TransformRelation::name(),
+            OutOfTreeTransform::name(),
         ],
     );
     if result.components.is_empty() {
-        return None;
+        return TransformsAtEntity::None;
     }
 
-    // Order is specified by order of components in the Transform3D archetype.
-    // See `has_transform_expected_order`
-    let mut transform = glam::Affine3A::IDENTITY;
-    if let Some(translation) = result.get_instance::<Translation3D>(resolver, 0) {
-        transform *= glam::Affine3A::from(translation);
+    let translations = result.get_slice::<Translation3D>(resolver).unwrap_or(&[]);
+    let scales = result.get_slice::<Scale3D>(resolver).unwrap_or(&[]);
+    let rotation_quats = result.get_slice::<RotationQuat>(resolver).unwrap_or(&[]);
+    let rotation_axis_angles = result
+        .get_slice::<RotationAxisAngle>(resolver)
+        .unwrap_or(&[]);
+    let mat3x3 = result.get_slice::<TransformMat3x3>(resolver).unwrap_or(&[]);
+
+    let max_count = translations
+        .len()
+        .max(scales.len())
+        .max(rotation_quats.len())
+        .max(rotation_axis_angles.len())
+        .max(mat3x3.len());
+
+    if max_count == 0 {
+        return TransformsAtEntity::None;
     }
-    if let Some(rotation) = result.get_instance::<RotationAxisAngle>(resolver, 0) {
-        transform *= glam::Affine3A::from(rotation);
-    }
-    if let Some(rotation) = result.get_instance::<RotationQuat>(resolver, 0) {
-        transform *= glam::Affine3A::from(rotation);
-    }
-    if let Some(scale) = result.get_instance::<Scale3D>(resolver, 0) {
-        transform *= glam::Affine3A::from(scale);
-    }
-    if let Some(mat3x3) = result.get_instance::<TransformMat3x3>(resolver, 0) {
-        transform *= glam::Affine3A::from(mat3x3);
+
+    // Default out of tree transform to true if any of the transform components are set more than once.
+    let out_of_tree = result
+        .get_instance::<OutOfTreeTransform>(resolver, 0)
+        .map_or(max_count > 1, |c| *c.0);
+
+    if !out_of_tree && max_count > 1 {
+        re_log::error!(
+            "Entity {:?} has multiple instances of transform components, but OutOfTreeTransform is set to false.
+Propagating multiple transforms to children is not supported",
+            entity_path
+        );
+        return TransformsAtEntity::None;
     }
 
     let transform_relation = result
         .get_instance::<TransformRelation>(resolver, 0)
         .unwrap_or_default();
-    if transform_relation == TransformRelation::ChildFromParent {
-        Some(transform.inverse())
+
+    if out_of_tree {
+        // Order is specified by order of components in the Transform3D archetype.
+        // See `has_transform_expected_order`
+
+        let mut out_of_tree_transforms = Vec::with_capacity(max_count);
+
+        let mut iter_scales = clamped_or_nothing(scales, max_count);
+        let mut iter_rotation_quats = clamped_or_nothing(rotation_quats, max_count);
+        let mut iter_rotation_axis_angles = clamped_or_nothing(rotation_axis_angles, max_count);
+        let mut iter_translations = clamped_or_nothing(translations, max_count);
+        let mut iter_mat3x3 = clamped_or_nothing(mat3x3, max_count);
+
+        for _ in 0..max_count {
+            out_of_tree_transforms.push(assemble_transform(
+                iter_translations.next(),
+                iter_rotation_quats.next(),
+                iter_rotation_axis_angles.next(),
+                iter_scales.next(),
+                iter_mat3x3.next(),
+                transform_relation,
+            ));
+        }
+
+        TransformsAtEntity::OutOfTreeTransforms(out_of_tree_transforms)
     } else {
-        Some(transform)
+        // Fast path for no out of tree transforms.
+        TransformsAtEntity::TreeTransform(assemble_transform(
+            translations.first(),
+            rotation_quats.first(),
+            rotation_axis_angles.first(),
+            scales.first(),
+            mat3x3.first(),
+            transform_relation,
+        ))
     }
 
     // TODO(#6831): Should add a unit test to this method once all variants are in.
@@ -420,23 +606,24 @@ fn transform_at(
     query: &LatestAtQuery,
     pinhole_image_plane_distance: impl Fn(&EntityPath) -> f32,
     encountered_pinhole: &mut Option<EntityPath>,
-) -> Result<Option<glam::Affine3A>, UnreachableTransformReason> {
+) -> Result<(TransformsAtEntity, Option<ObjFrom2DPinholeContent>), UnreachableTransformReason> {
     re_tracing::profile_function!();
 
     let entity_path = &subtree.path;
+    let transforms_at_entity =
+        query_and_resolve_transforms_at_entity(entity_path, entity_db, query);
 
-    let pinhole = get_cached_pinhole(entity_path, entity_db, query);
-    if pinhole.is_some() {
+    // Special pinhole handling.
+    // TODO(#1025): We should start a proper 2D subspace here instead of making up a 2D -> 3D transform.
+    let pinhole_transform = if let Some((image_from_camera, camera_xyz)) =
+        get_cached_pinhole(entity_path, entity_db, query)
+    {
         if encountered_pinhole.is_some() {
             return Err(UnreachableTransformReason::NestedPinholeCameras);
         } else {
             *encountered_pinhole = Some(entity_path.clone());
         }
-    }
 
-    let transform3d = get_parent_from_child_transform(entity_path, entity_db, query);
-
-    let pinhole = pinhole.map(|(image_from_camera, camera_xyz)| {
         // Everything under a pinhole camera is a 2D projection, thus doesn't actually have a proper 3D representation.
         // Our visualization interprets this as looking at a 2D image plane from a single point (the pinhole).
 
@@ -457,9 +644,11 @@ fn transform_at(
         // Our interpretation of the pinhole camera implies that the axis semantics, i.e. ViewCoordinates,
         // determine how the image plane is oriented.
         // (see also `CamerasPart` where the frustum lines are set up)
-        let world_from_image_plane3d = camera_xyz.from_other(&image_view_coordinates());
+        let obj_from_image_plane3d = camera_xyz.from_other(&image_view_coordinates());
 
-        glam::Affine3A::from_mat3(world_from_image_plane3d) * image_plane3d_from_2d_content
+        Some(ObjFrom2DPinholeContent(
+            glam::Affine3A::from_mat3(obj_from_image_plane3d) * image_plane3d_from_2d_content,
+        ))
 
         // Above calculation is nice for a certain kind of visualizing a projected image plane,
         // but the image plane distance is arbitrary and there might be other, better visualizations!
@@ -471,23 +660,19 @@ fn transform_at(
         // should have infinite depth!
         // The inverse of this matrix *is* working for this, but quickly runs into precision issues.
         // See also `ui_2d.rs#setup_target_config`
-    });
-
-    let is_disconnect_space = || {
-        entity_db
-            .latest_at_component::<DisconnectedSpace>(entity_path, query)
-            .map_or(false, |res| **res.value)
+    } else {
+        None
     };
 
     // If there is any other transform, we ignore `DisconnectedSpace`.
-    if transform3d.is_some() || pinhole.is_some() {
-        Ok(Some(
-            transform3d.unwrap_or(glam::Affine3A::IDENTITY)
-                * pinhole.unwrap_or(glam::Affine3A::IDENTITY),
-        ))
-    } else if is_disconnect_space() {
+    if transforms_at_entity.is_none()
+        && pinhole_transform.is_none()
+        && entity_db
+            .latest_at_component::<DisconnectedSpace>(entity_path, query)
+            .map_or(false, |res| **res.value)
+    {
         Err(UnreachableTransformReason::DisconnectedSpace)
     } else {
-        Ok(None)
+        Ok((transforms_at_entity, pinhole_transform))
     }
 }
