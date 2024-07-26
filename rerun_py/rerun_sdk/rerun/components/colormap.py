@@ -79,8 +79,41 @@ class Colormap(Enum):
     It interpolates from dark purple to green to yellow.
     """
 
+    def __str__(self) -> str:
+        """Returns the variant name."""
+        if self == Colormap.Grayscale:
+            return "Grayscale"
+        elif self == Colormap.Inferno:
+            return "Inferno"
+        elif self == Colormap.Magma:
+            return "Magma"
+        elif self == Colormap.Plasma:
+            return "Plasma"
+        elif self == Colormap.Turbo:
+            return "Turbo"
+        elif self == Colormap.Viridis:
+            return "Viridis"
+        else:
+            raise ValueError("Unknown enum variant")
 
-ColormapLike = Union[Colormap, Literal["grayscale", "inferno", "magma", "plasma", "turbo", "viridis"]]
+
+ColormapLike = Union[
+    Colormap,
+    Literal[
+        "Grayscale",
+        "Inferno",
+        "Magma",
+        "Plasma",
+        "Turbo",
+        "Viridis",
+        "grayscale",
+        "inferno",
+        "magma",
+        "plasma",
+        "turbo",
+        "viridis",
+    ],
+]
 ColormapArrayLike = Union[ColormapLike, Sequence[ColormapLike]]
 
 

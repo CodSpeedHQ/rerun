@@ -31,7 +31,9 @@ namespace rerun {
 
     // Also import any component or datatype that has a unique name:
     using components::AlbedoFactor;
+    using components::ChannelDatatype;
     using components::Color;
+    using components::ColorModel;
     using components::FillMode;
     using components::HalfSize2D;
     using components::HalfSize3D;
@@ -39,9 +41,11 @@ namespace rerun {
     using components::LineStrip3D;
     using components::MediaType;
     using components::OutOfTreeTransform3D;
+    using components::PixelFormat;
     using components::Position2D;
     using components::Position3D;
     using components::Radius;
+    using components::Resolution2D;
     using components::Text;
     using components::TextLogLevel;
     using components::TransformRelation;
